@@ -50,5 +50,6 @@ install(FILES
     time_deinterleave_ff.h
     crc16_bb.h
     fib_source_b.h
-    select_subch_vfvf.h DESTINATION include/dab
+    select_subch_vfvf.h
+    mp4_decoder.h DESTINATION include/dab
 )

@@ -37,6 +37,7 @@
 #include "dab/crc16_bb.h"
 #include "dab/fib_source_b.h"
 #include "dab/select_subch_vfvf.h"
+#include "dab/mp4_decoder.h"
 %}
 
 
@@ -98,3 +99,5 @@ GR_SWIG_BLOCK_MAGIC2(dab, crc16_bb);
 GR_SWIG_BLOCK_MAGIC2(dab, fib_source_b);
 %include "dab/select_subch_vfvf.h"
 GR_SWIG_BLOCK_MAGIC2(dab, select_subch_vfvf);
+%include "dab/mp4_decoder.h"
+GR_SWIG_BLOCK_MAGIC2(dab, mp4_decoder);

@@ -54,7 +54,9 @@ list(APPEND dab_sources
     time_deinterleave_ff_impl.cc
     crc16_bb_impl.cc
     fib_source_b_impl.cc
-    select_subch_vfvf_impl.cc )
+    select_subch_vfvf_impl.cc
+    mp4_decoder_impl.cc
+    firecode-checker.cpp )
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)
 if(NOT dab_sources)

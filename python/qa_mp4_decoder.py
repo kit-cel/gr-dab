@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # 
-# Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+# Copyright 2017 <+YOU OR YOUR COMPANY+>.
 # 
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import dab
 
-class qa_msc_decode (gr_unittest.TestCase):
+class qa_mp4_decoder (gr_unittest.TestCase):
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -31,18 +31,16 @@ class qa_msc_decode (gr_unittest.TestCase):
     def tearDown (self):
         self.tb = None
 
-#manual check if data comes threw in transmission mode 1 (default)
     def test_001_t (self):
-        self.dab_params = dab.parameters.dab_parameters(1 , 208.064e6, True)
-        self.src01 = blocks.file_source_make(gr.sizeof_float * 2*self.dab_params.num_carriers, "debug/transmission_frame.dat")
-        self.src02 = blocks.file_source_make(gr.sizeof_char, "debug/transmission_frame_trigger.dat")
-        self.msc = dab.msc_decode(self.dab_params, 54, 84, 2, 1, 1)
+        self.src01 = blocks.file_source_make(gr.sizeof_char, "debug/subch_energy_disp_undone_packed.dat")
+        self.s2v = blocks.stream_to_vector_make(gr.sizeof_char, 4 * 84)
+        self.mp4 = dab.mp4_decoder_make(14)
+        self.dst = blocks.file_sink_make(gr.sizeof_char, "debug/superframes_firecode_checked.dat")
 
-        self.tb.connect(self.src01, (self.msc, 0), blocks.null_sink_make(gr.sizeof_char * 4 * 84))
-        self.tb.connect(self.src02, (self.msc, 1))
+        self.tb.connect(self.src01, self.s2v, self.mp4, self.dst)
         self.tb.run ()
-        # check data
         pass
 
+
 if __name__ == '__main__':
-    gr_unittest.run(qa_msc_decode, "qa_msc_decode.xml")
+    gr_unittest.run(qa_mp4_decoder, "qa_mp4_decoder.xml")

@@ -50,5 +50,6 @@ install(FILES
     dab_time_deinterleave_ff.xml
     dab_crc16_bb.xml
     dab_fib_source_b.xml
-    dab_select_subch_vfvf.xml DESTINATION share/gnuradio/grc/blocks
+    dab_select_subch_vfvf.xml
+    dab_mp4_decoder.xml DESTINATION share/gnuradio/grc/blocks
 )

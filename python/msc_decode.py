@@ -42,7 +42,7 @@ class msc_decode(gr.hier_block2):
                                 # Input signature
                                 gr.io_signature2(2, 2, gr.sizeof_float * dab_params.num_carriers * 2, gr.sizeof_char),
                                 # Output signature
-                                gr.io_signature(1, 1, gr.sizeof_char))
+                                gr.io_signature(1, 1, gr.sizeof_char * 4 * size))
         self.dp = dab_params
         self.address = address
         self.size = size
@@ -129,10 +129,12 @@ class msc_decode(gr.hier_block2):
         self.prbs_src = blocks.vector_source_b(self.dp.prbs(self.msc_I), True)
         self.energy_v2s = blocks.vector_to_stream(gr.sizeof_char, self.msc_I)
         self.add_mod_2 = blocks.xor_bb()
-        #self.energy_s2v = blocks.stream_to_vector(gr.sizeof_char, self.msc_I)
 
         #pack bits
         self.pack_bits = blocks.unpacked_to_packed_bb_make(1, gr.GR_MSB_FIRST)
+
+        #stream to output vectors (logical frames packed)
+        self.s2v_logical_frame = blocks.stream_to_vector(gr.sizeof_char, 24 * self.n)
 
         # connect blocks
         self.connect((self, 0),
@@ -150,7 +152,7 @@ class msc_decode(gr.hier_block2):
                      self.energy_v2s,
                      self.add_mod_2,
                      self.pack_bits,
-                     #self.energy_s2v, #better output stream or vector??
+                     self.s2v_logical_frame, #better output stream or vector??
                      (self))
         #connect trigger chain
         self.connect((self, 1),
