@@ -22,7 +22,7 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC_INCLUDE_DIRS})
+include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC_INCLUDE_DIRS} ${LIBTOOLAME-DAB_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dab_sources
     moving_sum_ff_impl.cc
@@ -72,27 +72,27 @@ list(APPEND dab_sources
     reed_solomon_encode_bb_impl.cc
     mp4_encode_sb_impl.cc
     mp2_encode_sb_impl.cc
-    libtoolame-dab/ath.c
-    libtoolame-dab/crc.c
-    libtoolame-dab/fft.c
-    libtoolame-dab/mem.c
-    libtoolame-dab/utils.c
-    libtoolame-dab/common.c
-    libtoolame-dab/encode.c
-    libtoolame-dab/tables.c
-    libtoolame-dab/subband.c
-    libtoolame-dab/toolame.c
-    libtoolame-dab/psycho_0.c
-    libtoolame-dab/psycho_1.c
-    libtoolame-dab/psycho_2.c
-    libtoolame-dab/psycho_3.c
-    libtoolame-dab/psycho_4.c
-    libtoolame-dab/availbits.c
-    libtoolame-dab/bitstream.c
-    libtoolame-dab/ieeefloat.c
-    libtoolame-dab/psycho_n1.c
-    libtoolame-dab/encode_new.c
-    libtoolame-dab/portableio.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/ath.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/crc.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/fft.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/mem.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/utils.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/common.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/encode.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/tables.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/subband.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/toolame.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_0.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_1.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_2.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_3.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_4.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/availbits.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/bitstream.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/ieeefloat.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_n1.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/encode_new.c
+    ${LIBTOOLAME-DAB_SOURCE_DIR}/portableio.c
 )
 
 
