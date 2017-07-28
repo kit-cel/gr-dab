@@ -1,0 +1,3 @@
+[submodule "ODR-AudioEnc"]
+	path = ODR-AudioEnc
+	url = https://github.com/Opendigitalradio/ODR-AudioEnc/
