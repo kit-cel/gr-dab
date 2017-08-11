@@ -65,6 +65,7 @@ namespace gr {
       d_superframe_size = bit_rate_n * 120;
       d_superframe_size_rs = bit_rate_n * 110;
       set_output_multiple(d_superframe_size_rs);
+      d_corrected_errors = 0;
     }
 
     /*
@@ -109,6 +110,7 @@ namespace gr {
         }
       }
       GR_LOG_DEBUG(d_logger, format("RS corrected %d errors in superframe") % total_corr_count);
+      d_corrected_errors = total_corr_count;
     }
 
 

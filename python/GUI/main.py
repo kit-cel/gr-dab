@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 
 from PyQt4 import QtGui
-from PyQt4.QtCore import QThread
+from PyQt4 import QtCore
 from PyQt4.QtCore import QTimer
 import sys
+import time
 import user_frontend
 import usrp_dab_rx
 import usrp_dab_tx
 import math
 import json
 import sip
+import random
 
 class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -58,6 +60,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # set file path
         self.btn_file_path.clicked.connect(self.set_file_path)
         # init button initializes receiver with center frequency
+        self.btn_init.clicked.connect(self.update_statusBar)
         self.btn_init.clicked.connect(self.init_receiver)
         # update button updates services in table
         self.btn_update_info.clicked.connect(self.update_service_info)
@@ -71,6 +74,19 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.slider_volume.valueChanged.connect(self.set_volume)
         # record button
         self.btn_record.clicked.connect(self.record_audio)
+
+        ######################################################################
+        # DEVELOPER MODE
+        ######################################################################
+        self.dev_mode_active = False
+        # hide close button and just show open button
+        self.btn_dev_mode_close.hide()
+        # dev mode open button pressed
+        self.btn_dev_mode_open.clicked.connect(self.dev_mode_open)
+        # dev mode close button pressed
+        self.btn_dev_mode_close.clicked.connect(self.dev_mode_close)
+        # firecode display
+        self.snr_timer.timeout.connect(self.update_firecode)
 
         ######################################################################
         # TAB TRANSMISSION (defining variables, signals and slots)
@@ -177,20 +193,29 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.label_path.setText(path)
 
     def init_receiver(self):
-        # set status bar message
-        self.statusBar.showMessage("initializing receiver ...")
-        self.btn_update_info.setEnabled(True)
         # stop any processes that access to an instance of usrp_dab_rx
         self.snr_timer.stop()
         # set up and start flowgraph
         self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection,
                                           self.src_is_USRP, self.file_path, self.recorder)
         self.my_receiver.start()
-        self.snr_timer.start(5000)
+        # status bar
+        self.statusBar.showMessage("initialization finished!")
+        # init dev mode
+        self.dev_mode_init()
+        # once scan ensemble automatically (after per clicking btn)
+        time.sleep(1)
+        self.update_service_info()
+        self.btn_update_info.setEnabled(True)
+        self.snr_update()
+        self.snr_timer.start(1000)
+
+    def update_statusBar(self):
+        self.statusBar.showMessage("initializing receiver ...")
 
     def update_service_info(self):
         # set status bar message
-        self.statusBar.showMessage("scanning ensemble...", 1000)
+        self.statusBar.showMessage("scanning ensemble...")
         # remove all old data from table at first
         while (self.table_mci.rowCount() > 0):
             self.table_mci.removeRow(0)
@@ -220,21 +245,16 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.label_ensemble.setText(ensemble_data.keys()[0].strip())
         self.label_country.setText(str(self.table.country_ID_ECC_E0[int(ensemble_data.values()[0]['country_ID'])]))
         self.lcd_number_num_subch.display(self.num_subch)
+        # status bar
+        self.statusBar.showMessage("Select a Service Component.")
 
     def selected_subch(self):
         # enable/disable buttons
         self.btn_play.setEnabled(True)
         self.btn_record.setEnabled(True)
-
-        # check if selected sub-channel is different to former selected sub-channel
-        if self.table_mci.currentRow() is self.subch:
-            self.need_new_init = False
-        else:
-            # new subch was selected
-            self.subch = self.table_mci.currentRow()
-            self.need_new_init = True
-            self.btn_play.setText("Play")
-            self.slider_volume.setEnabled(False)
+        # new subch was selected
+        self.btn_play.setText("Play")
+        self.slider_volume.setEnabled(False)
 
         # get selected sub-channel by its ID
         ID = self.table_mci.item(self.table_mci.currentRow(), 0).text()
@@ -259,6 +279,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # service component (=sub-channel) info
         self.label_primary.setText(("primary" if service_data['primary'] == True else "secondary"))
         self.label_dabplus.setText(("DAB+" if service_data['DAB+'] == True else "DAB"))
+        # status Bar
+        self.statusBar.showMessage("Play/Record the selected Service Component.")
 
     def snr_update(self):
         print "update snr"
@@ -293,13 +315,21 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.slider_volume.setValue(self.volume)
             self.set_volume()
             # if selected sub-channel is not the current sub-channel we have to reconfigure the receiver
-            if self.need_new_init:
+            if self.subch is not self.table_mci.currentRow():
+                self.subch = self.table_mci.currentRow()
+                dev_mode_opened = False
+                if self.dev_mode_active:
+                    dev_mode_opened = True
+                self.dev_mode_close()
                 self.snr_timer.stop()
                 self.my_receiver.stop()
                 self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.frequency, self.bit_rate, self.address, self.size,
                                                            self.protection,
                                                            self.src_is_USRP, self.file_path, self.recorder)
                 self.my_receiver.start()
+                self.dev_mode_init()
+                if dev_mode_opened:
+                    self.dev_mode_open()
                 self.snr_timer.start(5000)
         else:
             # mute button pressed
@@ -309,9 +339,15 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.slider_volume.setEnabled(False)
             self.set_volume()
             self.need_new_init = False
+        # start timer for snr update again
         self.snr_timer.start(1000)
+        # update dev mode
 
     def stop_reception(self):
+        # close dev mode
+        self.btn_dev_mode_close.hide()
+        self.btn_dev_mode_open.show()
+        self.btn_dev_mode_open.setEnabled(False)
         # stop flowgraph
         self.my_receiver.stop()
         # enable/disable buttons
@@ -379,6 +415,63 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def get_sample_rate(self):
         # TODO: set rational resampler in flowgraoph with sample rate
         return self.my_receiver.get_sample_rate()
+
+    ################################
+    # Developer Mode
+    ################################
+
+    def dev_mode_init(self):
+        # FFT plot
+        self.fft_plot = sip.wrapinstance(self.my_receiver.fft_plot.pyqwidget(), QtGui.QWidget)
+        self.vertical_layout_dev_mode_right.addWidget(self.fft_plot)
+        self.fft_plot.hide()
+        # Waterfall plot
+        self.waterfall_plot = sip.wrapinstance(self.my_receiver.waterfall_plot.pyqwidget(), QtGui.QWidget)
+        self.vertical_layout_dev_mode_right.addWidget(self.waterfall_plot)
+        self.waterfall_plot.hide()
+        # Time plot
+        # self.time_plot = sip.wrapinstance(self.my_receiver.time_plot.pyqwidget(), QtGui.QWidget)
+        # self.vertical_layout_dev_mode_right.addWidget(self.time_plot)
+        #self.time_plot.hide()
+        # constellation plot
+        self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtGui.QWidget)
+        self.vertical_layout_dev_mode_right.addWidget(self.constellation)
+        self.constellation.hide()
+        # if dev mode is initialized, we can enable the dev mode open button
+        self.btn_dev_mode_open.setEnabled(True)
+
+    def dev_mode_open(self):
+        self.dev_mode_active = True
+        # hide open button and show close button
+        self.btn_dev_mode_open.hide()
+        self.btn_dev_mode_close.show()
+        # show widgets
+        self.fft_plot.show()
+        self.waterfall_plot.show()
+        self.constellation.show()
+        self.label_firecode.show()
+        self.label_firecode.setText("")
+
+    def dev_mode_close(self):
+        self.dev_mode_active = False
+        # hide close button and show open button
+        self.btn_dev_mode_close.hide()
+        self.btn_dev_mode_open.show()
+        # hide widgets
+        self.fft_plot.hide()
+        self.waterfall_plot.hide()
+        self.constellation.hide()
+        self.label_firecode.hide()
+
+    def update_firecode(self):
+        if self.dev_mode_active:
+            if not self.my_receiver.get_firecode_passed():
+                self.label_firecode.setText(self.label_firecode.text() + "<font color=\"red\">X </font>")
+            else:
+                errors = self.my_receiver.get_corrected_errors()
+                self.label_firecode.setText(self.label_firecode.text() +("<font color=\"" + ("green" if (errors < 10) else "orange") + "\">" + str(errors) +" </font>"))
+        self.label_firecode.setWordWrap(True)
+
 
     ################################
     # Transmitter functions

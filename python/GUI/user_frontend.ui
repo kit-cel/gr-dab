@@ -60,6 +60,32 @@
         </property>
        </spacer>
       </item>
+      <item>
+       <widget class="QPushButton" name="btn_dev_mode_close">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="text">
+         <string>Developer Mode</string>
+        </property>
+        <property name="icon">
+         <iconset theme="list-remove"/>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btn_dev_mode_open">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+        <property name="text">
+         <string>Developer Mode</string>
+        </property>
+        <property name="icon">
+         <iconset theme="list-add"/>
+        </property>
+       </widget>
+      </item>
      </layout>
     </item>
     <item>
@@ -362,7 +388,7 @@
                  <number>20</number>
                 </property>
                 <property name="value">
-                 <number>-20</number>
+                 <number>0</number>
                 </property>
                 <property name="format">
                  <string/>
@@ -494,7 +520,9 @@
                  <string>set up receiver</string>
                 </property>
                 <property name="icon">
-                 <iconset theme="network-receive"/>
+                 <iconset theme="network-receive">
+                  <normaloff/>
+                 </iconset>
                 </property>
                 <property name="checkable">
                  <bool>false</bool>
@@ -510,7 +538,9 @@
                  <string>scan ensemble</string>
                 </property>
                 <property name="icon">
-                 <iconset theme="system-search"/>
+                 <iconset theme="system-search">
+                  <normaloff/>
+                 </iconset>
                 </property>
                </widget>
               </item>
@@ -622,7 +652,13 @@
             </item>
            </layout>
           </item>
+          <item>
+           <layout class="QVBoxLayout" name="vertical_layout_dev_mode_right"/>
+          </item>
          </layout>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="test_layout"/>
         </item>
        </layout>
       </widget>
@@ -773,7 +809,7 @@
                <property name="geometry">
                 <rect>
                  <x>0</x>
-                 <y>-587</y>
+                 <y>0</y>
                  <width>397</width>
                  <height>954</height>
                 </rect>
@@ -1621,7 +1657,9 @@
                  <string>  set up transmitter</string>
                 </property>
                 <property name="icon">
-                 <iconset theme="network-transmit"/>
+                 <iconset theme="network-transmit">
+                  <normaloff/>
+                 </iconset>
                 </property>
                </widget>
               </item>
@@ -1769,6 +1807,17 @@
        </layout>
       </widget>
      </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_29">
+      <item>
+       <widget class="QLabel" name="label_firecode">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Frames:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

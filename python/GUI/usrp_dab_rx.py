@@ -26,6 +26,7 @@ receive DAB+ with USRP
 from gnuradio import gr, uhd, blocks
 from gnuradio import audio, digital
 from gnuradio import qtgui
+from gnuradio import fft
 import dab
 import time, math
 
@@ -68,6 +69,12 @@ class usrp_dab_rx(gr.top_block):
                                                             self.resample_fixed,
                                                             self.verbose, self.correct_ffe,
                                                             self.equalize_magnitude)
+        ########################
+        # FFT and waterfall plot
+        ########################
+        self.fft_plot = qtgui.freq_sink_c_make(1024, fft.window.WIN_BLACKMAN_HARRIS, self.frequency, 2e6, "FFT")
+        self.waterfall_plot = qtgui.waterfall_sink_c_make(1024, fft.window.WIN_BLACKMAN_HARRIS, self.frequency, 2e6, "Waterfall")
+        #self.time_plot = qtgui.time_sink_c_make(1024, 2e6, "Time")
 
         ########################
         # OFDM demod
@@ -79,7 +86,7 @@ class usrp_dab_rx(gr.top_block):
         ########################
         self.v2s_snr = blocks.vector_to_stream_make(gr.sizeof_gr_complex, 1536)
         self.snr_measurement = digital.mpsk_snr_est_cc_make(digital.SNR_EST_SIMPLE, 10000)
-        self.null_sink_snr = blocks.null_sink_make(gr.sizeof_gr_complex)
+        self.constellation_plot = qtgui.const_sink_c_make(1024, "", 1)
 
         ########################
         # FIC decoder
@@ -95,11 +102,14 @@ class usrp_dab_rx(gr.top_block):
         ########################
         # Connections
         ########################
+        self.connect(self.src, self.fft_plot)
+        self.connect(self.src, self.waterfall_plot)
+        #self.connect(self.src, self.time_plot)
         self.connect(self.src, self.demod, (self.fic_dec, 0))
         self.connect((self.demod, 1), (self.fic_dec, 1))
         self.connect((self.demod, 0), (self.dabplus, 0))
         self.connect((self.demod, 1), (self.dabplus, 1))
-        self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, self.null_sink_snr)
+        self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, self.constellation_plot)
         # connect audio to sound card
         # left stereo channel
         self.connect((self.dabplus, 0), (self.audio, 0))
@@ -143,6 +153,12 @@ class usrp_dab_rx(gr.top_block):
 
     def get_snr(self):
         return self.snr_measurement.snr()
+
+    def get_firecode_passed(self):
+        return self.dabplus.get_firecode_passed()
+
+    def get_corrected_errors(self):
+        return self.dabplus.get_corrected_errors()
 
 ########################
 # setter methods

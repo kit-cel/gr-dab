@@ -99,3 +99,9 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
 
     def get_sample_rate(self):
         return self.mp4.get_sample_rate()
+
+    def get_firecode_passed(self):
+        return self.firecode.get_firecode_passed()
+
+    def get_corrected_errors(self):
+        return self.rs.get_corrected_errors()
