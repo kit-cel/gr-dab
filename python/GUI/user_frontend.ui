@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>849</width>
-    <height>596</height>
+    <width>896</width>
+    <height>655</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -21,19 +21,6 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_21">
       <item>
-       <spacer name="horizontalSpacer_3">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item>
        <widget class="QLabel" name="label_5">
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
@@ -41,7 +28,7 @@
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="label_6">
+       <widget class="QLabel" name="label_logo">
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:20pt; font-weight:600;&quot;&gt;DABstep&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
@@ -521,7 +508,7 @@
                  </font>
                 </property>
                 <property name="text">
-                 <string>set up receiver</string>
+                 <string>start receiver</string>
                 </property>
                 <property name="icon">
                  <iconset theme="network-receive">
@@ -814,7 +801,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>369</width>
+                 <width>400</width>
                  <height>954</height>
                 </rect>
                </property>
@@ -1658,7 +1645,7 @@
               <item>
                <widget class="QPushButton" name="t_btn_init">
                 <property name="text">
-                 <string>  set up transmitter</string>
+                 <string>start transmitter</string>
                 </property>
                 <property name="icon">
                  <iconset theme="network-transmit">
@@ -1815,9 +1802,55 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout_29">
       <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <widget class="QLabel" name="label_firecode">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>365</width>
+          <height>113</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>365</width>
+          <height>113</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::Box</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <property name="lineWidth">
+         <number>2</number>
+        </property>
+        <property name="midLineWidth">
+         <number>0</number>
+        </property>
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Frames:&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
         </property>
        </widget>
       </item>

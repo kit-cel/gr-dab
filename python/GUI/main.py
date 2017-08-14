@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
 from PyQt4 import QtGui
-from PyQt4 import QtCore
 from PyQt4.QtCore import QTimer
 import sys
 import time
@@ -11,12 +10,16 @@ import usrp_dab_tx
 import math
 import json
 import sip
-import random
+import os
 
 class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def __init__(self, parent=None):
         super(DABstep, self).__init__(parent)
         self.setupUi(self)
+
+        # show logo if it exists
+        if os.path.exists("DAB_logo.png"):
+            self.label_logo.setText("<img src=\"DAB_logo.png\">")
 
         # tab definitions
         self.modes = {"rec": 0, "trans": 1, "dev": 2}
@@ -87,6 +90,14 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.btn_dev_mode_close.clicked.connect(self.dev_mode_close)
         # firecode display
         self.snr_timer.timeout.connect(self.update_firecode)
+        self.label_firecode.setText("")
+        font = QtGui.QFont()
+        font.setFamily("CourierNew")
+        self.label_firecode.setFont(font)
+        self.label_firecode.hide()
+        self.content_count = 0
+
+
 
         ######################################################################
         # TAB TRANSMISSION (defining variables, signals and slots)
@@ -208,7 +219,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.update_service_info()
         self.btn_update_info.setEnabled(True)
         self.snr_update()
-        self.snr_timer.start(1000)
+        self.snr_timer.start(500)
 
     def update_statusBar(self):
         self.statusBar.showMessage("initializing receiver ...")
@@ -299,11 +310,11 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                     SNR = -20
             self.bar_snr.setValue(SNR)
             self.lcd_snr.display(SNR)
-            self.snr_timer.start(1000)
+            self.snr_timer.start(500)
         else:
             self.bar_snr.setValue(-20)
             self.label_snr.setText("SNR: no reception")
-            self.snr_timer.start(4000)
+            self.snr_timer.start(500)
 
     def play_audio(self):
         if not self.slider_volume.isEnabled():
@@ -340,7 +351,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.set_volume()
             self.need_new_init = False
         # start timer for snr update again
-        self.snr_timer.start(1000)
+        self.snr_timer.start(500)
         # update dev mode
 
     def stop_reception(self):
@@ -451,6 +462,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.constellation.show()
         self.label_firecode.show()
         self.label_firecode.setText("")
+        self.content_count = 0
 
     def dev_mode_close(self):
         self.dev_mode_active = False
@@ -462,18 +474,19 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot.hide()
         self.constellation.hide()
         self.label_firecode.hide()
-        self.hide()
-        self.show()
 
     def update_firecode(self):
         if self.dev_mode_active:
+            if self.content_count >=120:
+                self.label_firecode.setText("")
+                self.content_count = 0
             if not self.my_receiver.get_firecode_passed():
                 self.label_firecode.setText(self.label_firecode.text() + "<font color=\"red\">X </font>")
             else:
                 errors = self.my_receiver.get_corrected_errors()
                 self.label_firecode.setText(self.label_firecode.text() +("<font color=\"" + ("green" if (errors < 10) else "orange") + "\">" + str(errors) +" </font>"))
         self.label_firecode.setWordWrap(True)
-
+        self.content_count += 1
 
     ################################
     # Transmitter functions
