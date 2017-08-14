@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(890, 585)
+        MainWindow.resize(849, 596)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setEnabled(True)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -402,7 +402,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 397, 954))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 672, 1080))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_9 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))

@@ -462,6 +462,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot.hide()
         self.constellation.hide()
         self.label_firecode.hide()
+        self.hide()
+        self.show()
 
     def update_firecode(self):
         if self.dev_mode_active:

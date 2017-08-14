@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>890</width>
-    <height>585</height>
+    <width>849</width>
+    <height>596</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -69,7 +69,9 @@
          <string>Developer Mode</string>
         </property>
         <property name="icon">
-         <iconset theme="list-remove"/>
+         <iconset theme="list-remove">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -82,7 +84,9 @@
          <string>Developer Mode</string>
         </property>
         <property name="icon">
-         <iconset theme="list-add"/>
+         <iconset theme="list-add">
+          <normaloff/>
+         </iconset>
         </property>
        </widget>
       </item>
@@ -810,7 +814,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>397</width>
+                 <width>369</width>
                  <height>954</height>
                 </rect>
                </property>
