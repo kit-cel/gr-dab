@@ -5,7 +5,9 @@ from PyQt4.QtCore import QTimer
 import sys
 import time
 import user_frontend
+import usrp_dabplus_rx
 import usrp_dab_rx
+import usrp_dabplus_tx
 import usrp_dab_tx
 import math
 import json
@@ -17,6 +19,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         super(DABstep, self).__init__(parent)
         self.setupUi(self)
 
+        # window title
+        self.setWindowTitle("DABstep - A DAB/DAB+ transceiver app")
         # show logo if it exists
         if os.path.exists("DAB_logo.png"):
             self.label_logo.setText("<img src=\"DAB_logo.png\">")
@@ -33,13 +37,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # TAB RECEPTION (defining variables, signals and slots)
         ######################################################################
         # receiver variables
-        self.frequency = 208.064e6
         self.bit_rate = 8
         self.address = 0
         self.size = 6
         self.protection = 2
         self.volume = 80
         self.subch = -1
+        self.dabplus = True
         self.need_new_init = True
         self.recorder = False
         self.file_path = "None"
@@ -53,6 +57,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         header.setResizeMode(3, QtGui.QHeaderView.ResizeToContents)
         header.setStretchLastSection(False)
         self.table_mci.verticalHeader().hide()
+        self.table_mci.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
 
         # timer for update of SNR
         self.snr_timer = QTimer()
@@ -96,8 +101,6 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.label_firecode.setFont(font)
         self.label_firecode.hide()
         self.content_count = 0
-
-
 
         ######################################################################
         # TAB TRANSMISSION (defining variables, signals and slots)
@@ -204,22 +207,26 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.label_path.setText(path)
 
     def init_receiver(self):
-        # stop any processes that access to an instance of usrp_dab_rx
+        # stop any processes that access to an instance of usrp_dabplus_rx
         self.snr_timer.stop()
-        # set up and start flowgraph
-        self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection,
-                                          self.src_is_USRP, self.file_path, self.recorder)
-        self.my_receiver.start()
-        # status bar
-        self.statusBar.showMessage("initialization finished!")
-        # init dev mode
-        self.dev_mode_init()
-        # once scan ensemble automatically (after per clicking btn)
-        time.sleep(1)
-        self.update_service_info()
-        self.btn_update_info.setEnabled(True)
-        self.snr_update()
-        self.snr_timer.start(500)
+        # check if file path is selected in case that file is the selected source
+        if (not self.src_is_USRP) and (self.file_path == "None"):
+            self.label_path.setStyleSheet('color: red')
+        else:
+            # set up and start flowgraph
+            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection,
+                                              self.src_is_USRP, self.file_path, self.recorder)
+            self.my_receiver.start()
+            # status bar
+            self.statusBar.showMessage("initialization finished!")
+            # init dev mode
+            self.dev_mode_init()
+            # once scan ensemble automatically (after per clicking btn)
+            time.sleep(1)
+            self.update_service_info()
+            self.btn_update_info.setEnabled(True)
+            self.snr_update()
+            self.snr_timer.start(500)
 
     def update_statusBar(self):
         self.statusBar.showMessage("initializing receiver ...")
@@ -275,13 +282,14 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         service_data = next((item for item in self.get_service_info() if item['ID'] == int(ID)), {"reference":-1, "ID": -1, "primary": True})
         service_label = next((item for item in self.get_service_labels() if item['reference'] == int(reference)), {"reference": -1, "label":"not found"})
         subch_data = next((item for item in self.get_subch_info() if item['ID'] == int(ID)), {"ID":-1, "address":0, "protection":0,"size":0})
-        #programme_type = next((item for item in self.get_programme_type() if item["reference"] == reference), {"programme_type":0,"language":0})
+        programme_type = next((item for item in self.get_programme_type() if item["reference"] == reference), {"programme_type":0})
 
         # update sub-channel info for receiver
         self.address = int(subch_data['address'])
         self.size = int(subch_data['size'])
         self.protection = int(subch_data['protection'])
         self.bit_rate = self.size * 8/6
+        #self.dabplus = service_data['DAB+']
 
         # display info to selected sub-channel
         # service info
@@ -290,12 +298,17 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # service component (=sub-channel) info
         self.label_primary.setText(("primary" if service_data['primary'] == True else "secondary"))
         self.label_dabplus.setText(("DAB+" if service_data['DAB+'] == True else "DAB"))
+        # programme type
+        if programme_type["programme_type"] is 0:
+            self.label_programme_type.setText("\n")
+        else:
+            self.label_programme_type.setText(self.table.programme_types[programme_type["programme_type"]] + "\n")
         # status Bar
         self.statusBar.showMessage("Play/Record the selected Service Component.")
 
     def snr_update(self):
         print "update snr"
-        # display snr in progress bar if an instance of usrp_dab_rx is existing
+        # display snr in progress bar if an instance of usrp_dabplus_rx is existing
         if hasattr(self, 'my_receiver'):
             SNR = self.my_receiver.get_snr()
             if SNR > 10:
@@ -334,9 +347,18 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.dev_mode_close()
                 self.snr_timer.stop()
                 self.my_receiver.stop()
-                self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.frequency, self.bit_rate, self.address, self.size,
-                                                           self.protection,
-                                                           self.src_is_USRP, self.file_path, self.recorder)
+                if self.dabplus:
+                    self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(),
+                                                                       self.spinbox_frequency.value(), self.bit_rate,
+                                                                       self.address, self.size,
+                                                                       self.protection,
+                                                                       self.src_is_USRP, self.file_path, self.recorder)
+                else:
+                    self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
+                                                               self.spinbox_frequency.value(), self.bit_rate,
+                                                               self.address, self.size,
+                                                               self.protection,
+                                                               self.src_is_USRP, self.file_path, self.recorder)
                 self.my_receiver.start()
                 self.dev_mode_init()
                 if dev_mode_opened:
@@ -379,9 +401,16 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.btn_stop.setEnabled(True)
         self.recorder = True
         # start flowgraph
-        self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.frequency, self.bit_rate, self.address, self.size,
-                                                   self.protection,
-                                                   self.src_is_USRP, self.file_path, self.recorder)
+        if self.dabplus:
+            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size,
+                                                       self.protection,
+                                                       self.src_is_USRP, self.file_path, self.recorder)
+        else:
+            self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
+                                                       self.spinbox_frequency.value(), self.bit_rate,
+                                                       self.address, self.size,
+                                                       self.protection,
+                                                       self.src_is_USRP, self.file_path, self.recorder)
         self.my_receiver.start()
 
     def set_volume(self):
@@ -573,16 +602,33 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
         if arguments_incomplete is False:
             # init transmitter
-            self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spinbox_frequency.value(),
-                                              self.t_spin_num_subch.value(),
-                                              str(self.t_edit_ensemble_label.text()),
-                                              str(self.t_edit_service_label.text()),
-                                              self.t_combo_language.currentIndex(),
-                                              protection_array, data_rate_n_array,
-                                              audio_paths,
-                                              self.t_spin_listen_to_component.value(),
-                                              self.t_rbtn_USRP.isChecked(),
-                                              str(self.t_label_sink.text())+ "/" +str(self.t_edit_file_name.text()))
+            if self.t_combo_dabplus.currentIndex() is 1:
+                # transmitting in DAB mode
+                self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spin_dab_mode.value(), self.t_spinbox_frequency.value(),
+                                                  self.t_spin_num_subch.value(),
+                                                  str(self.t_edit_ensemble_label.text()),
+                                                  str(self.t_edit_service_label.text()),
+                                                  self.t_combo_language.currentIndex(),
+                                                  protection_array, data_rate_n_array, 48000,
+                                                  audio_paths,
+                                                  self.t_spin_listen_to_component.value(),
+                                                  self.t_rbtn_USRP.isChecked(),
+                                                  str(self.t_label_sink.text())+ "/" +str(self.t_edit_file_name.text()))
+            else:
+                # transmitting in DAB+ mode
+                self.my_transmitter = usrp_dabplus_tx.usrp_dabplus_tx(self.t_spin_dab_mode.value(),
+                                                                      self.t_spinbox_frequency.value(),
+                                                                      self.t_spin_num_subch.value(),
+                                                                      str(self.t_edit_ensemble_label.text()),
+                                                                      str(self.t_edit_service_label.text()),
+                                                                      self.t_combo_language.currentIndex(),
+                                                                      protection_array, data_rate_n_array,
+                                                                      audio_paths,
+                                                                      self.t_spin_listen_to_component.value(),
+                                                                      self.t_rbtn_USRP.isChecked(),
+                                                                      str(self.t_label_sink.text()) + "/" + str(
+                                                                          self.t_edit_file_name.text()))
+
             # enable play button
             self.t_btn_play.setEnabled(True)
             self.t_label_status.setText("ready to transmit")

@@ -20,7 +20,7 @@
 #
 
 """
-receive DAB with USRP (for DAB+ transmission see usrp_dabplus_tx.py)
+transmit DAB+ with USRP
 """
 
 from gnuradio import gr, uhd, blocks
@@ -30,7 +30,7 @@ import numpy as np
 
 
 class usrp_dabplus_tx(gr.top_block):
-    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, audio_sample_rate, src_paths, selected_audio, use_usrp, sink_path = "dab_iq_generated.dat"):
+    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, src_paths, selected_audio, use_usrp, sink_path = "dab_iq_generated.dat"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -65,7 +65,8 @@ class usrp_dabplus_tx(gr.top_block):
         self.msc_sources = [None] * self.num_subch
         self.f2s_left_converters = [None] * self.num_subch
         self.f2s_right_converters = [None] * self.num_subch
-        self.mp2_encoders = [None] * self.num_subch
+        self.mp4_encoders = [None] * self.num_subch
+        self.rs_encoders = [None] * self.num_subch
         self.msc_encoders = [None] * self.num_subch
         for i in range(0, self.num_subch):
             # source
@@ -73,8 +74,9 @@ class usrp_dabplus_tx(gr.top_block):
             # float to short
             self.f2s_left_converters[i] = blocks.float_to_short_make(1, 32767)
             self.f2s_right_converters[i] = blocks.float_to_short_make(1, 32767)
-            # mp2 encoder
-            self.mp2_encoders[i] = dab.mp2_encode_sb_make(self.data_rates_n, 2, audio_sample_rate)
+            # mp4 encoder and Reed-Solomon encoder
+            self.mp4_encoders[i] = dab.mp4_encode_sb_make(self.data_rates_n[i], 2, 32000, 1)
+            self.rs_encoders[i] = dab.reed_solomon_encode_bb_make(self.data_rates_n[i])
             # encoder
             self.msc_encoders[i] = dab.msc_encode(self.dp, self.data_rates_n[i], self.protections[i])
 
@@ -102,7 +104,7 @@ class usrp_dabplus_tx(gr.top_block):
         else:
             self.sink = blocks.file_sink_make(gr.sizeof_gr_complex, self.sink_path)
         # audio sink
-        self.audio = audio.sink_make(audio_sample_rate)
+        self.audio = audio.sink_make(32000)
         self.gain_left = blocks.multiply_const_ff_make(1, 1)
         self.gain_right = blocks.multiply_const_ff_make(1, 1)
 
@@ -111,8 +113,8 @@ class usrp_dabplus_tx(gr.top_block):
         ########################
         self.connect(self.fic_src, self.fic_enc, (self.mux, 0))
         for i in range(0, self.num_subch):
-            self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp2_encoders[i], 0), self.msc_encoders[i], (self.mux, i+1))
-            self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp2_encoders[i], 1))
+            self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
+            self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
         self.connect(self.mod, self.sink)

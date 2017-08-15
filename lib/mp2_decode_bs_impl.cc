@@ -293,8 +293,9 @@ namespace gr {
           || ((frame[1] & 0xF6) != 0xF4)   // no MPEG-1/2 Audio Layer II?
           || ((frame[2] - 0x10) >= 0xE0))  // invalid bitrate?
         return 0;
-      return sample_rates[(((frame[1] & 0x08) >> 1) ^ 4)  // MPEG-1/2 switch
+      d_sample_rate = sample_rates[(((frame[1] & 0x08) >> 1) ^ 4)  // MPEG-1/2 switch
                           + ((frame[2] >> 2) & 3)];         // actual rate
+      return d_sample_rate;
     }
 
     struct quantizer_spec *mp2_decode_bs_impl::read_allocation(int sb, int b2_table)
