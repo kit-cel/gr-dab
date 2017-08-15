@@ -347,7 +347,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.dev_mode_close()
                 self.snr_timer.stop()
                 self.my_receiver.stop()
-                if self.dabplus:
+                if True:
                     self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(),
                                                                        self.spinbox_frequency.value(), self.bit_rate,
                                                                        self.address, self.size,
@@ -418,39 +418,59 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.my_receiver.set_volume(float(self.slider_volume.value()) / 100)
 
     def get_ensemble_info(self):
-        # load string (json) with ensemble info and convert it to dictionary
-        # string structure example: "{\"SWR_BW_N\":{\"country_ID\":1}}"
-        self.ensemble_info = json.loads(self.my_receiver.get_ensemble_info())
-        json.dumps(self.ensemble_info)
-        return self.ensemble_info
+        json = self.my_receiver.get_ensemble_info()
+        if json is "":
+            return {"unknown":{"country_ID":0}}
+        else:
+            # load string (json) with ensemble info and convert it to dictionary
+            # string structure example: "{\"SWR_BW_N\":{\"country_ID\":1}}"
+            self.ensemble_info = json.loads(json)
+            json.dumps(self.ensemble_info)
+            return self.ensemble_info
 
     def get_service_info(self):
-        # load string (json) with MCI and convert it to array of dictionaries
-        self.service_info = json.loads(self.my_receiver.get_service_info())
-        # string structure example: "[{\"reference\":736,\"ID\":2,\"primary\":true},{\"reference\":736,\"ID\":3,\"primary\":false},{\"reference\":234,\"ID\":5,\"primary\":true}]"
-        json.dumps(self.service_info)
-        return self.service_info
+        self.json = self.my_receiver.get_service_info()
+        if self.json is "":
+            return []
+        else:
+            # load string (json) with MCI and convert it to array of dictionaries
+            self.service_info = json.loads(self.json)
+            # string structure example: "[{\"reference\":736,\"ID\":2,\"primary\":true},{\"reference\":736,\"ID\":3,\"primary\":false},{\"reference\":234,\"ID\":5,\"primary\":true}]"
+            json.dumps(self.service_info)
+            return self.service_info
 
     def get_service_labels(self):
-        # load string (json) with service labels and convert it to array of dictionaries
-        self.service_labels = json.loads(self.my_receiver.get_service_labels())
-        # string structure example: "[{\"label\":\"SWR1_BW         \",\"reference\":736},{\"label\":\"SWR2            \",\"reference\":234}]"
-        json.dumps(self.service_labels)
-        return self.service_labels
+        self.json = self.my_receiver.get_service_labels()
+        if self.json is "":
+            return []
+        else:
+            # load string (json) with service labels and convert it to array of dictionaries
+            self.service_labels = json.loads(self.json)
+            # string structure example: "[{\"label\":\"SWR1_BW         \",\"reference\":736},{\"label\":\"SWR2            \",\"reference\":234}]"
+            json.dumps(self.service_labels)
+            return self.service_labels
 
     def get_subch_info(self):
-        # load string (json) with sub-channel info and convert it to array of dictionaries
-        self.subch_info = json.loads(self.my_receiver.get_subch_info())
-        # string structure example: "[{\"ID\":2, \"address\":54, \"protect\":2,\"size\":84},{\"ID\":3, \"address\":54, \"protect\":2,\"size\":84}]"
-        json.dumps(self.subch_info)
-        return self.subch_info
+        self.json = self.my_receiver.get_subch_info()
+        if self.json is "":
+            return []
+        else:
+            # load string (json) with sub-channel info and convert it to array of dictionaries
+            self.subch_info = json.loads(self.json)
+            # string structure example: "[{\"ID\":2, \"address\":54, \"protect\":2,\"size\":84},{\"ID\":3, \"address\":54, \"protect\":2,\"size\":84}]"
+            json.dumps(self.subch_info)
+            return self.subch_info
 
     def get_programme_type(self):
+        self.json = self.my_receiver.get_programme_type()
         # load string (json) with service information (programme type) and convert it to array of dictionaries
-        self.programme_type = json.loads(self.my_receiver.get_programme_type())
-        # string structure example: "[{\"reference\":736, \"programme_type\":13},{\"reference\":234, \"programme_type\":0}]"
-        json.dumps(self.programme_type)
-        return self.programme_type
+        if self.json == "":
+            return []
+        else:
+            self.programme_type = json.loads(self.json)
+            # string structure example: "[{\"reference\":736, \"programme_type\":13},{\"reference\":234, \"programme_type\":0}]"
+            json.dumps(self.programme_type)
+            return self.programme_type
 
     def get_sample_rate(self):
         # TODO: set rational resampler in flowgraoph with sample rate
