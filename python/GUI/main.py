@@ -2,6 +2,7 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QTimer
+from PyQt4 import QtCore
 import sys
 import time
 import user_frontend
@@ -18,9 +19,9 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def __init__(self, parent=None):
         super(DABstep, self).__init__(parent)
         self.setupUi(self)
-
         # window title
         self.setWindowTitle("DABstep - A DAB/DAB+ transceiver app")
+        self.resize(5000, 5000)
         # show logo if it exists
         if os.path.exists("DAB_logo.png"):
             self.label_logo.setText("<img src=\"DAB_logo.png\">")
@@ -418,13 +419,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.my_receiver.set_volume(float(self.slider_volume.value()) / 100)
 
     def get_ensemble_info(self):
-        json = self.my_receiver.get_ensemble_info()
-        if json is "":
+        self.json = self.my_receiver.get_ensemble_info()
+        if self.json is "":
             return {"unknown":{"country_ID":0}}
         else:
             # load string (json) with ensemble info and convert it to dictionary
             # string structure example: "{\"SWR_BW_N\":{\"country_ID\":1}}"
-            self.ensemble_info = json.loads(json)
+            self.ensemble_info = json.loads(self.json)
             json.dumps(self.ensemble_info)
             return self.ensemble_info
 
@@ -495,7 +496,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         #self.time_plot.hide()
         # constellation plot
         self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtGui.QWidget)
-        self.vertical_layout_dev_mode_right.addWidget(self.constellation)
+        self.horitontal_layout_dev_mode_bottom.addWidget(self.constellation)
         self.constellation.hide()
         # if dev mode is initialized, we can enable the dev mode open button
         self.btn_dev_mode_open.setEnabled(True)
@@ -523,6 +524,9 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot.hide()
         self.constellation.hide()
         self.label_firecode.hide()
+        print "key"
+        self.resize(2000, 2000)
+
 
     def update_firecode(self):
         if self.dev_mode_active:
