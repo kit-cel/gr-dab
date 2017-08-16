@@ -104,7 +104,7 @@ class usrp_dabplus_tx(gr.top_block):
         else:
             self.sink = blocks.file_sink_make(gr.sizeof_gr_complex, self.sink_path)
         # audio sink
-        self.audio = audio.sink_make(32000)
+        #self.audio = audio.sink_make(32000)
         self.gain_left = blocks.multiply_const_ff_make(1, 1)
         self.gain_right = blocks.multiply_const_ff_make(1, 1)
 
@@ -117,9 +117,9 @@ class usrp_dabplus_tx(gr.top_block):
             self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
-        self.connect(self.mod, self.sink)
-        self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
-        self.connect((self.msc_sources[self.selected_audio - 1], 1), self.gain_right, (self.audio, 1))
+        self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
+        #self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
+        #self.connect((self.msc_sources[self.selected_audio-1], 1), self.gain_right, (self.audio, 1))
 
     def transmit(self):
         tx = usrp_dabplus_tx()

@@ -2,7 +2,6 @@
 
 from PyQt4 import QtGui
 from PyQt4.QtCore import QTimer
-from PyQt4 import QtCore
 import sys
 import time
 import user_frontend
@@ -42,6 +41,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.address = 0
         self.size = 6
         self.protection = 2
+        self.audio_bit_rate = 32000
         self.volume = 80
         self.subch = -1
         self.dabplus = True
@@ -69,7 +69,6 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # set file path
         self.btn_file_path.clicked.connect(self.set_file_path)
         # init button initializes receiver with center frequency
-        self.btn_init.clicked.connect(self.update_statusBar)
         self.btn_init.clicked.connect(self.init_receiver)
         # update button updates services in table
         self.btn_update_info.clicked.connect(self.update_service_info)
@@ -95,12 +94,22 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # dev mode close button pressed
         self.btn_dev_mode_close.clicked.connect(self.dev_mode_close)
         # firecode display
-        self.snr_timer.timeout.connect(self.update_firecode)
+        self.firecode_timer = QTimer()
+        self.firecode_timer.timeout.connect(self.update_firecode)
         self.label_firecode.setText("")
+        self.label_fic.setText("")
         font = QtGui.QFont()
         font.setFamily("CourierNew")
         self.label_firecode.setFont(font)
         self.label_firecode.hide()
+        self.led_msc.hide()
+        self.label_label_msc.hide()
+        self.label_fic.setFont(font)
+        self.label_fic.hide()
+        self.led_fic.hide()
+        self.label_label_fic.hide()
+        self.label_label_fic.setFont(font)
+        self.label_label_msc.setFont(font)
         self.content_count = 0
 
         ######################################################################
@@ -208,18 +217,20 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.label_path.setText(path)
 
     def init_receiver(self):
+        self.statusBar.showMessage("initializing receiver ...")
         # stop any processes that access to an instance of usrp_dabplus_rx
         self.snr_timer.stop()
+        self.firecode_timer.stop()
         # check if file path is selected in case that file is the selected source
         if (not self.src_is_USRP) and (self.file_path == "None"):
             self.label_path.setStyleSheet('color: red')
         else:
             # set up and start flowgraph
-            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection,
+            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate,
                                               self.src_is_USRP, self.file_path, self.recorder)
             self.my_receiver.start()
             # status bar
-            self.statusBar.showMessage("initialization finished!")
+            self.statusBar.showMessage("Reception is running.")
             # init dev mode
             self.dev_mode_init()
             # once scan ensemble automatically (after per clicking btn)
@@ -227,14 +238,12 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.update_service_info()
             self.btn_update_info.setEnabled(True)
             self.snr_update()
-            self.snr_timer.start(500)
-
-    def update_statusBar(self):
-        self.statusBar.showMessage("initializing receiver ...")
+            self.snr_timer.start(1000)
+            self.firecode_timer.start(120)
 
     def update_service_info(self):
         # set status bar message
-        self.statusBar.showMessage("scanning ensemble...")
+        self.statusBar.showMessage("Scanning ensemble...")
         # remove all old data from table at first
         while (self.table_mci.rowCount() > 0):
             self.table_mci.removeRow(0)
@@ -289,7 +298,12 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.address = int(subch_data['address'])
         self.size = int(subch_data['size'])
         self.protection = int(subch_data['protection'])
-        self.bit_rate = self.size * 8/6
+        conv_table = [12, 8, 6, 5]
+        self.bit_rate = self.size * 8/conv_table[self.protection]
+        if self.bit_rate < 100:
+            self.audio_bit_rate = 48000
+        else:
+            self.audio_bit_rate = 32000
         #self.dabplus = service_data['DAB+']
 
         # display info to selected sub-channel
@@ -305,7 +319,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         else:
             self.label_programme_type.setText(self.table.programme_types[programme_type["programme_type"]] + "\n")
         # status Bar
-        self.statusBar.showMessage("Play/Record the selected Service Component.")
+        self.statusBar.showMessage("Play/Record the selected service component.")
 
     def snr_update(self):
         print "update snr"
@@ -324,11 +338,10 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                     SNR = -20
             self.bar_snr.setValue(SNR)
             self.lcd_snr.display(SNR)
-            self.snr_timer.start(500)
         else:
             self.bar_snr.setValue(-20)
             self.label_snr.setText("SNR: no reception")
-            self.snr_timer.start(500)
+        self.snr_timer.start(1000)
 
     def play_audio(self):
         if not self.slider_volume.isEnabled():
@@ -347,12 +360,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                     dev_mode_opened = True
                 self.dev_mode_close()
                 self.snr_timer.stop()
+                self.firecode_timer.stop()
                 self.my_receiver.stop()
                 if True:
                     self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(),
                                                                        self.spinbox_frequency.value(), self.bit_rate,
                                                                        self.address, self.size,
-                                                                       self.protection,
+                                                                       self.protection, self.audio_bit_rate,
                                                                        self.src_is_USRP, self.file_path, self.recorder)
                 else:
                     self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
@@ -361,10 +375,10 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                                self.protection,
                                                                self.src_is_USRP, self.file_path, self.recorder)
                 self.my_receiver.start()
+                self.statusBar.showMessage("Audio playing.")
                 self.dev_mode_init()
                 if dev_mode_opened:
                     self.dev_mode_open()
-                self.snr_timer.start(5000)
         else:
             # mute button pressed
             self.btn_play.setText("Play")
@@ -374,7 +388,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.set_volume()
             self.need_new_init = False
         # start timer for snr update again
-        self.snr_timer.start(500)
+        self.snr_timer.start(1000)
+        self.firecode_timer.start(120)
         # update dev mode
 
     def stop_reception(self):
@@ -394,6 +409,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.recorder = False
         # stop snr updates because no flowgraph is running to measure snr
         self.snr_timer.stop()
+        self.firecode_timer.stop()
+        self.statusBar.showMessage("Reception stopped.")
 
     def record_audio(self):
         # enable/disable buttons
@@ -404,7 +421,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # start flowgraph
         if self.dabplus:
             self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size,
-                                                       self.protection,
+                                                       self.protection, self.audio_bit_rate,
                                                        self.src_is_USRP, self.file_path, self.recorder)
         else:
             self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
@@ -413,6 +430,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                        self.protection,
                                                        self.src_is_USRP, self.file_path, self.recorder)
         self.my_receiver.start()
+        self.statusBar.showMessage("Recording audio ...")
 
     def set_volume(self):
         # map volume from [0:100] to [0:1]
@@ -490,13 +508,9 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot = sip.wrapinstance(self.my_receiver.waterfall_plot.pyqwidget(), QtGui.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.waterfall_plot)
         self.waterfall_plot.hide()
-        # Time plot
-        # self.time_plot = sip.wrapinstance(self.my_receiver.time_plot.pyqwidget(), QtGui.QWidget)
-        # self.vertical_layout_dev_mode_right.addWidget(self.time_plot)
-        #self.time_plot.hide()
         # constellation plot
         self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtGui.QWidget)
-        self.horitontal_layout_dev_mode_bottom.addWidget(self.constellation)
+        self.vertical_layout_dev_mode_right.addWidget(self.constellation)
         self.constellation.hide()
         # if dev mode is initialized, we can enable the dev mode open button
         self.btn_dev_mode_open.setEnabled(True)
@@ -511,7 +525,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot.show()
         self.constellation.show()
         self.label_firecode.show()
+        self.led_msc.show()
+        self.label_label_msc.show()
         self.label_firecode.setText("")
+        self.label_fic.show()
+        self.led_fic.show()
+        self.label_label_fic.show()
+        self.label_fic.setText("")
         self.content_count = 0
 
     def dev_mode_close(self):
@@ -524,20 +544,41 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot.hide()
         self.constellation.hide()
         self.label_firecode.hide()
+        self.led_msc.hide()
+        self.label_label_msc.hide()
+        self.label_fic.hide()
+        self.led_fic.hide()
+        self.label_label_fic.hide()
         print "key"
         self.resize(2000, 2000)
 
 
     def update_firecode(self):
         if self.dev_mode_active:
-            if self.content_count >=120:
+            if self.content_count >=69:
                 self.label_firecode.setText("")
+                self.label_fic.setText("")
                 self.content_count = 0
+            # write msc status
             if not self.my_receiver.get_firecode_passed():
                 self.label_firecode.setText(self.label_firecode.text() + "<font color=\"red\">X </font>")
+                self.led_msc.setColor(QtGui.QColor(255, 0, 0))
             else:
                 errors = self.my_receiver.get_corrected_errors()
-                self.label_firecode.setText(self.label_firecode.text() +("<font color=\"" + ("green" if (errors < 10) else "orange") + "\">" + str(errors) +" </font>"))
+                if errors < 10:
+                    self.label_firecode.setText(self.label_firecode.text() + "<font color=\"green\">" + str(errors) + " < /font>")
+                    self.led_msc.setColor(QtGui.QColor(0, 255, 0))
+                else:
+                    self.label_firecode.setText(self.label_firecode.text() + "<font color=\"orange\">" + str(errors) + "</font>")
+                    self.led_msc.setColor(QtGui.QColor(0, 255, 128))
+            # write fic status
+            if self.my_receiver.get_crc_passed():
+                self.label_fic.setText(self.label_fic.text() + "<font color=\"green\">0 </font>")
+                self.led_fic.setColor(QtGui.QColor(0, 255, 0))
+            else:
+                self.label_fic.setText(self.label_fic.text() + "<font color=\"red\">X </font>")
+                self.led_fic.setColor(QtGui.QColor(255, 0, 0))
+        self.label_fic.setWordWrap(True)
         self.label_firecode.setWordWrap(True)
         self.content_count += 1
 
@@ -656,12 +697,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             # enable play button
             self.t_btn_play.setEnabled(True)
             self.t_label_status.setText("ready to transmit")
+            self.statusBar.showMessage("ready to transmit")
 
     def t_run_transmitter(self):
         self.t_btn_stop.setEnabled(True)
         self.t_slider_volume.setEnabled(True)
-        self.t_label_status.setText("transmitting..")
-        self.statusBar.showMessage("transmitting..")
+        self.t_label_status.setText("transmitting...")
+        self.statusBar.showMessage("transmitting...")
         self.my_transmitter.start()
 
     def t_set_volume(self):
@@ -673,7 +715,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.t_btn_stop.setEnabled(False)
         self.t_slider_volume.setEnabled(False)
         self.t_label_status.setText("not running")
-        self.statusBar.showMessage("not running")
+        self.statusBar.showMessage("Transmission stopped.")
 
     def t_set_file_path(self):
         path = QtGui.QFileDialog.getExistingDirectory(self, "Pick a folder for your file sink")

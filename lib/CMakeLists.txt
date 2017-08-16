@@ -93,7 +93,7 @@ list(APPEND dab_sources
     ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_n1.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/encode_new.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/portableio.c
-)
+    )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)

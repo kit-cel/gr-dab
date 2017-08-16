@@ -69,5 +69,6 @@ install(FILES
     dab_dabplus_audio_decoder_ff.xml
     dab_reed_solomon_encode_bb.xml
     dab_mp4_encode_sb.xml
-    dab_mp2_encode_sb.xml DESTINATION share/gnuradio/grc/blocks
+    dab_mp2_encode_sb.xml
+    DESTINATION share/gnuradio/grc/blocks
 )

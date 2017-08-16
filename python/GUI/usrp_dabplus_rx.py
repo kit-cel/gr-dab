@@ -32,7 +32,7 @@ import time, math
 
 
 class usrp_dabplus_rx(gr.top_block):
-    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, use_usrp, src_path, record_audio = False, sink_path = "None"):
+    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, use_usrp, src_path, record_audio = False, sink_path = "None"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -52,7 +52,7 @@ class usrp_dabplus_rx(gr.top_block):
             self.src.set_antenna("TX/RX")
         else:
             print "using file source"
-            self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, True)
+            self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, False)
 
         # set paramters to default mode
         self.softbits = True
@@ -97,7 +97,7 @@ class usrp_dabplus_rx(gr.top_block):
         # MSC decoder and audio sink
         ########################
         self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
-        self.audio = audio.sink_make(32000)
+        self.audio = audio.sink_make(audio_bit_rate)
 
         ########################
         # Connections
@@ -159,6 +159,9 @@ class usrp_dabplus_rx(gr.top_block):
 
     def get_corrected_errors(self):
         return self.dabplus.get_corrected_errors()
+
+    def get_crc_passed(self):
+        return self.fic_dec.get_crc_passed()
 
 ########################
 # setter methods

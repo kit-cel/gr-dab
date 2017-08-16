@@ -57,6 +57,7 @@ namespace gr {
       d_service_labels_written_trigger = -1;
       d_subch_info_written_trigger = -1;
       d_programme_type_written_trigger = -1;
+      d_crc_passed = false;
     }
 
     int
@@ -65,9 +66,11 @@ namespace gr {
       uint8_t type, length, pos;
       if (crc16(fib, FIB_LENGTH, FIB_CRC_POLY, FIB_CRC_INITSTATE) != 0) {
         GR_LOG_DEBUG(d_logger, "FIB CRC error");
+        d_crc_passed = false;
         return 1;
       }
       GR_LOG_DEBUG(d_logger, "FIB correct");
+      d_crc_passed = true;
       pos = 0;
       while (pos < FIB_LENGTH - FIB_CRC_LENGTH && (uint8_t) fib[pos] != FIB_ENDMARKER &&
              (uint8_t) fib[pos] != 0) { //TODO correct?
@@ -262,12 +265,11 @@ namespace gr {
               GR_LOG_DEBUG(d_logger, "programme number");
               break;
             case FIB_SI_EXTENSION_PROGRAMME_TYPE: {
-              GR_LOG_DEBUG(d_logger, format("programme type, %d components") %((length-1)/6));
-              for(int i = 0; i < (length-1)/6; i++) {
-                uint8_t programme_type = (uint8_t)(data[2 + i*6 + 4] & 0x1f);
-                uint8_t language = (uint8_t)(data[2 + i*6 + 3]);
-                uint16_t service_reference = (uint16_t)(data[2 + i*6] & 0x0f) << 8 |
-                                             (uint8_t) data[2 + i*6 + 1];
+              GR_LOG_DEBUG(d_logger, format("programme type, %d components") %((length-1)/4));
+              for(int i = 0; i < (length-1)/4; i++) {
+                uint8_t programme_type = (uint8_t)(data[2 + i*4 + 3] & 0x1f);
+                uint16_t service_reference = (uint16_t)(data[2 + i*4] & 0x0f) << 8 |
+                                             (uint8_t) data[2 + i*4 + 1];
                 GR_LOG_DEBUG(d_logger, format("reference %d, type: %d") %service_reference %(int)programme_type);
 
                 // write programme type to json
@@ -276,7 +278,7 @@ namespace gr {
                 } else {
                   std::stringstream ss;
                   ss << d_programme_type_current << ",{" << "\"reference\":" << (int) service_reference << ",\"programme_type\":"
-                     << (int) programme_type << ",\"language\":" << (int)language << "}\0";
+                     << (int) programme_type << "}\0";
                   d_programme_type_current = ss.str();
                   if ((int) service_reference == d_programme_type_written_trigger) {
                     std::stringstream ss_json;

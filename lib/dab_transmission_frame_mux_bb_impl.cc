@@ -85,6 +85,7 @@ namespace gr {
 
       // generate PRBS for padding
       generate_prbs(d_prbs, sizeof(d_prbs));
+      GR_LOG_DEBUG(d_logger, boost::format("key num_subch: %d") %d_num_subch);
     }
 
     /*
@@ -133,7 +134,7 @@ namespace gr {
                                                      gr_vector_void_star &output_items)
     {
       unsigned char *out = (unsigned char *) output_items[0];
-      unsigned char *triggerout = (unsigned char *) output_items[1];
+      //unsigned char *triggerout = (unsigned char *) output_items[1];
       //const unsigned char *in;
 
       // create control stream for ofdm with trigger at start of frame and set zero

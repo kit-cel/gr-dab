@@ -54,6 +54,7 @@ namespace gr {
       virtual std::string get_service_labels() = 0;
       virtual std::string get_subch_info() = 0;
       virtual std::string get_programme_type() = 0;
+      virtual bool get_crc_passed() = 0;
     };
 
   } // namespace dab
