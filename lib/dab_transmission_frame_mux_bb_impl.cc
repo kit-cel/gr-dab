@@ -100,11 +100,9 @@ namespace gr {
     {
       // the first input is always the FIC
       ninput_items_required[0] = d_fic_len * (noutput_items / d_vlen_out);
-      // the second input is always the PRBS source
-      ninput_items_required[1] = d_cif_len * 8;
       for (int i = 0; i < d_num_subch; ++i) {
         // the amount of consumed data of each sub-channel depends on its size
-        ninput_items_required[i + 2] = d_subch_size[i] * d_cu_len * (noutput_items / d_vlen_out);
+        ninput_items_required[i + 1] = d_subch_size[i] * d_cu_len * d_num_cifs * (noutput_items / d_vlen_out);
       }
     }
 
