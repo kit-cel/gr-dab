@@ -45,14 +45,13 @@ namespace gr {
                                                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     // 000 00110 000 00000 0100000000000000 00 0 0000000000000 00000000
 
-    //service orga with number of service components (last 4 bits have to be modified) and without service component descrition (only 1 service with numSubCh of SubChannels)
-    const char fib_source_b_impl::d_service_orga[40] = {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,
-                                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-    //000 00110 000 00010 0100000000000000 0 000 0001
+    //service orga header
+    const char fib_source_b_impl::d_service_orga_header[16] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+    //000 00100 000 00010
 
-    //d_service_comp_description, has to be added for each service comp to d_service_orga (with change of Sub_channel ID!!)
-    const char fib_source_b_impl::d_service_comp_description[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
-    //00 000000 000000 1 0
+    //service orga for one service containing one subchannel
+    const char fib_source_b_impl::d_service_orga[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+    // 0100000000000000 0 000 0001 00 000000 000000 00
 
     //subchannel orga header, length has to be changed according to the number of subchannel-orga fields
     const char fib_source_b_impl::d_subchannel_orga_header[16] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
@@ -230,7 +229,7 @@ namespace gr {
         if ((d_nFIBs_written % 3 == 0 && d_transmission_mode != 3) ||
             (d_nFIBs_written % 4 == 0 && d_transmission_mode == 3)) {
 ////////////////////////////////////////////////
-/// add first FIB with only MCI (max numSubCh = 7)
+/// add first FIB with only MCI (max numSubCh = 5)
 ////////////////////////////////////////////////
           //ensemble info
           std::memcpy(out + d_offset, d_ensemble_info, d_size_ensemble_info);
@@ -240,27 +239,24 @@ namespace gr {
           else CIF_counter(out + d_offset, d_nFIBs_written / 4);
 
           //service orga
-          std::memcpy(out + d_offset, d_service_orga, d_size_service_orga);
-          d_offset += d_size_service_orga;
-          //change number of service components in d_service_orga (bit manipulation)
-          bit_adaption(out + d_offset, d_num_subch, 4);
-          //service component description (numSubCh times; for every sub_channel different, belongs to d_service_orga)
-          for (int subch_count = 0; subch_count < d_num_subch; subch_count++) {
-            std::memcpy(out + d_offset,
-                        d_service_comp_description,
-                        d_size_service_comp_description); //add numSubCh with default values
-            d_offset += d_size_service_comp_description;
-            //change SubChID and priority for all not-primary channels
-            if (subch_count >= 1) { //is it not the first (=secondary) subchannel?
-              out[d_offset - 2] = 0; //all additional subchannels are secondary
-              //the SubChannel ID has to increase, to be different (count up from zero)
-              bit_adaption(out + d_offset - 2, subch_count, 6);
-            }
+          //header
+          std::memcpy(out + d_offset, d_service_orga_header, d_size_service_orga_header);
+          d_offset += d_size_service_orga_header;
+          //change FIG length depending on number of services
+          bit_adaption(out + d_offset - 8, 1 + 5*d_num_subch, 5);
+          //data field for every service (each containing one service component)
+          for (int service_count = 0; service_count < d_num_subch; service_count++) {
+            std::memcpy(out + d_offset, d_service_orga, d_size_service_orga);
+            d_offset += d_size_service_orga;
+            //change service Identifier
+            bit_adaption(out + d_offset - 24, service_count, 8);
+            //change subchannel ID
+            bit_adaption(out + d_offset - 2, service_count, 6);
           }
           //MCI is set, set EndMarker and padding
           if ((8 * FIB_DATA_FIELD_LENGTH) - d_offset >=
               8) {//add EndMarker (111 11111) if there is minimum one byte left in FIG (FIG without 16 bit crc16)
-            for (int i = 0; i < 8; i++) { //find:: binde FIC.h ein und verwende die konstaten statt FIB_size
+            for (int i = 0; i < 8; i++) {
               out[i + d_offset] = 1;
             }
           }

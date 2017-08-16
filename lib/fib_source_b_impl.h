@@ -32,7 +32,7 @@ namespace gr {
  * produces Fast Information Blocks (FIBs) according to the DAB standard and the input parameters
  *
  * @param transmission_mode transmission mode
- * @param num_subch number of subchannels to be transmitted
+ * @param num_subch number of subchannels to be transmitted, each in a speparated service
  * @param ensemble_label string label of the DAB ensemble (max 16 characters)
  * @param programme_service_label string label of the DAB service (max 16 characters)
  * @param service_comp_label string label of the DAB service component (max 16 characters)
@@ -54,10 +54,10 @@ namespace gr {
       const static int d_size_ensemble_info = 56;
 
       void CIF_counter(char *out_ptr, int counter);//implementation of the mod 20 and mod 250 counter
-      const static char d_service_orga[40]; //const
+      const static char d_service_orga_header[16]; //*const
+      const static int d_size_service_orga_header = 16;
+      const static char d_service_orga[40]; //*services
       const static int d_size_service_orga = 40;
-      const static char d_service_comp_description[16]; //*numSubCh
-      const static int d_size_service_comp_description = 16;
       const static char d_subchannel_orga_header[16]; //const
       const static int d_size_subchannel_orga_header = 16;
       const static char d_subchannel_orga_field[32]; //*numSubCh
