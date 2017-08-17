@@ -66,27 +66,19 @@ namespace gr {
       std::vector <uint8_t> d_protection_mode, d_data_rate_n;
 
       //Service Information
+      int d_label_counter;
+      const static int d_size_label = 176;
       static char d_ensemble_label[176]; //21*8+8, ensemble label (FIG 1/0)
       const static int d_size_ensemble_label = 176;
       static char d_programme_service_label[176]; //21*8+8, service label (FIG 1/0)
       const static int d_size_service_label = 176;
-      static char d_service_comp_label[184]; //21*8+8, service component label (FIG 1/0)
-      const static int d_size_service_comp_label = 184;
-      static char d_service_comp_language[32]; //3*8+8, service component language; short form (FIG 0/5)
-      const static int d_size_service_comp_language = 32;
-
-      const static int d_num_SI_basic = 4; //no subchannel specific SI
-      const static int d_num_SI_subch = 0; //SI for a specific subchannel
-      const static char *d_SI_pointer[d_num_SI_basic +
-                                      d_num_SI_subch]; //pointer to iterate the SI data in non-primary FIBs, saves the start adress from each SI_Array
-      const static int d_SI_size[d_num_SI_basic + d_num_SI_subch]; //Saves the lengths of the SI_Arrays
-      int d_nSI_written, d_subch_iterate;
+      std::string d_service_labels;
 
       int write_label(char *out_ptr, std::string label, int num_chars = 16);//default for 16 characters (16 byte)
 
     public:
       fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
-                        std::string programme_service_label, std::string service_comp_label, uint8_t service_comp_lang,
+                        std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
                         const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n);
 
       ~fib_source_b_impl();
