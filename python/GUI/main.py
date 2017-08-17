@@ -14,13 +14,18 @@ import json
 import sip
 import os
 
+resolution_width = 0
+resolution_height = 0
+
 class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def __init__(self, parent=None):
         super(DABstep, self).__init__(parent)
         self.setupUi(self)
+        self.resize(800, 600)
         # window title
         self.setWindowTitle("DABstep - A DAB/DAB+ transceiver app")
-        self.resize(5000, 5000)
+        self.screen_width = resolution_width
+        self.screen_height = resolution_height
         # show logo if it exists
         if os.path.exists("DAB_logo.png"):
             self.label_logo.setText("<img src=\"DAB_logo.png\">")
@@ -87,6 +92,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # DEVELOPER MODE
         ######################################################################
         self.dev_mode_active = False
+        # hide scroll area
+        self.dev_scroll_area.hide()
         # hide close button and just show open button
         self.btn_dev_mode_close.hide()
         # dev mode open button pressed
@@ -108,8 +115,6 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.label_fic.hide()
         self.led_fic.hide()
         self.label_label_fic.hide()
-        self.label_label_fic.setFont(font)
-        self.label_label_msc.setFont(font)
         self.content_count = 0
 
         ######################################################################
@@ -174,6 +179,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.t_btn_path_src5.pressed.connect(self.t_set_subch_path5)
         self.t_btn_path_src6.pressed.connect(self.t_set_subch_path6)
         self.t_btn_path_src7.pressed.connect(self.t_set_subch_path7)
+        self.t_btn_record1.pressed.connect(self.t_toggle_record1)
+        self.t_btn_record2.pressed.connect(self.t_toggle_record2)
+        self.t_btn_record3.pressed.connect(self.t_toggle_record3)
+        self.t_btn_record4.pressed.connect(self.t_toggle_record4)
+        self.t_btn_record5.pressed.connect(self.t_toggle_record5)
+        self.t_btn_record6.pressed.connect(self.t_toggle_record6)
+        self.t_btn_record7.pressed.connect(self.t_toggle_record7)
         # set volume if volume slider is changed
         self.t_slider_volume.valueChanged.connect(self.t_set_volume)
 
@@ -226,7 +238,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.label_path.setStyleSheet('color: red')
         else:
             # set up and start flowgraph
-            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate,
+            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
                                               self.src_is_USRP, self.file_path, self.recorder)
             self.my_receiver.start()
             # status bar
@@ -304,7 +316,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.audio_bit_rate = 48000
         else:
             self.audio_bit_rate = 32000
-        #self.dabplus = service_data['DAB+']
+        self.dabplus = service_data['DAB+']
 
         # display info to selected sub-channel
         # service info
@@ -362,18 +374,12 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.snr_timer.stop()
                 self.firecode_timer.stop()
                 self.my_receiver.stop()
-                if True:
-                    self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(),
-                                                                       self.spinbox_frequency.value(), self.bit_rate,
-                                                                       self.address, self.size,
-                                                                       self.protection, self.audio_bit_rate,
-                                                                       self.src_is_USRP, self.file_path, self.recorder)
-                else:
-                    self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
-                                                               self.spinbox_frequency.value(), self.bit_rate,
-                                                               self.address, self.size,
-                                                               self.protection,
-                                                               self.src_is_USRP, self.file_path, self.recorder)
+                self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(),
+                                                                   self.spinbox_frequency.value(), self.bit_rate,
+                                                                   self.address, self.size,
+                                                                   self.protection, self.audio_bit_rate, self.dabplus,
+                                                                   self.src_is_USRP, self.file_path, self.recorder)
+
                 self.my_receiver.start()
                 self.statusBar.showMessage("Audio playing.")
                 self.dev_mode_init()
@@ -419,16 +425,10 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.btn_stop.setEnabled(True)
         self.recorder = True
         # start flowgraph
-        if self.dabplus:
-            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size,
-                                                       self.protection, self.audio_bit_rate,
-                                                       self.src_is_USRP, self.file_path, self.recorder)
-        else:
-            self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
-                                                       self.spinbox_frequency.value(), self.bit_rate,
-                                                       self.address, self.size,
-                                                       self.protection,
-                                                       self.src_is_USRP, self.file_path, self.recorder)
+        self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size,
+                                                   self.protection, self.audio_bit_rate, self.dabplus,
+                                                   self.src_is_USRP, self.file_path, self.recorder)
+
         self.my_receiver.start()
         self.statusBar.showMessage("Recording audio ...")
 
@@ -500,23 +500,31 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     ################################
 
     def dev_mode_init(self):
+        available_height = self.screen_height-200
+        # constellation plot
+        self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtGui.QWidget)
+        self.vertical_layout_dev_mode_right.addWidget(self.constellation)
+        self.constellation.setMaximumHeight(available_height/3)
+        self.constellation.setMaximumWidth(available_height/3*2)
+        self.constellation.hide()
         # FFT plot
         self.fft_plot = sip.wrapinstance(self.my_receiver.fft_plot.pyqwidget(), QtGui.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.fft_plot)
+        self.fft_plot.setMaximumHeight(available_height/3)
+        self.fft_plot.setMaximumWidth(available_height/3*2)
         self.fft_plot.hide()
         # Waterfall plot
         self.waterfall_plot = sip.wrapinstance(self.my_receiver.waterfall_plot.pyqwidget(), QtGui.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.waterfall_plot)
+        self.waterfall_plot.setMaximumHeight(available_height/3)
+        self.waterfall_plot.setMaximumWidth(available_height/3*2)
         self.waterfall_plot.hide()
-        # constellation plot
-        self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtGui.QWidget)
-        self.vertical_layout_dev_mode_right.addWidget(self.constellation)
-        self.constellation.hide()
         # if dev mode is initialized, we can enable the dev mode open button
         self.btn_dev_mode_open.setEnabled(True)
 
     def dev_mode_open(self):
         self.dev_mode_active = True
+        self.dev_scroll_area.show()
         # hide open button and show close button
         self.btn_dev_mode_open.hide()
         self.btn_dev_mode_close.show()
@@ -533,9 +541,12 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.label_label_fic.show()
         self.label_fic.setText("")
         self.content_count = 0
+        # resize window width
+        self.showMaximized()
 
     def dev_mode_close(self):
         self.dev_mode_active = False
+        self.dev_scroll_area.hide()
         # hide close button and show open button
         self.btn_dev_mode_close.hide()
         self.btn_dev_mode_open.show()
@@ -549,13 +560,11 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.label_fic.hide()
         self.led_fic.hide()
         self.label_label_fic.hide()
-        print "key"
-        self.resize(2000, 2000)
-
+        self.resize(800, 600)
 
     def update_firecode(self):
         if self.dev_mode_active:
-            if self.content_count >=69:
+            if self.content_count >=80:
                 self.label_firecode.setText("")
                 self.label_fic.setText("")
                 self.content_count = 0
@@ -677,8 +686,6 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 merged_service_string = merged_service_string + str(self.components[i]["edit_label"].text()).ljust(16)
             # write dabplus types
                 dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() is 0 else 0)
-            # write record states
-                record_states[i] = (True if self.components[i]["btn_record"].isDefault() else False)
         print merged_service_string
 
         # check if File path for sink is chosen if option enabled
@@ -698,7 +705,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                                   audio_paths,
                                                                   self.t_spin_listen_to_component.value(),
                                                                   self.t_rbtn_USRP.isChecked(),
-                                                                  dabplus_types, record_states,
+                                                                  dabplus_types,
                                                                   str(self.t_label_sink.text()) + "/" + str(
                                                                       self.t_edit_file_name.text()))
 
@@ -740,6 +747,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             # display path in path label
             self.components[0]["src_path_disp"].setText(path)
             self.components[0]["src_path_disp"].setStyleSheet('color: black')
+        self.t_btn_record1.setFlat(False)
 
     def t_set_subch_path2(self):
         path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
@@ -794,6 +802,34 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             # display path in path label
             self.components[6]["src_path_disp"].setText(path)
         self.components[7]["src_path_disp"].setStyleSheet('color: black')
+
+    def t_toggle_record1(self):
+        self.t_label_path_src1.setText("microphone")
+        self.components[0]["src_path"] = "mic"
+
+    def t_toggle_record2(self):
+        self.t_label_path_src2.setText("microphone")
+        self.components[1]["src_path"] = "mic"
+
+    def t_toggle_record3(self):
+        self.t_label_path_src3.setText("microphone")
+        self.components[2]["src_path"] = "mic"
+
+    def t_toggle_record4(self):
+        self.t_label_path_src4.setText("microphone")
+        self.components[3]["src_path"] = "mic"
+
+    def t_toggle_record5(self):
+        self.t_label_path_src5.setText("microphone")
+        self.components[4]["src_path"] = "mic"
+
+    def t_toggle_record6(self):
+        self.t_label_path_src6.setText("microphone")
+        self.components[5]["src_path"] = "mic"
+
+    def t_toggle_record7(self):
+        self.t_label_path_src7.setText("microphone")
+        self.components[6]["src_path"] = "mic"
 
 
 class lookup_tables:
@@ -904,6 +940,11 @@ class lookup_tables:
 
 def main():
     app = QtGui.QApplication(sys.argv)
+    global resolution_width
+    resolution_width = app.desktop().screenGeometry().width()
+    global resolution_height
+    resolution_height = app.desktop().screenGeometry().height()
+
     form = DABstep()
     form.show()
     app.exec_()

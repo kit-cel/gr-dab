@@ -30,7 +30,7 @@ import numpy as np
 
 
 class usrp_dabplus_tx(gr.top_block):
-    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, src_paths, selected_audio, use_usrp, dabplus_types, record_states, sink_path = "dab_iq_generated.dat"):
+    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -48,7 +48,6 @@ class usrp_dabplus_tx(gr.top_block):
         self.src_paths = src_paths
         self.use_usrp = use_usrp
         self.dabplus_types = dabplus_types
-        self.record_sates = record_states
         self.sink_path = sink_path
         self.selected_audio = selected_audio
         self.volume = 80
@@ -64,6 +63,7 @@ class usrp_dabplus_tx(gr.top_block):
         ########################
         # MSC
         ########################
+        self.recorder = audio.source_make(32000)
         self.msc_sources = [None] * self.num_subch
         self.f2s_left_converters = [None] * self.num_subch
         self.f2s_right_converters = [None] * self.num_subch
@@ -72,8 +72,9 @@ class usrp_dabplus_tx(gr.top_block):
         self.rs_encoders = [None] * self.num_subch
         self.msc_encoders = [None] * self.num_subch
         for i in range(0, self.num_subch):
-            # source
-            self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], True)
+            if not self.src_paths[i] is "mic":
+                # source
+                self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], True)
             # float to short
             self.f2s_left_converters[i] = blocks.float_to_short_make(1, 32767)
             self.f2s_right_converters[i] = blocks.float_to_short_make(1, 32767)
@@ -111,9 +112,12 @@ class usrp_dabplus_tx(gr.top_block):
         else:
             self.sink = blocks.file_sink_make(gr.sizeof_gr_complex, self.sink_path)
         # audio sink
-        #self.audio = audio.sink_make(32000)
+        self.audio = audio.sink_make(32000)
+
         self.gain_left = blocks.multiply_const_ff_make(1, 1)
         self.gain_right = blocks.multiply_const_ff_make(1, 1)
+        self.s2f_left = blocks.short_to_float_make(1, 32767)
+        self.s2f_right = blocks.short_to_float_make(1, 32767)
 
         ########################
         # Connections
@@ -121,16 +125,20 @@ class usrp_dabplus_tx(gr.top_block):
         self.connect(self.fic_src, self.fic_enc, (self.mux, 0))
         for i in range(0, self.num_subch):
             if self.dabplus_types[i] is 1:
-                self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
-                self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                if self.src_paths[i] is "mic":
+                    self.connect((self.recorder, 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i + 1))
+                    self.connect((self.recorder, 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                else:
+                    self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
+                    self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
             else:
                 self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp2_encoders[i], 0), self.msc_encoders[i], (self.mux, i + 1))
                 self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp2_encoders[i], 1))
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
         self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
-        #self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
-        #self.connect((self.msc_sources[self.selected_audio-1], 1), self.gain_right, (self.audio, 1))
+        self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
+        self.connect((self.msc_sources[self.selected_audio-1], 1), self.gain_right, (self.audio, 1))
 
     def transmit(self):
         tx = usrp_dabplus_tx()
