@@ -69,6 +69,7 @@ namespace gr {
         GR_LOG_INFO(d_logger, "AAC enc init succeeded");
       } else {
         GR_LOG_ERROR(d_logger, "AAC enc init failed");
+	throw std::runtime_error("AAC enc init failed");
       }
       // check encoder status
       if (aacEncInfo(d_aac_encoder, &info) != AACENC_OK) {
