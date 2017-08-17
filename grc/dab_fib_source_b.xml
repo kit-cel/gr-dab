@@ -61,6 +61,11 @@
     <key>data_rate_n</key>
     <type>raw</type>
   </param>
+  <param>
+    <name>DAB+</name>
+    <key>dabplus</key>
+    <type>raw</type>
+  </param>
   <source>
     <name>out</name>
     <type>byte</type>

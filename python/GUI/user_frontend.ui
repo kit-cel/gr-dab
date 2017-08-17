@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>816</width>
-    <height>664</height>
+    <width>1051</width>
+    <height>737</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -85,7 +85,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_reception">
        <attribute name="title">
@@ -1034,20 +1034,6 @@
                 </property>
                </widget>
               </item>
-              <item>
-               <widget class="QComboBox" name="t_combo_dabplus">
-                <item>
-                 <property name="text">
-                  <string>DAB+</string>
-                 </property>
-                </item>
-                <item>
-                 <property name="text">
-                  <string>DAB</string>
-                 </property>
-                </item>
-               </widget>
-              </item>
              </layout>
             </item>
             <item>
@@ -1066,9 +1052,9 @@
                <property name="geometry">
                 <rect>
                  <x>0</x>
-                 <y>0</y>
-                 <width>392</width>
-                 <height>876</height>
+                 <y>-811</y>
+                 <width>477</width>
+                 <height>1269</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -1114,14 +1100,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="3" column="0">
+                    <item row="4" column="0">
                      <widget class="QLabel" name="t_label_rate1">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="3" column="1">
+                    <item row="4" column="1">
                      <widget class="QSpinBox" name="t_spin_rate1">
                       <property name="maximum">
                        <number>999</number>
@@ -1131,14 +1117,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="4" column="0">
+                    <item row="5" column="0">
                      <widget class="QLabel" name="t_label_prot1">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="4" column="1">
+                    <item row="5" column="1">
                      <widget class="QSpinBox" name="t_spin_prot1">
                       <property name="maximum">
                        <number>3</number>
@@ -1148,15 +1134,49 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="5" column="0">
+                    <item row="6" column="0">
                      <widget class="QLabel" name="t_label_comp_src1">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="5" column="1">
+                    <item row="6" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_13">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record1">
+                        <property name="sizePolicy">
+                         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                        <property name="default">
+                         <bool>false</bool>
+                        </property>
+                        <property name="flat">
+                         <bool>false</bool>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src1">
                         <property name="sizePolicy">
@@ -1200,7 +1220,7 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="6" column="0">
+                    <item row="7" column="0">
                      <widget class="QLabel" name="t_label_comp2">
                       <property name="enabled">
                        <bool>true</bool>
@@ -1217,14 +1237,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="7" column="0">
+                    <item row="9" column="0">
                      <widget class="QLabel" name="t_label_rate2">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="7" column="1">
+                    <item row="9" column="1">
                      <widget class="QSpinBox" name="t_spin_rate2">
                       <property name="maximum">
                        <number>999</number>
@@ -1234,29 +1254,45 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="8" column="0">
+                    <item row="10" column="0">
                      <widget class="QLabel" name="t_label_prot2">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="8" column="1">
+                    <item row="10" column="1">
                      <widget class="QSpinBox" name="t_spin_prot2">
                       <property name="value">
                        <number>2</number>
                       </property>
                      </widget>
                     </item>
-                    <item row="9" column="0">
+                    <item row="11" column="0">
                      <widget class="QLabel" name="t_label_comp_src2">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="9" column="1">
+                    <item row="11" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_14">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record2">
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src2">
                         <property name="sizePolicy">
@@ -1291,7 +1327,7 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="10" column="0">
+                    <item row="12" column="0">
                      <widget class="QLabel" name="t_label_comp3">
                       <property name="enabled">
                        <bool>true</bool>
@@ -1308,14 +1344,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="11" column="0">
+                    <item row="14" column="0">
                      <widget class="QLabel" name="t_label_rate3">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="11" column="1">
+                    <item row="14" column="1">
                      <widget class="QSpinBox" name="t_spin_rate3">
                       <property name="maximum">
                        <number>999</number>
@@ -1325,29 +1361,45 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="12" column="0">
+                    <item row="15" column="0">
                      <widget class="QLabel" name="t_label_prot3">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="12" column="1">
+                    <item row="15" column="1">
                      <widget class="QSpinBox" name="t_spin_prot3">
                       <property name="value">
                        <number>2</number>
                       </property>
                      </widget>
                     </item>
-                    <item row="13" column="0">
+                    <item row="16" column="0">
                      <widget class="QLabel" name="t_label_comp_src3">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="13" column="1">
+                    <item row="16" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_15">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record3">
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src3">
                         <property name="sizePolicy">
@@ -1382,7 +1434,7 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="14" column="0">
+                    <item row="17" column="0">
                      <widget class="QLabel" name="t_label_comp4">
                       <property name="font">
                        <font>
@@ -1396,14 +1448,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="15" column="0">
+                    <item row="19" column="0">
                      <widget class="QLabel" name="t_label_rate4">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="15" column="1">
+                    <item row="19" column="1">
                      <widget class="QSpinBox" name="t_spin_rate4">
                       <property name="maximum">
                        <number>999</number>
@@ -1413,29 +1465,45 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="16" column="0">
+                    <item row="20" column="0">
                      <widget class="QLabel" name="t_label_prot4">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="16" column="1">
+                    <item row="20" column="1">
                      <widget class="QSpinBox" name="t_spin_prot4">
                       <property name="value">
                        <number>2</number>
                       </property>
                      </widget>
                     </item>
-                    <item row="17" column="0">
+                    <item row="21" column="0">
                      <widget class="QLabel" name="t_label_comp_src4">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="17" column="1">
+                    <item row="21" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_16">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record4">
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src4">
                         <property name="sizePolicy">
@@ -1470,7 +1538,7 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="18" column="0">
+                    <item row="22" column="0">
                      <widget class="QLabel" name="t_label_comp5">
                       <property name="font">
                        <font>
@@ -1484,14 +1552,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="19" column="0">
+                    <item row="24" column="0">
                      <widget class="QLabel" name="t_label_rate5">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="19" column="1">
+                    <item row="24" column="1">
                      <widget class="QSpinBox" name="t_spin_rate5">
                       <property name="maximum">
                        <number>999</number>
@@ -1501,29 +1569,45 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="20" column="0">
+                    <item row="25" column="0">
                      <widget class="QLabel" name="t_label_prot5">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="20" column="1">
+                    <item row="25" column="1">
                      <widget class="QSpinBox" name="t_spin_prot5">
                       <property name="value">
                        <number>2</number>
                       </property>
                      </widget>
                     </item>
-                    <item row="21" column="0">
+                    <item row="26" column="0">
                      <widget class="QLabel" name="t_label_comp_src5">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="21" column="1">
+                    <item row="26" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_17">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record5">
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src5">
                         <property name="sizePolicy">
@@ -1558,7 +1642,7 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="22" column="0">
+                    <item row="27" column="0">
                      <widget class="QLabel" name="t_label_comp6">
                       <property name="font">
                        <font>
@@ -1572,14 +1656,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="23" column="0">
+                    <item row="29" column="0">
                      <widget class="QLabel" name="t_label_rate6">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="23" column="1">
+                    <item row="29" column="1">
                      <widget class="QSpinBox" name="t_spin_rate6">
                       <property name="maximum">
                        <number>999</number>
@@ -1589,29 +1673,45 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="24" column="0">
+                    <item row="30" column="0">
                      <widget class="QLabel" name="t_label_prot6">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="24" column="1">
+                    <item row="30" column="1">
                      <widget class="QSpinBox" name="t_spin_prot6">
                       <property name="value">
                        <number>2</number>
                       </property>
                      </widget>
                     </item>
-                    <item row="25" column="0">
+                    <item row="31" column="0">
                      <widget class="QLabel" name="t_label_comp_src6">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="25" column="1">
+                    <item row="31" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_18">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record6">
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src6">
                         <property name="sizePolicy">
@@ -1646,7 +1746,7 @@
                       </item>
                      </layout>
                     </item>
-                    <item row="26" column="0">
+                    <item row="32" column="0">
                      <widget class="QLabel" name="t_label_comp7">
                       <property name="font">
                        <font>
@@ -1660,14 +1760,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="27" column="0">
+                    <item row="34" column="0">
                      <widget class="QLabel" name="t_label_rate7">
                       <property name="text">
                        <string>Data rate [kbit/s]</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="27" column="1">
+                    <item row="34" column="1">
                      <widget class="QSpinBox" name="t_spin_rate7">
                       <property name="maximum">
                        <number>999</number>
@@ -1677,14 +1777,14 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="28" column="0">
+                    <item row="35" column="0">
                      <widget class="QLabel" name="t_label_prot7">
                       <property name="text">
                        <string>Protection Mode</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="28" column="1">
+                    <item row="35" column="1">
                      <widget class="QSpinBox" name="t_spin_prot7">
                       <property name="enabled">
                        <bool>true</bool>
@@ -1694,15 +1794,31 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="29" column="0">
+                    <item row="36" column="0">
                      <widget class="QLabel" name="t_label_comp_src7">
                       <property name="text">
                        <string>Audio Source</string>
                       </property>
                      </widget>
                     </item>
-                    <item row="29" column="1">
+                    <item row="36" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_19">
+                      <item>
+                       <widget class="QPushButton" name="t_btn_record7">
+                        <property name="maximumSize">
+                         <size>
+                          <width>27</width>
+                          <height>27</height>
+                         </size>
+                        </property>
+                        <property name="text">
+                         <string/>
+                        </property>
+                        <property name="icon">
+                         <iconset theme="media-record"/>
+                        </property>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QLabel" name="t_label_path_src7">
                         <property name="sizePolicy">
@@ -1733,6 +1849,293 @@
                         <property name="text">
                          <string>...</string>
                         </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="3" column="0">
+                     <widget class="QLabel" name="t_label_label1">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="8" column="0">
+                     <widget class="QLabel" name="t_label_label2">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="13" column="0">
+                     <widget class="QLabel" name="t_label_label3">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="18" column="0">
+                     <widget class="QLabel" name="t_label_label4">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="23" column="0">
+                     <widget class="QLabel" name="t_label_label5">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="28" column="0">
+                     <widget class="QLabel" name="t_label_label6">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="33" column="0">
+                     <widget class="QLabel" name="t_label_label7">
+                      <property name="text">
+                       <string>Name</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="3" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label1"/>
+                    </item>
+                    <item row="8" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label2"/>
+                    </item>
+                    <item row="13" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label3"/>
+                    </item>
+                    <item row="18" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label4"/>
+                    </item>
+                    <item row="23" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label5"/>
+                    </item>
+                    <item row="28" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label6"/>
+                    </item>
+                    <item row="33" column="1">
+                     <widget class="QLineEdit" name="t_edit_service_label7"/>
+                    </item>
+                    <item row="2" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus1">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer1">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus1">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="7" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus2">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer2">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus2">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="12" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus3">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer3">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus3">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="17" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus4">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer4">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus4">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="22" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus5">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer5">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus5">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="27" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus6">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer6">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus6">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                    <item row="32" column="1">
+                     <layout class="QHBoxLayout" name="t_layout_combo_dabplus7">
+                      <item>
+                       <spacer name="t_combo_dabplus_spacer7">
+                        <property name="orientation">
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0">
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QComboBox" name="t_combo_dabplus7">
+                        <item>
+                         <property name="text">
+                          <string>DAB+</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>DAB</string>
+                         </property>
+                        </item>
                        </widget>
                       </item>
                      </layout>

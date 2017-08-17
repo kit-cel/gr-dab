@@ -123,31 +123,31 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             {"label": self.t_label_comp1, "data_rate_label": self.t_label_rate1, "data_rate": self.t_spin_rate1,
              "protection_label": self.t_label_prot1, "protection": self.t_spin_prot1, "enabled": True,
              "src_label": self.t_label_comp_src1, "src_path_disp": self.t_label_path_src1,
-             "src_btn": self.t_btn_path_src1, "src_path":"None"},
+             "src_btn": self.t_btn_path_src1, "src_path": "None", "label_label": self.t_label_label1, "edit_label": self.t_edit_service_label1, "combo_dabplus": self.t_combo_dabplus1, "btn_record": self.t_btn_record1},
             {"label": self.t_label_comp2, "data_rate_label": self.t_label_rate2, "data_rate": self.t_spin_rate2,
              "protection_label": self.t_label_prot2, "protection": self.t_spin_prot2, "enabled": False,
              "src_label": self.t_label_comp_src2, "src_path_disp": self.t_label_path_src2,
-             "src_btn": self.t_btn_path_src2, "src_path":"None"},
+             "src_btn": self.t_btn_path_src2, "src_path": "None", "label_label": self.t_label_label2, "edit_label": self.t_edit_service_label2, "combo_dabplus": self.t_combo_dabplus2, "btn_record": self.t_btn_record2},
             {"label": self.t_label_comp3, "data_rate_label": self.t_label_rate3, "data_rate": self.t_spin_rate3,
              "protection_label": self.t_label_prot3, "protection": self.t_spin_prot3, "enabled": False,
              "src_label": self.t_label_comp_src3, "src_path_disp": self.t_label_path_src3,
-             "src_btn": self.t_btn_path_src3, "src_path":"None"},
+             "src_btn": self.t_btn_path_src3, "src_path": "None", "label_label": self.t_label_label3, "edit_label": self.t_edit_service_label3, "combo_dabplus": self.t_combo_dabplus3, "btn_record": self.t_btn_record3},
             {"label": self.t_label_comp4, "data_rate_label": self.t_label_rate4, "data_rate": self.t_spin_rate4,
              "protection_label": self.t_label_prot4, "protection": self.t_spin_prot4, "enabled": False,
              "src_label": self.t_label_comp_src4, "src_path_disp": self.t_label_path_src4,
-             "src_btn": self.t_btn_path_src4, "src_path":"None"},
+             "src_btn": self.t_btn_path_src4, "src_path": "None", "label_label": self.t_label_label4, "edit_label": self.t_edit_service_label4, "combo_dabplus": self.t_combo_dabplus4, "btn_record": self.t_btn_record4},
             {"label": self.t_label_comp5, "data_rate_label": self.t_label_rate5, "data_rate": self.t_spin_rate5,
              "protection_label": self.t_label_prot5, "protection": self.t_spin_prot5, "enabled": False,
              "src_label": self.t_label_comp_src5, "src_path_disp": self.t_label_path_src5,
-             "src_btn": self.t_btn_path_src5, "src_path":"None"},
+             "src_btn": self.t_btn_path_src5, "src_path": "None", "label_label": self.t_label_label5, "edit_label": self.t_edit_service_label5, "combo_dabplus": self.t_combo_dabplus5, "btn_record": self.t_btn_record5},
             {"label": self.t_label_comp6, "data_rate_label": self.t_label_rate6, "data_rate": self.t_spin_rate6,
              "protection_label": self.t_label_prot6, "protection": self.t_spin_prot6, "enabled": False,
              "src_label": self.t_label_comp_src6, "src_path_disp": self.t_label_path_src6,
-             "src_btn": self.t_btn_path_src6, "src_path":"None"},
+             "src_btn": self.t_btn_path_src6, "src_path": "None", "label_label": self.t_label_label6, "edit_label": self.t_edit_service_label6, "combo_dabplus": self.t_combo_dabplus6, "btn_record": self.t_btn_record6},
             {"label": self.t_label_comp7, "data_rate_label": self.t_label_rate7, "data_rate": self.t_spin_rate7,
              "protection_label": self.t_label_prot7, "protection": self.t_spin_prot7, "enabled": False,
              "src_label": self.t_label_comp_src7, "src_path_disp": self.t_label_path_src7,
-             "src_btn": self.t_btn_path_src7, "src_path":"None"}]
+             "src_btn": self.t_btn_path_src7, "src_path": "None", "label_label": self.t_label_label7, "edit_label": self.t_edit_service_label7, "combo_dabplus": self.t_combo_dabplus7, "btn_record": self.t_btn_record7}]
         # update service components initially to hide the service components 2-7
         self.t_update_service_components()
         # provide suggestions for language combo box
@@ -631,6 +631,10 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 component["src_label"].hide()
                 component["src_path_disp"].hide()
                 component["src_btn"].hide()
+                component["label_label"].hide()
+                component["edit_label"].hide()
+                component["combo_dabplus"].hide()
+                component["btn_record"].hide()
             else:
                 component["label"].show()
                 component["data_rate_label"].show()
@@ -640,6 +644,10 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 component["src_label"].show()
                 component["src_path_disp"].show()
                 component["src_btn"].show()
+                component["label_label"].show()
+                component["edit_label"].show()
+                component["combo_dabplus"].show()
+                component["btn_record"].show()
 
     def t_init_transmitter(self):
         self.statusBar.showMessage("initializing transmitter...")
@@ -649,16 +657,29 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         protection_array = [None] * self.t_spin_num_subch.value()
         data_rate_n_array = [None] * self.t_spin_num_subch.value()
         audio_paths = ["None"] * self.t_spin_num_subch.value()
+        merged_service_string = ""
+        dabplus_types = [True] * self.t_spin_num_subch.value()
+        record_states = [False] * self.t_spin_num_subch.value()
         for i in range(0, self.t_spin_num_subch.value()):
+            # write array with protection modes
             protection_array[i] = self.components[i]["protection"].value()
+            # write array with data rates
             data_rate_n_array[i] = self.components[i]["data_rate"].value()/8
+            # check audio paths
             if self.components[i]["src_path"] is "None":
                 # highlight the path which is not selected
                 self.components[i]["src_path_disp"].setStyleSheet('color: red')
                 arguments_incomplete = True
-                print "path " + str(i+1) + " not selected"
+                self.statusBar.showMessage("path " + str(i+1) + " not selected")
             else:
                 audio_paths[i] = self.components[i]["src_path"]
+            # write service labels
+                merged_service_string = merged_service_string + str(self.components[i]["edit_label"].text()).ljust(16)
+            # write dabplus types
+                dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() is 0 else 0)
+            # write record states
+                record_states[i] = (True if self.components[i]["btn_record"].isDefault() else False)
+        print merged_service_string
 
         # check if File path for sink is chosen if option enabled
         if self.t_rbtn_File.isChecked() and (str(self.t_label_sink.text()) == "select path"):
@@ -667,32 +688,19 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
         if arguments_incomplete is False:
             # init transmitter
-            if self.t_combo_dabplus.currentIndex() is 1:
-                # transmitting in DAB mode
-                self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spin_dab_mode.value(), self.t_spinbox_frequency.value(),
-                                                  self.t_spin_num_subch.value(),
-                                                  str(self.t_edit_ensemble_label.text()),
-                                                  str(self.t_edit_service_label.text()),
-                                                  self.t_combo_language.currentIndex(),
-                                                  protection_array, data_rate_n_array, 48000,
-                                                  audio_paths,
-                                                  self.t_spin_listen_to_component.value(),
-                                                  self.t_rbtn_USRP.isChecked(),
-                                                  str(self.t_label_sink.text())+ "/" +str(self.t_edit_file_name.text()))
-            else:
-                # transmitting in DAB+ mode
-                self.my_transmitter = usrp_dabplus_tx.usrp_dabplus_tx(self.t_spin_dab_mode.value(),
-                                                                      self.t_spinbox_frequency.value(),
-                                                                      self.t_spin_num_subch.value(),
-                                                                      str(self.t_edit_ensemble_label.text()),
-                                                                      str(self.t_edit_service_label.text()),
-                                                                      self.t_combo_language.currentIndex(),
-                                                                      protection_array, data_rate_n_array,
-                                                                      audio_paths,
-                                                                      self.t_spin_listen_to_component.value(),
-                                                                      self.t_rbtn_USRP.isChecked(),
-                                                                      str(self.t_label_sink.text()) + "/" + str(
-                                                                          self.t_edit_file_name.text()))
+            self.my_transmitter = usrp_dabplus_tx.usrp_dabplus_tx(self.t_spin_dab_mode.value(),
+                                                                  self.t_spinbox_frequency.value(),
+                                                                  self.t_spin_num_subch.value(),
+                                                                  str(self.t_edit_ensemble_label.text()),
+                                                                  merged_service_string,
+                                                                  self.t_combo_language.currentIndex(),
+                                                                  protection_array, data_rate_n_array,
+                                                                  audio_paths,
+                                                                  self.t_spin_listen_to_component.value(),
+                                                                  self.t_rbtn_USRP.isChecked(),
+                                                                  dabplus_types, record_states,
+                                                                  str(self.t_label_sink.text()) + "/" + str(
+                                                                      self.t_edit_file_name.text()))
 
             # enable play button
             self.t_btn_play.setEnabled(True)

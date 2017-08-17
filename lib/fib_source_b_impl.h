@@ -43,6 +43,7 @@ namespace gr {
     class fib_source_b_impl : public fib_source_b {
     private:
       int d_transmission_mode; //transmission mode
+      std::vector <uint8_t> d_dabplus;
       int d_offset;
       uint16_t d_nFIBs_written; //counts totally written FIBs
       void bit_adaption(char *out_ptr, int number,
@@ -79,7 +80,7 @@ namespace gr {
     public:
       fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
                         std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
-                        const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n);
+                        const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus);
 
       ~fib_source_b_impl();
 

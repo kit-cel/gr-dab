@@ -50,8 +50,8 @@ namespace gr {
     //000 00100 000 00010
 
     //service orga for one service containing one subchannel
-    const char fib_source_b_impl::d_service_orga[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-    // 0100000000000000 0 000 0001 00 000000 000000 00
+    const char fib_source_b_impl::d_service_orga[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+    // 0100000000000000 0 000 0001 00 111111 000000 00
 
     //subchannel orga header, length has to be changed according to the number of subchannel-orga fields
     const char fib_source_b_impl::d_subchannel_orga_header[16] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
@@ -101,12 +101,12 @@ namespace gr {
     fib_source_b::sptr
     fib_source_b::make(int transmission_mode, int num_subch, std::string ensemble_label,
                        std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
-                       const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n)
+                       const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus)
     {
       return gnuradio::get_initial_sptr
               (new fib_source_b_impl(transmission_mode, num_subch, ensemble_label,
                                      programme_service_labels, service_comp_label, service_comp_lang, protection_mode,
-                                     data_rate_n));
+                                     data_rate_n, dabplus));
     }
 
     /*
@@ -115,12 +115,12 @@ namespace gr {
     fib_source_b_impl::fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
                                          std::string programme_service_labels, std::string service_comp_label,
                                          uint8_t service_comp_lang, const std::vector <uint8_t> &protection_mode,
-                                         const std::vector <uint8_t> &data_rate_n)
+                                         const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus)
             : gr::sync_block("fib_source_b",
                              gr::io_signature::make(0, 0, 0),
                              gr::io_signature::make(1, 1, sizeof(char))),
               d_transmission_mode(transmission_mode), d_num_subch(num_subch), d_nFIBs_written(0),
-              d_protection_mode(protection_mode), d_data_rate_n(data_rate_n)
+              d_protection_mode(protection_mode), d_data_rate_n(data_rate_n), d_dabplus(dabplus)
     {
       if (d_transmission_mode != 3) set_output_multiple((8 * FIB_LENGTH) * 3);
       else set_output_multiple((8 * FIB_LENGTH) * 4);
@@ -229,6 +229,10 @@ namespace gr {
             bit_adaption(out + d_offset - 24, service_count, 8);
             //change subchannel ID
             bit_adaption(out + d_offset - 2, service_count, 6);
+            //change DAB+ mode if not DAB+ but DAB
+            if(d_dabplus[service_count] != 1){
+              bit_adaption(out + d_offset -8, 0, 6);
+            }
           }
           //MCI is set, set EndMarker and padding
           if ((8 * FIB_DATA_FIELD_LENGTH) - d_offset >=

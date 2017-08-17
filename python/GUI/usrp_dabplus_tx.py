@@ -30,7 +30,7 @@ import numpy as np
 
 
 class usrp_dabplus_tx(gr.top_block):
-    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, src_paths, selected_audio, use_usrp, sink_path = "dab_iq_generated.dat"):
+    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, src_paths, selected_audio, use_usrp, dabplus_types, record_states, sink_path = "dab_iq_generated.dat"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -47,6 +47,8 @@ class usrp_dabplus_tx(gr.top_block):
         self.subch_sizes = np.multiply(self.data_rates_n, 6)
         self.src_paths = src_paths
         self.use_usrp = use_usrp
+        self.dabplus_types = dabplus_types
+        self.record_sates = record_states
         self.sink_path = sink_path
         self.selected_audio = selected_audio
         self.volume = 80
@@ -55,7 +57,7 @@ class usrp_dabplus_tx(gr.top_block):
         # FIC
         ########################
         # source
-        self.fic_src = dab.fib_source_b_make(self.dab_mode, self.num_subch, self.ensemble_label, self.service_label, "", self.language, self.protections, self.data_rates_n)
+        self.fic_src = dab.fib_source_b_make(self.dab_mode, self.num_subch, self.ensemble_label, self.service_label, "", self.language, self.protections, self.data_rates_n, self.dabplus_types)
         # encoder
         self.fic_enc = dab.fic_encode(self.dp)
 
@@ -66,6 +68,7 @@ class usrp_dabplus_tx(gr.top_block):
         self.f2s_left_converters = [None] * self.num_subch
         self.f2s_right_converters = [None] * self.num_subch
         self.mp4_encoders = [None] * self.num_subch
+        self.mp2_encoders = [None] * self.num_subch
         self.rs_encoders = [None] * self.num_subch
         self.msc_encoders = [None] * self.num_subch
         for i in range(0, self.num_subch):
@@ -74,9 +77,13 @@ class usrp_dabplus_tx(gr.top_block):
             # float to short
             self.f2s_left_converters[i] = blocks.float_to_short_make(1, 32767)
             self.f2s_right_converters[i] = blocks.float_to_short_make(1, 32767)
-            # mp4 encoder and Reed-Solomon encoder
-            self.mp4_encoders[i] = dab.mp4_encode_sb_make(self.data_rates_n[i], 2, 32000, 1)
-            self.rs_encoders[i] = dab.reed_solomon_encode_bb_make(self.data_rates_n[i])
+            if self.dabplus_types[i] is 1:
+                # mp4 encoder and Reed-Solomon encoder
+                self.mp4_encoders[i] = dab.mp4_encode_sb_make(self.data_rates_n[i], 2, 32000, 1)
+                self.rs_encoders[i] = dab.reed_solomon_encode_bb_make(self.data_rates_n[i])
+            else:
+                # mp2 encoder
+                self.mp2_encoders[i] = dab.mp2_encode_sb_make(self.data_rates_n[i], 2, 48000)
             # encoder
             self.msc_encoders[i] = dab.msc_encode(self.dp, self.data_rates_n[i], self.protections[i])
 
@@ -113,8 +120,12 @@ class usrp_dabplus_tx(gr.top_block):
         ########################
         self.connect(self.fic_src, self.fic_enc, (self.mux, 0))
         for i in range(0, self.num_subch):
-            self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
-            self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+            if self.dabplus_types[i] is 1:
+                self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
+                self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+            else:
+                self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp2_encoders[i], 0), self.msc_encoders[i], (self.mux, i + 1))
+                self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp2_encoders[i], 1))
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
         self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
