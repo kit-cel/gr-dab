@@ -74,7 +74,9 @@ namespace gr {
       // check encoder status
       if (aacEncInfo(d_aac_encoder, &info) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to get the encoder info");
+	throw std::runtime_error("AAC enc init failed");
       }
+      
       // set input size (number of items per channel(in this case one item is a int16_t))
       d_input_size = info.frameLength;
       GR_LOG_INFO(d_logger, format("AAC Encoding: framelen = %d") % info.frameLength);
