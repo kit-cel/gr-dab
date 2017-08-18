@@ -1,7 +1,7 @@
 <block>
   <name>DAB: FIB source</name>
   <key>dab_fib_source_b</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.fib_source_b($dab_mode, $num_subch, $ensemble_label, $programme_service_label, $service_comp_label, $service_comp_lang, $protection_mode, $data_rate_n)</make>
    <param>

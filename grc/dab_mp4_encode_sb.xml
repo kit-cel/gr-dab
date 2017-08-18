@@ -1,7 +1,7 @@
 <block>
   <name>DAB: MP4 Encoder</name>
   <key>dab_mp4_encode_sb</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.mp4_encode_sb($bit_rate_n, $channels, $samp_rate, $afterburner)</make>
   <param>

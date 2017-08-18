@@ -2,7 +2,7 @@
 <block>
   <name>DAB: MSC decoder</name>
   <key>dab_msc_decode</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.msc_decode($dab_params, $address, $size, $protection, $verbose, $debug)</make>
   <param>

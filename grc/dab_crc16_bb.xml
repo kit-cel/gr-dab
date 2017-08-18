@@ -2,7 +2,7 @@
 <block>
   <name>CRC16</name>
   <key>dab_crc16_bb</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.crc16_bb($length, $generator, $initial_state)</make>
   <param>

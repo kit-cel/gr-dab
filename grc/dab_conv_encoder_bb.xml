@@ -1,7 +1,7 @@
 <block>
   <name>DAB: Convolutional encoder</name>
   <key>dab_conv_encoder_bb</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.conv_encoder_bb($framesize)</make>
   <param>

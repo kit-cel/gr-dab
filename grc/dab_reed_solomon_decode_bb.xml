@@ -1,7 +1,7 @@
 <block>
   <name>DAB: Reed Solomon Decoder</name>
   <key>dab_reed_solomon_decode_bb</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.reed_solomon_decode_bb($bit_rate_n)</make>
   <param>

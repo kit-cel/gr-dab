@@ -2,7 +2,7 @@
 <block>
   <name>DAB: Transmission Frame MUX</name>
   <key>dab_dab_transmission_frame_mux_bb</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.dab_transmission_frame_mux_bb($dab_mode, $num_subch, $subch_size)</make>
    <param>
