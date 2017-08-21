@@ -23,7 +23,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 from gnuradio import audio
 from gnuradio import fft
-import dab
+import dab_swig as dab
 import os
 
 class qa_dab_transmission_frame_mux_bb (gr_unittest.TestCase):

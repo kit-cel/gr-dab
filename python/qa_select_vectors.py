@@ -20,7 +20,7 @@
 #
 
 from gnuradio import gr, gr_unittest, blocks
-import dab
+import dab_swig as dab
 
 
 class qa_select_vectors(gr_unittest.TestCase):

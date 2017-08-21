@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab
+import dab_swig as dab
 from math import sqrt
 
 class qa_mapper_bc (gr_unittest.TestCase):

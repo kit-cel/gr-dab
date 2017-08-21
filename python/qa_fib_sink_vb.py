@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab
+import dab_swig as dab
 
 class qa_fib_sink_vb (gr_unittest.TestCase):
 
