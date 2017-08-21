@@ -2,7 +2,7 @@
 <block>
   <name>DAB: FIC encoder</name>
   <key>dab_fic_encode</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.fic_encode(dab.parameters.dab_parameters(mode=$dab_mode, sample_rate=$samp_rate, verbose=False))</make>
   <param>

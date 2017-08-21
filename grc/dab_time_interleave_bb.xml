@@ -1,7 +1,7 @@
 <block>
   <name>Time Interleaver</name>
   <key>dab_time_interleave_bb</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.time_interleave_bb($vector_length, $scrambling_vector)</make>
   <param>

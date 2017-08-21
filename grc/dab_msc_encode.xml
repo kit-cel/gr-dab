@@ -2,7 +2,7 @@
 <block>
   <name>DAB: MSC encoder</name>
   <key>dab_msc_encode</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.msc_encode(dab.parameters.dab_parameters(mode=$dab_mode, sample_rate=$samp_rate, verbose=False), $data_rate_n, $protection)</make>
    <param>

@@ -2,7 +2,7 @@
 <block>
   <name>Magnitude Equalizer</name>
   <key>dab_magnitude_equalizer_vcc</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.magnitude_equalizer_vcc($vlen, $num_symbols)</make>
   <param>

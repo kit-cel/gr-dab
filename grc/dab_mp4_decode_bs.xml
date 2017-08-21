@@ -1,7 +1,7 @@
 <block>
   <name>DAB: MP4 Decoder</name>
   <key>dab_mp4_decode_bs</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.mp4_decode_bs($bit_rate_n)</make>
   <param>

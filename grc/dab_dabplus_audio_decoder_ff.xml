@@ -2,7 +2,7 @@
 <block>
   <name>DAB: DAB+ Decoder</name>
   <key>dab_dabplus_audio_decoder_ff</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.dabplus_audio_decoder_ff(dab.parameters.dab_parameters(mode=$dab_mode, sample_rate=$samp_rate, verbose=False), $bit_rate, $address, $subch_size, $protection, $output_float)</make>
    <param>

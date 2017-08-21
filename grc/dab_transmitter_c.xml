@@ -2,7 +2,7 @@
 <block>
   <name>DAB: Transmitter</name>
   <key>dab_transmitter_c</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.transmitter_c(dab.parameters.dab_parameters(mode=$dab_mode, sample_rate=$samp_rate, verbose=False), $sampling_rate, $num_subch, $ensemble_lable, $service_label, $service_comp_label, $service_language, $protection_mode, $data_rate_n)</make>
   <param>
