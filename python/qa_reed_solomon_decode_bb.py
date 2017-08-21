@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab
+import dab_swig as dab
 import os
 
 class qa_reed_solomon_decode_bb (gr_unittest.TestCase):

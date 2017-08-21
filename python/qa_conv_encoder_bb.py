@@ -21,7 +21,8 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab
+#import dab_swig as dab
+import dab_swig as dab
 
 class qa_conv_encoder_bb (gr_unittest.TestCase):
 

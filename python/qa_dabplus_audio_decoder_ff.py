@@ -23,7 +23,7 @@ from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 from gnuradio import audio
 import os
-import dab
+import dab_swig as dab
 from gnuradio import audio
 
 class qa_dabplus_audio_decoder_ff (gr_unittest.TestCase):

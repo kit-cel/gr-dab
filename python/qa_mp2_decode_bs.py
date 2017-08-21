@@ -22,7 +22,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import os
-import dab
+import dab_swig as dab
 
 class qa_mp2_decode_bs (gr_unittest.TestCase):
 

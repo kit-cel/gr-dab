@@ -21,7 +21,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab
+import dab_swig as dab
 
 class qa_prune (gr_unittest.TestCase):
 

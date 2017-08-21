@@ -22,7 +22,10 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 from gnuradio import fec
-import dab
+import dab_swig as dab
+from parameters import dab_parameters
+from fic_encode import fic_encode
+from fic import fic_decode
 
 class qa_fic_encode (gr_unittest.TestCase):
 
@@ -36,14 +39,14 @@ class qa_fic_encode (gr_unittest.TestCase):
 # manual check, if fibs are correctly processed through the coding and mapping blocks
     def test_001_t (self):
         self.symbol_length = 32*4
-        self.dab_params = dab.parameters.dab_parameters(1, 208.064e6, True)
+        self.dab_params = dab_parameters(1, 208.064e6, True)
 
         # source
-        self.dp = dab.parameters.dab_parameters(1, 208.064e6, True)
+        self.dp = dab_parameters(1, 208.064e6, True)
         self.fib_src = dab.fib_source_b_make(1, 1, "ensemble1", "service1", "musicmix", 4, [2], [15])
 
         # encoder
-        self.fib_enc = dab.fic_encode(self.dab_params)
+        self.fib_enc = fic_encode(self.dab_params)
         self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
 
         # mapper
@@ -54,7 +57,7 @@ class qa_fic_encode (gr_unittest.TestCase):
         self.soft_interleaver = dab.complex_to_interleaved_float_vcf_make(self.dp.num_carriers)
 
         # decode
-        self.fic_decoder = dab.fic_decode(self.dab_params)
+        self.fic_decoder = fic_decode(self.dab_params)
 
         # control stream
         self.trigger_src = blocks.vector_source_b([1] + [0]*74, True)

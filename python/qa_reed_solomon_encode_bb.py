@@ -22,7 +22,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import random
-import dab
+import dab_swig as dab
 
 
 class qa_reed_solomon_encode_bb(gr_unittest.TestCase):
