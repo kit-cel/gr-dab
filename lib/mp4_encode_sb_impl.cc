@@ -33,7 +33,7 @@
 #include <stdio.h>
 #include <sstream>
 #include <boost/format.hpp>
-#include "aacenc_lib.h"
+#include "fdk-aac-dab/aacenc_lib.h"
 
 using namespace boost;
 

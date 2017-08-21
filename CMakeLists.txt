@@ -53,13 +53,13 @@ else()
 endif ()
 
 ########################################################################
-# Find FDK-AAC
+# Find FDK-AAC-DAB
 ########################################################################
-find_package(Fdk-aac REQUIRED)
-if (NOT FDK-AAC_FOUND )
-    message(FATAL_ERROR "please install fdk-aac")
+find_package(Fdk-aac-dab REQUIRED)
+if (NOT FDK-AAC-DAB_FOUND )
+    message(FATAL_ERROR "please install fdk-aac-dab")
 else()
-    message(STATUS "FDK-AAC found")
+    message(STATUS "FDK-AAC-DAB found")
 endif ()
 
 ########################################################################

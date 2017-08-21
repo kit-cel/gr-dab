@@ -22,7 +22,7 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC_INCLUDE_DIRS} ${LIBTOOLAME-DAB_INCLUDE_DIR})
+include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC-DAB_INCLUDE_DIRS} ${LIBTOOLAME-DAB_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dab_sources
     moving_sum_ff_impl.cc
@@ -103,7 +103,7 @@ if(NOT dab_sources)
 endif(NOT dab_sources)
 
 add_library(gnuradio-dab SHARED ${dab_sources})
-target_link_libraries(gnuradio-dab ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} ${GNURADIO_FILTER_LIBRARIES} ${FAAD_LIBRARIES} ${FDK-AAC_LIBRARIES})
+target_link_libraries(gnuradio-dab ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} ${GNURADIO_FILTER_LIBRARIES} ${FAAD_LIBRARIES} ${FDK-AAC-DAB_LIBRARIES})
 set_target_properties(gnuradio-dab PROPERTIES DEFINE_SYMBOL "gnuradio_dab_EXPORTS")
 
 if(APPLE)
