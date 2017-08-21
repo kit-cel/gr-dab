@@ -102,7 +102,8 @@ class usrp_dabplus_rx(gr.top_block):
             self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
         else:
             self.msc_dec = dab.msc_decode(self.dab_params, address, size, protection)
-            self.mp2_dec = dab.mp2_decode_bs_make(bit_rate)
+            self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
+            self.mp2_dec = dab.mp2_decode_bs_make(bit_rate / 8)
             self.s2f_left = blocks.short_to_float_make(1, 32767)
             self.s2f_right = blocks.short_to_float_make(1, 32767)
             self.gain_left = blocks.multiply_const_ff(1, 1)
@@ -120,7 +121,7 @@ class usrp_dabplus_rx(gr.top_block):
             self.connect((self.demod, 0), (self.dabplus, 0))
             self.connect((self.demod, 1), (self.dabplus, 1))
         else:
-            self.connect((self.demod, 0), (self.msc_dec, 0), self.mp2_dec)
+            self.connect((self.demod, 0), (self.msc_dec, 0), self.unpack, self.mp2_dec)
             self.connect((self.demod, 1), (self.msc_dec, 1))
             self.connect((self.mp2_dec, 0), self.s2f_left, self.gain_left)
             self.connect((self.mp2_dec, 1), self.s2f_right, self.gain_right)

@@ -44,13 +44,16 @@ class usrp_dabplus_tx(gr.top_block):
         self.language = language
         self.protections = protections
         self.data_rates_n = data_rates_n
-        self.subch_sizes = np.multiply(self.data_rates_n, 6)
         self.src_paths = src_paths
         self.use_usrp = use_usrp
         self.dabplus_types = dabplus_types
         self.sink_path = sink_path
         self.selected_audio = selected_audio
         self.volume = 80
+        sizes = {0: 12, 1: 8, 2: 6, 3: 4}
+        self.subch_sizes = [None] * len(self.data_rates_n)
+        for i in range(0, len(self.data_rates_n)):
+            self.subch_sizes[i] = self.data_rates_n[i] * sizes[protections[i]]
 
         ########################
         # FIC
@@ -74,7 +77,7 @@ class usrp_dabplus_tx(gr.top_block):
         for i in range(0, self.num_subch):
             if not self.src_paths[i] is "mic":
                 # source
-                self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], True)
+                self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], False)
             # float to short
             self.f2s_left_converters[i] = blocks.float_to_short_make(1, 32767)
             self.f2s_right_converters[i] = blocks.float_to_short_make(1, 32767)
@@ -92,7 +95,6 @@ class usrp_dabplus_tx(gr.top_block):
         # MUX
         ########################
         self.mux = dab.dab_transmission_frame_mux_bb_make(self.dab_mode, self.num_subch, self.subch_sizes)
-        #self.mux = dab.dab_transmission_frame_mux_bb_make(1, 1, [84, 84])
         self.trigsrc = blocks.vector_source_b([1] + [0] * (self.dp.symbols_per_frame-2), True)
 
         ########################
@@ -137,8 +139,8 @@ class usrp_dabplus_tx(gr.top_block):
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
         self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
-        self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
-        self.connect((self.msc_sources[self.selected_audio-1], 1), self.gain_right, (self.audio, 1))
+        #self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
+        #self.connect((self.msc_sources[self.selected_audio-1], 1), self.gain_right, (self.audio, 1))
 
     def transmit(self):
         tx = usrp_dabplus_tx()
