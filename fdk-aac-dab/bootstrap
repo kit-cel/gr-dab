@@ -1,4 +1,20 @@
-#! /bin/sh
+#!/bin/sh
+
+#stupid, but works: first "unpatch", in case we've patched already
+echo "scanning for files..."
+files=$(git ls-files|grep -v bootstrap |grep -vi changelog)
+echo "replacing occurrences of patched string"
+sed -i 's/\(fdk[^ ]aac\)[^ ]dab/\1/g' $files
+sed -i 's/\(FDK[^ ]AAC\)[^ ]DAB/\1/g' $files
+
+#then patch: append "dab" to lower and uppercase fdk?aacdab, and use the same "?"
+#delimiter to connect the two
+echo "patching"
+sed -i 's/\(fdk\([^ ]\)aac\)/\1\2dab/g' $files
+sed -i 's/\(FDK\([^ ]\)AAC\)/\1\2DAB/g' $files
+
+mv fdk-aac.pc.in fdk-aac-dab.pc.in
+mv fdk-aac.sym fdk-aac-dab.sym
 
 autoreconf --install && \
     echo "You can call ./configure now"
