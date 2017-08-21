@@ -46,10 +46,14 @@ This package requires that GNU Radio is already installed.  It
 also depends on some GNU Radio prerequisites, such as Boost and
 cppunit.
 
-It also depends on fdk-aac. If you're on a Debianoid (Debian, Mint, *buntu…),
-you might want to `apt-get install fdk-aac-dev`.  If you're on a Redhatoid
-(Redhat, Fedora, Centos…), `dnf install fdk-aac-devel` is the analogous method
-of installing this dependency.
+It also depends on fdk-aac with DAB patches (fdk-aac-dab). You'll find it in
+the eponymous subdirectory; build it using:
+
+    $ cd fdk-aac-dab
+    $ ./bootstrap
+    $ ./configure [--prefix ...] [--other options]
+    $ make
+    $ make install
 
 There is a dependency on the modified MPEG encoder libtoolame from the ODR
 project. It's fetched by ´git submodule update --init´ automatically.
