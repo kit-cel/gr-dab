@@ -9,7 +9,7 @@ Makefile.in
 aclocal.m4
 autom4te.cache
 configure
-fdk-aac.pc
+fdk-aac-dab.pc
 config.guess
 config.log
 config.status

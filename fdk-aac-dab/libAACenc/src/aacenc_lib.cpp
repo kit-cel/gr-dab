@@ -1803,7 +1803,7 @@ AACENC_ERROR aacEncGetLibInfo(LIB_INFO *info)
     return AACENC_INIT_ERROR;
   }
 
-  info[i].module_id = FDK_AACENC;
+  info[i].module_id = FDK_AAC_DABENC;
   info[i].build_date = (char*)AACENCODER_LIB_BUILD_DATE;
   info[i].build_time = (char*)AACENCODER_LIB_BUILD_TIME;
   info[i].title = (char*)AACENCODER_LIB_TITLE;

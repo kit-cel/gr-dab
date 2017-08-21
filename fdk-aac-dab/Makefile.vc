@@ -165,7 +165,7 @@ SYS_SRC = \
     libSYS/src/genericStds.cpp \
     libSYS/src/wav_file.cpp
 
-libfdk_aac_SOURCES = \
+libfdk_aac_dab_SOURCES = \
     $(AACDEC_SRC) $(AACENC_SRC) \
     $(MPEGTPDEC_SRC) $(MPEGTPENC_SRC) \
     $(SBRDEC_SRC) $(SBRENC_SRC) \
@@ -183,19 +183,19 @@ CPPFLAGS = $(CFLAGS)
 LDFLAGS  = -nologo $(XLDFLAGS)
 ARFLAGS  = -nologo
 
-incdir = $(prefix_win)\include\fdk-aac
+incdir = $(prefix_win)\include\fdk-aac-dab
 bindir = $(prefix_win)\bin
 libdir = $(prefix_win)\lib
 
 INST_DIRS = $(bindir) $(incdir) $(libdir)
 
-LIB_DEF    = fdk-aac.def
-STATIC_LIB = fdk-aac.lib
-SHARED_LIB = fdk-aac-1.dll
-IMP_LIB    = fdk-aac.dll.lib
+LIB_DEF    = fdk-aac-dab.def
+STATIC_LIB = fdk-aac-dab.lib
+SHARED_LIB = fdk-aac-dab-1.dll
+IMP_LIB    = fdk-aac-dab.dll.lib
 
 AAC_ENC_OBJS = $(aac_enc_SOURCES:.c=.obj)
-FDK_OBJS     = $(libfdk_aac_SOURCES:.cpp=.obj)
+FDK_OBJS     = $(libfdk_aac_dab_SOURCES:.cpp=.obj)
 
 PROGS = aac-enc.exe
 
@@ -204,7 +204,7 @@ PROGS = aac-enc.exe
 all: $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS)
 
 clean:
-	del /f $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS) libfdk-aac.pc 2>NUL
+	del /f $(LIB_DEF) $(STATIC_LIB) $(SHARED_LIB) $(IMP_LIB) $(PROGS) libfdk-aac-dab.pc 2>NUL
 	del /f *.obj *.exp 2>NUL
 	del /f libAACdec\src\*.obj 2>NUL
 	del /f libAACenc\src\*.obj 2>NUL
@@ -247,4 +247,4 @@ $(PROGS): $(AAC_ENC_OBJS)
 
 $(LIB_DEF):
 	@echo EXPORTS > $(LIB_DEF)
-	@type fdk-aac.sym >> $(LIB_DEF)
+	@type fdk-aac-dab.sym >> $(LIB_DEF)

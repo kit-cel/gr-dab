@@ -13,12 +13,12 @@ AM_CPPFLAGS = \
     -I$(top_srcdir)/libPCMutils/include
 
 AM_CXXFLAGS = -fno-exceptions -fno-rtti
-libfdk_aac_la_LINK = $(LINK) $(libfdk_aac_la_LDFLAGS)
+libfdk_aac_dab_la_LINK = $(LINK) $(libfdk_aac_dab_la_LDFLAGS)
 # Mention a dummy pure C file to trigger generation of the $(LINK) variable
-nodist_EXTRA_libfdk_aac_la_SOURCES = dummy.c
+nodist_EXTRA_libfdk_aac_dab_la_SOURCES = dummy.c
 
-fdk_aacincludedir = $(includedir)/fdk-aac
-fdk_aacinclude_HEADERS = \
+fdk_aac_dabincludedir = $(includedir)/fdk-aac-dab
+fdk_aac_dabinclude_HEADERS = \
     $(top_srcdir)/libSYS/include/machine_type.h \
     $(top_srcdir)/libSYS/include/genericStds.h \
     $(top_srcdir)/libSYS/include/FDK_audio.h \
@@ -26,17 +26,17 @@ fdk_aacinclude_HEADERS = \
     $(top_srcdir)/libAACdec/include/aacdecoder_lib.h
 
 pkgconfigdir = $(libdir)/pkgconfig
-pkgconfig_DATA = fdk-aac.pc
+pkgconfig_DATA = fdk-aac-dab.pc
 
-lib_LTLIBRARIES = libfdk-aac.la
+lib_LTLIBRARIES = libfdk-aac-dab.la
 
-libfdk_aac_la_LDFLAGS = -version-info @FDK_AAC_VERSION@ -no-undefined \
-    -export-symbols $(top_srcdir)/fdk-aac.sym
+libfdk_aac_dab_la_LDFLAGS = -version-info @FDK_AAC_DAB_VERSION@ -no-undefined \
+    -export-symbols $(top_srcdir)/fdk-aac-dab.sym
 
 if EXAMPLE
 bin_PROGRAMS = aac-enc$(EXEEXT)
 
-aac_enc_LDADD = libfdk-aac.la
+aac_enc_LDADD = libfdk-aac-dab.la
 aac_enc_SOURCES = aac-enc.c wavreader.c
 
 noinst_HEADERS = wavreader.h
@@ -179,7 +179,7 @@ SYS_SRC = \
     libSYS/src/genericStds.cpp \
     libSYS/src/wav_file.cpp
 
-libfdk_aac_la_SOURCES = \
+libfdk_aac_dab_la_SOURCES = \
     $(AACDEC_SRC) $(AACENC_SRC) \
     $(MPEGTPDEC_SRC) $(MPEGTPENC_SRC) \
     $(SBRDEC_SRC) $(SBRENC_SRC) \
@@ -190,7 +190,7 @@ EXTRA_DIST = \
     $(top_srcdir)/MODULE_LICENSE_FRAUNHOFER \
     $(top_srcdir)/NOTICE \
     $(top_srcdir)/Android.mk \
-    $(top_srcdir)/fdk-aac.sym \
+    $(top_srcdir)/fdk-aac-dab.sym \
     $(top_srcdir)/Makefile.vc \
     $(top_srcdir)/documentation/*.pdf \
     $(top_srcdir)/libAACdec/src/*.h \

@@ -1123,7 +1123,7 @@ LINKSPEC_CPP INT aacDecoder_GetLibInfo ( LIB_INFO *info )
   }
   info += i;
 
-  info->module_id = FDK_AACDEC;
+  info->module_id = FDK_AAC_DABDEC;
   /* build own library info */
   info->version = LIB_VERSION(AACDECODER_LIB_VL0, AACDECODER_LIB_VL1, AACDECODER_LIB_VL2);
   LIB_VERSION_STRING(info);
