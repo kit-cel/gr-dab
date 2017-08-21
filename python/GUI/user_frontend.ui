@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>992</width>
+    <width>1146</width>
     <height>739</height>
    </rect>
   </property>
@@ -85,7 +85,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="tab_reception">
        <attribute name="title">
@@ -382,6 +382,19 @@
                <enum>Qt::Horizontal</enum>
               </property>
              </widget>
+            </item>
+            <item>
+             <spacer name="verticalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>20</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
             </item>
             <item>
              <layout class="QHBoxLayout" name="horizontalLayout_23">
@@ -941,7 +954,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>87</width>
+               <width>241</width>
                <height>602</height>
               </rect>
              </property>
@@ -1139,7 +1152,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>448</width>
+                 <width>525</width>
                  <height>1269</height>
                 </rect>
                </property>
@@ -1207,16 +1220,6 @@
                      <widget class="QLabel" name="t_label_prot1">
                       <property name="text">
                        <string>Protection Mode</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="5" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot1">
-                      <property name="maximum">
-                       <number>3</number>
-                      </property>
-                      <property name="value">
-                       <number>2</number>
                       </property>
                      </widget>
                     </item>
@@ -1349,13 +1352,6 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="10" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot2">
-                      <property name="value">
-                       <number>2</number>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="11" column="0">
                      <widget class="QLabel" name="t_label_comp_src2">
                       <property name="text">
@@ -1458,13 +1454,6 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="15" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot3">
-                      <property name="value">
-                       <number>2</number>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="16" column="0">
                      <widget class="QLabel" name="t_label_comp_src3">
                       <property name="text">
@@ -1561,13 +1550,6 @@
                      <widget class="QLabel" name="t_label_prot4">
                       <property name="text">
                        <string>Protection Mode</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="20" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot4">
-                      <property name="value">
-                       <number>2</number>
                       </property>
                      </widget>
                     </item>
@@ -1670,13 +1652,6 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="25" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot5">
-                      <property name="value">
-                       <number>2</number>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="26" column="0">
                      <widget class="QLabel" name="t_label_comp_src5">
                       <property name="text">
@@ -1776,13 +1751,6 @@
                       </property>
                      </widget>
                     </item>
-                    <item row="30" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot6">
-                      <property name="value">
-                       <number>2</number>
-                      </property>
-                     </widget>
-                    </item>
                     <item row="31" column="0">
                      <widget class="QLabel" name="t_label_comp_src6">
                       <property name="text">
@@ -1879,16 +1847,6 @@
                      <widget class="QLabel" name="t_label_prot7">
                       <property name="text">
                        <string>Protection Mode</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="35" column="1">
-                     <widget class="QSpinBox" name="t_spin_prot7">
-                      <property name="enabled">
-                       <bool>true</bool>
-                      </property>
-                      <property name="value">
-                       <number>2</number>
                       </property>
                      </widget>
                     </item>
@@ -2240,6 +2198,174 @@
                       </item>
                      </layout>
                     </item>
+                    <item row="5" column="1">
+                     <widget class="QComboBox" name="t_combo_prot1">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item row="10" column="1">
+                     <widget class="QComboBox" name="t_combo_prot2">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item row="15" column="1">
+                     <widget class="QComboBox" name="t_combo_prot3">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item row="20" column="1">
+                     <widget class="QComboBox" name="t_combo_prot4">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item row="25" column="1">
+                     <widget class="QComboBox" name="t_combo_prot5">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item row="30" column="1">
+                     <widget class="QComboBox" name="t_combo_prot6">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item row="35" column="1">
+                     <widget class="QComboBox" name="t_combo_prot7">
+                      <item>
+                       <property name="text">
+                        <string>A1</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A2</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A3</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>A4</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
                    </layout>
                   </item>
                   <item>
@@ -2329,6 +2455,16 @@
                 </property>
                </widget>
               </item>
+              <item row="2" column="1">
+               <widget class="QComboBox" name="t_combo_country"/>
+              </item>
+              <item row="3" column="0">
+               <widget class="Line" name="line">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+               </widget>
+              </item>
               <item row="4" column="0">
                <widget class="QLabel" name="label_15">
                 <property name="font">
@@ -2383,16 +2519,6 @@
               </item>
               <item row="7" column="1">
                <widget class="QComboBox" name="t_combo_language"/>
-              </item>
-              <item row="2" column="1">
-               <widget class="QComboBox" name="t_combo_country"/>
-              </item>
-              <item row="3" column="0">
-               <widget class="Line" name="line">
-                <property name="orientation">
-                 <enum>Qt::Horizontal</enum>
-                </property>
-               </widget>
               </item>
               <item row="8" column="1">
                <spacer name="verticalSpacer_2">

@@ -126,31 +126,31 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # create dict for service components
         self.components = [
             {"label": self.t_label_comp1, "data_rate_label": self.t_label_rate1, "data_rate": self.t_spin_rate1,
-             "protection_label": self.t_label_prot1, "protection": self.t_spin_prot1, "enabled": True,
+             "protection_label": self.t_label_prot1, "protection": self.t_combo_prot1, "enabled": True,
              "src_label": self.t_label_comp_src1, "src_path_disp": self.t_label_path_src1,
              "src_btn": self.t_btn_path_src1, "src_path": "None", "label_label": self.t_label_label1, "edit_label": self.t_edit_service_label1, "combo_dabplus": self.t_combo_dabplus1, "btn_record": self.t_btn_record1},
             {"label": self.t_label_comp2, "data_rate_label": self.t_label_rate2, "data_rate": self.t_spin_rate2,
-             "protection_label": self.t_label_prot2, "protection": self.t_spin_prot2, "enabled": False,
+             "protection_label": self.t_label_prot2, "protection": self.t_combo_prot2, "enabled": False,
              "src_label": self.t_label_comp_src2, "src_path_disp": self.t_label_path_src2,
              "src_btn": self.t_btn_path_src2, "src_path": "None", "label_label": self.t_label_label2, "edit_label": self.t_edit_service_label2, "combo_dabplus": self.t_combo_dabplus2, "btn_record": self.t_btn_record2},
             {"label": self.t_label_comp3, "data_rate_label": self.t_label_rate3, "data_rate": self.t_spin_rate3,
-             "protection_label": self.t_label_prot3, "protection": self.t_spin_prot3, "enabled": False,
+             "protection_label": self.t_label_prot3, "protection": self.t_combo_prot3, "enabled": False,
              "src_label": self.t_label_comp_src3, "src_path_disp": self.t_label_path_src3,
              "src_btn": self.t_btn_path_src3, "src_path": "None", "label_label": self.t_label_label3, "edit_label": self.t_edit_service_label3, "combo_dabplus": self.t_combo_dabplus3, "btn_record": self.t_btn_record3},
             {"label": self.t_label_comp4, "data_rate_label": self.t_label_rate4, "data_rate": self.t_spin_rate4,
-             "protection_label": self.t_label_prot4, "protection": self.t_spin_prot4, "enabled": False,
+             "protection_label": self.t_label_prot4, "protection": self.t_combo_prot4, "enabled": False,
              "src_label": self.t_label_comp_src4, "src_path_disp": self.t_label_path_src4,
              "src_btn": self.t_btn_path_src4, "src_path": "None", "label_label": self.t_label_label4, "edit_label": self.t_edit_service_label4, "combo_dabplus": self.t_combo_dabplus4, "btn_record": self.t_btn_record4},
             {"label": self.t_label_comp5, "data_rate_label": self.t_label_rate5, "data_rate": self.t_spin_rate5,
-             "protection_label": self.t_label_prot5, "protection": self.t_spin_prot5, "enabled": False,
+             "protection_label": self.t_label_prot5, "protection": self.t_combo_prot5, "enabled": False,
              "src_label": self.t_label_comp_src5, "src_path_disp": self.t_label_path_src5,
              "src_btn": self.t_btn_path_src5, "src_path": "None", "label_label": self.t_label_label5, "edit_label": self.t_edit_service_label5, "combo_dabplus": self.t_combo_dabplus5, "btn_record": self.t_btn_record5},
             {"label": self.t_label_comp6, "data_rate_label": self.t_label_rate6, "data_rate": self.t_spin_rate6,
-             "protection_label": self.t_label_prot6, "protection": self.t_spin_prot6, "enabled": False,
+             "protection_label": self.t_label_prot6, "protection": self.t_combo_prot6, "enabled": False,
              "src_label": self.t_label_comp_src6, "src_path_disp": self.t_label_path_src6,
              "src_btn": self.t_btn_path_src6, "src_path": "None", "label_label": self.t_label_label6, "edit_label": self.t_edit_service_label6, "combo_dabplus": self.t_combo_dabplus6, "btn_record": self.t_btn_record6},
             {"label": self.t_label_comp7, "data_rate_label": self.t_label_rate7, "data_rate": self.t_spin_rate7,
-             "protection_label": self.t_label_prot7, "protection": self.t_spin_prot7, "enabled": False,
+             "protection_label": self.t_label_prot7, "protection": self.t_combo_prot7, "enabled": False,
              "src_label": self.t_label_comp_src7, "src_path_disp": self.t_label_path_src7,
              "src_btn": self.t_btn_path_src7, "src_path": "None", "label_label": self.t_label_label7, "edit_label": self.t_edit_service_label7, "combo_dabplus": self.t_combo_dabplus7, "btn_record": self.t_btn_record7}]
         # update service components initially to hide the service components 2-7
@@ -237,6 +237,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         if (not self.src_is_USRP) and (self.file_path == "None"):
             self.label_path.setStyleSheet('color: red')
         else:
+            self.label_path.setStyleSheet('color: black')
             # set up and start flowgraph
             self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
                                               self.src_is_USRP, self.file_path, self.recorder)
@@ -671,7 +672,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         record_states = [False] * self.t_spin_num_subch.value()
         for i in range(0, self.t_spin_num_subch.value()):
             # write array with protection modes
-            protection_array[i] = self.components[i]["protection"].value()
+            protection_array[i] = self.components[i]["protection"].currentIndex()
             # write array with data rates
             data_rate_n_array[i] = self.components[i]["data_rate"].value()/8
             # check audio paths
@@ -680,14 +681,25 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.components[i]["src_path_disp"].setStyleSheet('color: red')
                 arguments_incomplete = True
                 self.statusBar.showMessage("path " + str(i+1) + " not selected")
+            # check if length of label is <= 16 chars
+            elif len(str(self.components[i]["edit_label"].text())) > 16:
+                self.components[i]["edit_label"].setStyleSheet('color: red')
+                arguments_incomplete = True
+                self.statusBar.showMessage("Warning: Label is longer than 16 characters!")
             else:
                 audio_paths[i] = self.components[i]["src_path"]
-            # write service labels
+            # write service labels appended in one string
                 merged_service_string = merged_service_string + str(self.components[i]["edit_label"].text()).ljust(16)
+                self.components[i]["edit_label"].setStyleSheet('color: black')
             # write dabplus types
                 dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() is 0 else 0)
-        print merged_service_string
 
+        # check if length of ensemble label is <= 16 chars
+        if len(str(self.t_edit_ensemble_label.text())) > 16:
+            self.t_edit_ensemble_label.setStyleSheet('color: red')
+            arguments_incomplete = True
+        else:
+            self.t_edit_ensemble_label.setStyleSheet('color: black')
         # check if File path for sink is chosen if option enabled
         if self.t_rbtn_File.isChecked() and (str(self.t_label_sink.text()) == "select path"):
             self.t_label_sink.setStyleSheet('color: red')

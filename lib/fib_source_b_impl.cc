@@ -206,7 +206,7 @@ namespace gr {
         if ((d_nFIBs_written % 3 == 0 && d_transmission_mode != 3) ||
             (d_nFIBs_written % 4 == 0 && d_transmission_mode == 3)) {
 ////////////////////////////////////////////////
-/// add first FIB with only MCI (max numSubCh = 5)
+/// add first FIB with only MCI (max services = 4)
 ////////////////////////////////////////////////
           //ensemble info
           std::memcpy(out + d_offset, d_ensemble_info, d_size_ensemble_info);
