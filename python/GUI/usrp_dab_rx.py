@@ -20,7 +20,7 @@
 #
 
 """
-receive DAB with USRP (for DAB+ reception see usrp_dabplus_rx.py)
+receive DAB+ with USRP
 """
 
 from gnuradio import gr, uhd, blocks
@@ -32,16 +32,18 @@ import time, math
 
 
 class usrp_dab_rx(gr.top_block):
-    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, use_usrp, src_path, record_audio = False, sink_path = "None"):
+    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, src_path, record_audio = False, sink_path = "None"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
         self.verbose = False
         self.sample_rate = 2e6
+        self.dabplus = dabplus
         self.use_usrp = use_usrp
         self.src_path = src_path
         self.record_audio = record_audio
         self.sink_path = sink_path
+        gr.log.set_level("warn")
 
         ########################
         # source
@@ -52,7 +54,7 @@ class usrp_dab_rx(gr.top_block):
             self.src.set_antenna("TX/RX")
         else:
             print "using file source"
-            self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, True)
+            self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, False)
 
         # set paramters to default mode
         self.softbits = True
@@ -96,32 +98,46 @@ class usrp_dab_rx(gr.top_block):
         ########################
         # MSC decoder and audio sink
         ########################
-        self.msc_dec = dab.msc_decode(self.dab_params, address, size, protection)
-        self.mp2 = dab.mp2_decode_bs_make(bit_rate / 8)
-        self.s2f_left = blocks.short_to_float_make(1, 32767)
-        self.s2f_right = blocks.short_to_float_make(1, 32767)
-        self.gain_left = blocks.multiply_const_ff(1, 1)
-        self.gain_right = blocks.multiply_const_ff(1, 1)
-        self.audio = audio.sink_make(32000)
+        if self.dabplus:
+            self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
+        else:
+            self.msc_dec = dab.msc_decode(self.dab_params, address, size, protection)
+            self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
+            self.mp2_dec = dab.mp2_decode_bs_make(bit_rate / 8)
+            self.s2f_left = blocks.short_to_float_make(1, 32767)
+            self.s2f_right = blocks.short_to_float_make(1, 32767)
+            self.gain_left = blocks.multiply_const_ff(1, 1)
+            self.gain_right = blocks.multiply_const_ff(1, 1)
+        self.audio = audio.sink_make(audio_bit_rate)
 
         ########################
         # Connections
         ########################
         self.connect(self.src, self.fft_plot)
         self.connect(self.src, self.waterfall_plot)
-        #self.connect(self.src, self.time_plot)
         self.connect(self.src, self.demod, (self.fic_dec, 0))
         self.connect((self.demod, 1), (self.fic_dec, 1))
-        self.connect((self.demod, 0), (self.msc_dec, 0))
-        self.connect((self.demod, 1), (self.msc_dec, 1))
-        self.connect(self.msc_dec, (self.mp2, 0), self.s2f_left, self.gain_left, (self.audio, 0))
-        self.connect((self.mp2, 1), self.s2f_right, self.gain_right, (self.audio, 1))
+        if self.dabplus:
+            self.connect((self.demod, 0), (self.dabplus, 0))
+            self.connect((self.demod, 1), (self.dabplus, 1))
+        else:
+            self.connect((self.demod, 0), (self.msc_dec, 0), self.unpack, self.mp2_dec)
+            self.connect((self.demod, 1), (self.msc_dec, 1))
+            self.connect((self.mp2_dec, 0), self.s2f_left, self.gain_left)
+            self.connect((self.mp2_dec, 1), self.s2f_right, self.gain_right)
         self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, self.constellation_plot)
+        # connect audio to sound card
+        if self.dabplus:
+            self.connect((self.dabplus, 0), (self.audio, 0))
+            self.connect((self.dabplus, 1), (self.audio, 1))
+        else:
+            self.connect(self.gain_left, (self.audio, 0))
+            self.connect(self.gain_right, (self.audio, 1))
         # connect file sink if recording is selected
         if self.record_audio:
             self.sink = blocks.wavfile_sink_make("dab_audio.wav", 2, 32000)
-            self.connect(self.gain_left, (self.sink, 0))
-            self.connect(self.gain_right, (self.sink, 1))
+            self.connect((self.dabplus, 0), (self.sink, 0))
+            self.connect((self.dabplus, 1), (self.sink, 1))
 
         # tune USRP frequency
         if self.use_usrp:
@@ -151,16 +167,29 @@ class usrp_dab_rx(gr.top_block):
         return self.fic_dec.get_programme_type()
 
     def get_sample_rate(self):
-        return self.mp2.get_sample_rate()
+        return self.dabplus.get_sample_rate()
 
     def get_snr(self):
         return self.snr_measurement.snr()
+
+    def get_firecode_passed(self):
+        return self.dabplus.get_firecode_passed()
+
+    def get_corrected_errors(self):
+        return self.dabplus.get_corrected_errors()
+
+    def get_crc_passed(self):
+        return self.fic_dec.get_crc_passed()
 
 ########################
 # setter methods
 ########################
     def set_volume(self, volume):
-        self.dabplus.set_volume(volume)
+        if self.dabplus:
+            self.dabplus.set_volume(volume)
+        else:
+            self.gain_left.set_k(volume)
+            self.gain_right.set_k(volume)
 
     def set_freq(self, freq):
         if self.src.set_center_freq(freq):

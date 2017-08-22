@@ -5,9 +5,7 @@ from PyQt4.QtCore import QTimer
 import sys
 import time
 import user_frontend
-import usrp_dabplus_rx
 import usrp_dab_rx
-import usrp_dabplus_tx
 import usrp_dab_tx
 import math
 import json
@@ -230,7 +228,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
     def init_receiver(self):
         self.statusBar.showMessage("initializing receiver ...")
-        # stop any processes that access to an instance of usrp_dabplus_rx
+        # stop any processes that access to an instance of usrp_dab_rx
         self.snr_timer.stop()
         self.firecode_timer.stop()
         # check if file path is selected in case that file is the selected source
@@ -239,7 +237,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         else:
             self.label_path.setStyleSheet('color: black')
             # set up and start flowgraph
-            self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
+            self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
                                               self.src_is_USRP, self.file_path, self.recorder)
             self.my_receiver.start()
             # status bar
@@ -336,7 +334,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
     def snr_update(self):
         print "update snr"
-        # display snr in progress bar if an instance of usrp_dabplus_rx is existing
+        # display snr in progress bar if an instance of usrp_dab_rx is existing
         if hasattr(self, 'my_receiver'):
             SNR = self.my_receiver.get_snr()
             if SNR > 10:
@@ -375,7 +373,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.snr_timer.stop()
                 self.firecode_timer.stop()
                 self.my_receiver.stop()
-                self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(),
+                self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
                                                                    self.spinbox_frequency.value(), self.bit_rate,
                                                                    self.address, self.size,
                                                                    self.protection, self.audio_bit_rate, self.dabplus,
@@ -426,7 +424,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.btn_stop.setEnabled(True)
         self.recorder = True
         # start flowgraph
-        self.my_receiver = usrp_dabplus_rx.usrp_dabplus_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size,
+        self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size,
                                                    self.protection, self.audio_bit_rate, self.dabplus,
                                                    self.src_is_USRP, self.file_path, self.recorder)
 
@@ -707,7 +705,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
         if arguments_incomplete is False:
             # init transmitter
-            self.my_transmitter = usrp_dabplus_tx.usrp_dabplus_tx(self.t_spin_dab_mode.value(),
+            self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spin_dab_mode.value(),
                                                                   self.t_spinbox_frequency.value(),
                                                                   self.t_spin_num_subch.value(),
                                                                   str(self.t_edit_ensemble_label.text()),
