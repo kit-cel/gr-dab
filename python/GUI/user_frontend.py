@@ -257,9 +257,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_13.setObjectName(_fromUtf8("verticalLayout_13"))
         spacerItem4 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_13.addItem(spacerItem4)
-        self.led_msc = KLed(self.tab_reception)
-        self.led_msc.setLook(KLed.Sunken)
-        self.led_msc.setDarkFactor(300)
+        self.led_msc = QtGui.QLabel(self.tab_reception)
         self.led_msc.setObjectName(_fromUtf8("led_msc"))
         self.verticalLayout_13.addWidget(self.led_msc)
         spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -291,8 +289,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_14.setObjectName(_fromUtf8("verticalLayout_14"))
         spacerItem7 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout_14.addItem(spacerItem7)
-        self.led_fic = KLed(self.tab_reception)
-        self.led_fic.setLook(KLed.Sunken)
+        self.led_fic = QtGui.QLabel(self.tab_reception)
         self.led_fic.setObjectName(_fromUtf8("led_fic"))
         self.verticalLayout_14.addWidget(self.led_fic)
         spacerItem8 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -439,7 +436,7 @@ class Ui_MainWindow(object):
         self.dev_scroll_area.setWidgetResizable(True)
         self.dev_scroll_area.setObjectName(_fromUtf8("dev_scroll_area"))
         self.dev_scroll_area_content = QtGui.QWidget()
-        self.dev_scroll_area_content.setGeometry(QtCore.QRect(0, 0, 241, 602))
+        self.dev_scroll_area_content.setGeometry(QtCore.QRect(0, 0, 239, 602))
         self.dev_scroll_area_content.setObjectName(_fromUtf8("dev_scroll_area_content"))
         self.verticalLayout_12 = QtGui.QVBoxLayout(self.dev_scroll_area_content)
         self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
@@ -1221,7 +1218,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(MainWindow)
-        self.mode_tabs.setCurrentIndex(1)
+        self.mode_tabs.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
@@ -1251,8 +1248,10 @@ class Ui_MainWindow(object):
         self.label_snr.setText(_translate("MainWindow", "reception: ", None))
         self.label_7.setText(_translate("MainWindow", "dB", None))
         self.label_firecode.setText(_translate("MainWindow", "<html><head/><body><p>Superframes:</p></body></html>", None))
+        self.led_msc.setText(_translate("MainWindow", "led", None))
         self.label_label_msc.setText(_translate("MainWindow", "MSC", None))
         self.label_fic.setText(_translate("MainWindow", "<html><head/><body><p>FIC:</p></body></html>", None))
+        self.led_fic.setText(_translate("MainWindow", "led", None))
         self.label_label_fic.setText(_translate("MainWindow", "FIC", None))
         self.label_service.setText(_translate("MainWindow", "SERVICE", None))
         self.label_programme_type.setText(_translate("MainWindow", "programme type\n"
@@ -1388,4 +1387,3 @@ class Ui_MainWindow(object):
         self.label_19.setText(_translate("MainWindow", "Volume", None))
         self.mode_tabs.setTabText(self.mode_tabs.indexOf(self.tab_transmission), _translate("MainWindow", "Transmitter", None))
 
-from PyKDE4.kdeui import KLed

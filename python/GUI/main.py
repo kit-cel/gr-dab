@@ -311,11 +311,14 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.protection = int(subch_data['protection'])
         conv_table = [12, 8, 6, 5]
         self.bit_rate = self.size * 8/conv_table[self.protection]
-        if self.bit_rate < 100:
-            self.audio_bit_rate = 48000
-        else:
-            self.audio_bit_rate = 32000
         self.dabplus = service_data['DAB+']
+        if dabplus:
+            if self.bit_rate < 100:
+                self.audio_bit_rate = 48000
+            else:
+                self.audio_bit_rate = 32000
+        else:
+            self.audio_bit_rate = 48000
 
         # display info to selected sub-channel
         # service info
@@ -532,10 +535,12 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.waterfall_plot.show()
         self.constellation.show()
         self.label_firecode.show()
+        self.led_msc.setText("<img src=\"led_green.png\">")
         self.led_msc.show()
         self.label_label_msc.show()
         self.label_firecode.setText("")
         self.label_fic.show()
+        self.led_fic.setText("<img src=\"led_green.png\">")
         self.led_fic.show()
         self.label_label_fic.show()
         self.label_fic.setText("")
@@ -570,22 +575,22 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             # write msc status
             if not self.my_receiver.get_firecode_passed():
                 self.label_firecode.setText(self.label_firecode.text() + "<font color=\"red\">X </font>")
-                self.led_msc.setColor(QtGui.QColor(255, 0, 0))
+                self.led_msc.setText("<img src=\"led_red.png\">")
             else:
                 errors = self.my_receiver.get_corrected_errors()
                 if errors < 10:
                     self.label_firecode.setText(self.label_firecode.text() + "<font color=\"green\">" + str(errors) + " < /font>")
-                    self.led_msc.setColor(QtGui.QColor(0, 255, 0))
+                    self.led_msc.setText("<img src=\"led_green.png\">")
                 else:
                     self.label_firecode.setText(self.label_firecode.text() + "<font color=\"orange\">" + str(errors) + "</font>")
-                    self.led_msc.setColor(QtGui.QColor(0, 255, 128))
+                    self.led_msc.setText("<img src=\"led_orange.png\">")
             # write fic status
             if self.my_receiver.get_crc_passed():
                 self.label_fic.setText(self.label_fic.text() + "<font color=\"green\">0 </font>")
-                self.led_fic.setColor(QtGui.QColor(0, 255, 0))
+                self.led_fic.setText("<img src=\"led_green.png\">")
             else:
                 self.label_fic.setText(self.label_fic.text() + "<font color=\"red\">X </font>")
-                self.led_fic.setColor(QtGui.QColor(255, 0, 0))
+                self.led_fic.setText("<img src=\"led_red.png\">")
         self.label_fic.setWordWrap(True)
         self.label_firecode.setWordWrap(True)
         self.content_count += 1

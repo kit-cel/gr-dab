@@ -85,7 +85,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_reception">
        <attribute name="title">
@@ -506,12 +506,9 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="KLed" name="led_msc">
-                    <property name="look">
-                     <enum>KLed::Sunken</enum>
-                    </property>
-                    <property name="darkFactor">
-                     <number>300</number>
+                   <widget class="QLabel" name="led_msc">
+                    <property name="text">
+                     <string>led</string>
                     </property>
                    </widget>
                   </item>
@@ -610,9 +607,9 @@
                    </spacer>
                   </item>
                   <item>
-                   <widget class="KLed" name="led_fic">
-                    <property name="look">
-                     <enum>KLed::Sunken</enum>
+                   <widget class="QLabel" name="led_fic">
+                    <property name="text">
+                     <string>led</string>
                     </property>
                    </widget>
                   </item>
@@ -954,7 +951,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>241</width>
+               <width>239</width>
                <height>602</height>
               </rect>
              </property>
@@ -2702,13 +2699,6 @@
    </property>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>KLed</class>
-   <extends>QWidget</extends>
-   <header>kled.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

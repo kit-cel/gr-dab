@@ -135,7 +135,7 @@ class usrp_dab_rx(gr.top_block):
             self.connect(self.gain_right, (self.audio, 1))
         # connect file sink if recording is selected
         if self.record_audio:
-            self.sink = blocks.wavfile_sink_make("dab_audio.wav", 2, 32000)
+            self.sink = blocks.wavfile_sink_make("dab_audio.wav", 2, audio_bit_rate)
             self.connect((self.dabplus, 0), (self.sink, 0))
             self.connect((self.dabplus, 1), (self.sink, 1))
 
