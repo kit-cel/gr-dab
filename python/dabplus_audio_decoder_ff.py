@@ -60,11 +60,11 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
         self.debug = debug
 
         # sanity check
-        if self.bit_rate_n*6 != self.size:
-            log = gr.logger("log")
-            log.debug("bit rate and subchannel size are not fitting")
-            log.set_level("ERROR")
-            raise ValueError
+        # if self.bit_rate_n*6 != self.size:
+        #     log = gr.logger("log")
+        #     log.debug("bit rate and subchannel size are not fitting")
+        #     log.set_level("ERROR")
+        #     raise ValueError
 
         # MSC decoder extracts logical frames out of transmission frame and decodes it
         self.msc_decoder = dab.msc_decode(self.dp, self.address, self.size, self.protection, self.verbose, self.debug)
@@ -84,10 +84,8 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
             self.s2f_right = blocks.short_to_float_make(1, 32767)
             self.gain_left = blocks.multiply_const_ff(1, 1)
             self.gain_right = blocks.multiply_const_ff(1, 1)
-            self.resample_left = filter.rational_resampler_base_fff_make(2, self.get_sample_rate()/16000, [1])
-            self.resample_right = filter.rational_resampler_base_fff_make(2, self.get_sample_rate()/16000, [1])
-            self.connect((self.mp4, 0), self.s2f_left, self.gain_left, self.resample_left, (self, 0))
-            self.connect((self.mp4, 1), self.s2f_right, self.gain_right, self.resample_right, (self, 1))
+            self.connect((self.mp4, 0), self.s2f_left, self.gain_left, (self, 0))
+            self.connect((self.mp4, 1), self.s2f_right, self.gain_right, (self, 1))
         else:
             # output signed 16 bit integers (directly from decoder)
             self.connect((self.mp4, 0), (self, 0))
@@ -99,3 +97,9 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
 
     def get_sample_rate(self):
         return self.mp4.get_sample_rate()
+
+    def get_firecode_passed(self):
+        return self.firecode.get_firecode_passed()
+
+    def get_corrected_errors(self):
+        return self.rs.get_corrected_errors()

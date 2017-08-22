@@ -45,14 +45,13 @@ namespace gr {
                                                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
     // 000 00110 000 00000 0100000000000000 00 0 0000000000000 00000000
 
-    //service orga with number of service components (last 4 bits have to be modified) and without service component descrition (only 1 service with numSubCh of SubChannels)
-    const char fib_source_b_impl::d_service_orga[40] = {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0,
-                                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
-    //000 00110 000 00010 0100000000000000 0 000 0001
+    //service orga header
+    const char fib_source_b_impl::d_service_orga_header[16] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
+    //000 00100 000 00010
 
-    //d_service_comp_description, has to be added for each service comp to d_service_orga (with change of Sub_channel ID!!)
-    const char fib_source_b_impl::d_service_comp_description[16] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0};
-    //00 000000 000000 1 0
+    //service orga for one service containing one subchannel
+    const char fib_source_b_impl::d_service_orga[40] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0};
+    // 0100000000000000 0 000 0001 00 111111 000000 00
 
     //subchannel orga header, length has to be changed according to the number of subchannel-orga fields
     const char fib_source_b_impl::d_subchannel_orga_header[16] = {0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1};
@@ -99,69 +98,46 @@ namespace gr {
                                                               1, 0, 0};
     //001 10101 0000 0 001 0100000000000000 01011111 01000111 01100001 01101100 01100001 01111000 01111001 01011111 01010010 01100001 01100100 01101001 01101111 00110001 01011111 01011111 0111000111100100
 
-    //Programme Service Component label
-    char fib_source_b_impl::d_service_comp_label[184] = {0, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-                                                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                                                         0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0,
-                                                         1, 1, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 0,
-                                                         1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0,
-                                                         1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1, 0, 1,
-                                                         1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 1,
-                                                         1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1, 1,
-                                                         0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 0, 0,
-                                                         0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1};
-    //001 10110 0000 0 100 0 000 0000 0100000000000000 01000001 01110111 01100101 01110011 01101111 01101101 01100101 01011111 01001101 01101001 01111000 01011111 01010110 01101111 01101100 00110001 0000000011111111
-
-    //service component language
-    char fib_source_b_impl::d_service_comp_language[32] = {0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0,
-                                                           0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-                                                           0};
-    //"000 00011  000 00101 0 0 000000 00001000";
-
-    /// d_SI_pointer array contains all SI for transmission.
-    const char *fib_source_b_impl::d_SI_pointer[
-            d_num_SI_basic + d_num_SI_subch] = {d_ensemble_label, d_programme_service_label, d_service_comp_language,
-                                                d_service_comp_label};
-    /// contains the lengths of the SI FIGs for transmission
-    const int fib_source_b_impl::d_SI_size[d_num_SI_basic + d_num_SI_subch] = {176, 176, 32, 184};
-
     fib_source_b::sptr
     fib_source_b::make(int transmission_mode, int num_subch, std::string ensemble_label,
-                       std::string programme_service_label, std::string service_comp_label, uint8_t service_comp_lang,
-                       const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n)
+                       std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
+                       const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus)
     {
       return gnuradio::get_initial_sptr
               (new fib_source_b_impl(transmission_mode, num_subch, ensemble_label,
-                                     programme_service_label, service_comp_label, service_comp_lang, protection_mode,
-                                     data_rate_n));
+                                     programme_service_labels, service_comp_label, service_comp_lang, protection_mode,
+                                     data_rate_n, dabplus));
     }
 
     /*
      * The private constructor
      */
     fib_source_b_impl::fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
-                                         std::string programme_service_label, std::string service_comp_label,
+                                         std::string programme_service_labels, std::string service_comp_label,
                                          uint8_t service_comp_lang, const std::vector <uint8_t> &protection_mode,
-                                         const std::vector <uint8_t> &data_rate_n)
+                                         const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus)
             : gr::sync_block("fib_source_b",
                              gr::io_signature::make(0, 0, 0),
                              gr::io_signature::make(1, 1, sizeof(char))),
-              d_transmission_mode(transmission_mode), d_num_subch(num_subch), d_nFIBs_written(0), d_nSI_written(0),
-              d_subch_iterate(0), d_protection_mode(protection_mode), d_data_rate_n(data_rate_n)
+              d_transmission_mode(transmission_mode), d_num_subch(num_subch), d_nFIBs_written(0),
+              d_protection_mode(protection_mode), d_data_rate_n(data_rate_n), d_dabplus(dabplus)
     {
       if (d_transmission_mode != 3) set_output_multiple((8 * FIB_LENGTH) * 3);
       else set_output_multiple((8 * FIB_LENGTH) * 4);
-      //write the labels with input strings once at beginning
+      //write the ensemble label with input string once at beginning
       write_label(d_ensemble_label + 32, ensemble_label);
-      write_label(d_programme_service_label + 32, programme_service_label);
-      write_label(d_service_comp_label + 40, service_comp_label);
-      //change service comp language
-      bit_adaption(d_service_comp_language + d_size_service_comp_language, service_comp_lang, 8);
       if (protection_mode.size() != num_subch) {
         throw std::invalid_argument((boost::format("size of vector protection_mode (%d) does not fit with number of subchannels (%d)") % protection_mode.size() % num_subch).str());
       }
       if (data_rate_n.size() != num_subch) {
         throw std::invalid_argument((boost::format("size of vector data_rate_n (%d) does not fit with number of subchannels (%d)") % data_rate_n.size() %  num_subch).str());
+      }
+      // init counter for iterating over the services
+      d_label_counter = 0;
+      d_service_labels = programme_service_labels;
+      // the string programme_service_labels containts num_subch * 16 chars, appended. Note that every subchannel is strutured in a different service in this implementation.
+      if (programme_service_labels.size() != 16*num_subch){
+        throw std::invalid_argument((boost::format("size of service label strings is (%d) but should be %d * 16 = %d") % programme_service_labels.size() % num_subch % (16*num_subch)).str());
       }
     }
 
@@ -230,7 +206,7 @@ namespace gr {
         if ((d_nFIBs_written % 3 == 0 && d_transmission_mode != 3) ||
             (d_nFIBs_written % 4 == 0 && d_transmission_mode == 3)) {
 ////////////////////////////////////////////////
-/// add first FIB with only MCI (max numSubCh = 7)
+/// add first FIB with only MCI (max services = 4)
 ////////////////////////////////////////////////
           //ensemble info
           std::memcpy(out + d_offset, d_ensemble_info, d_size_ensemble_info);
@@ -240,27 +216,28 @@ namespace gr {
           else CIF_counter(out + d_offset, d_nFIBs_written / 4);
 
           //service orga
-          std::memcpy(out + d_offset, d_service_orga, d_size_service_orga);
-          d_offset += d_size_service_orga;
-          //change number of service components in d_service_orga (bit manipulation)
-          bit_adaption(out + d_offset, d_num_subch, 4);
-          //service component description (numSubCh times; for every sub_channel different, belongs to d_service_orga)
-          for (int subch_count = 0; subch_count < d_num_subch; subch_count++) {
-            std::memcpy(out + d_offset,
-                        d_service_comp_description,
-                        d_size_service_comp_description); //add numSubCh with default values
-            d_offset += d_size_service_comp_description;
-            //change SubChID and priority for all not-primary channels
-            if (subch_count >= 1) { //is it not the first (=secondary) subchannel?
-              out[d_offset - 2] = 0; //all additional subchannels are secondary
-              //the SubChannel ID has to increase, to be different (count up from zero)
-              bit_adaption(out + d_offset - 2, subch_count, 6);
+          //header
+          std::memcpy(out + d_offset, d_service_orga_header, d_size_service_orga_header);
+          d_offset += d_size_service_orga_header;
+          //change FIG length depending on number of services
+          bit_adaption(out + d_offset - 8, 1 + 5*d_num_subch, 5);
+          //data field for every service (each containing one service component)
+          for (int service_count = 0; service_count < d_num_subch; service_count++) {
+            std::memcpy(out + d_offset, d_service_orga, d_size_service_orga);
+            d_offset += d_size_service_orga;
+            //change service Identifier
+            bit_adaption(out + d_offset - 24, service_count, 8);
+            //change subchannel ID
+            bit_adaption(out + d_offset - 2, service_count, 6);
+            //change DAB+ mode if not DAB+ but DAB
+            if(d_dabplus[service_count] != 1){
+              bit_adaption(out + d_offset -8, 0, 6);
             }
           }
           //MCI is set, set EndMarker and padding
           if ((8 * FIB_DATA_FIELD_LENGTH) - d_offset >=
               8) {//add EndMarker (111 11111) if there is minimum one byte left in FIG (FIG without 16 bit crc16)
-            for (int i = 0; i < 8; i++) { //find:: binde FIC.h ein und verwende die konstaten statt FIB_size
+            for (int i = 0; i < 8; i++) {
               out[i + d_offset] = 1;
             }
           }
@@ -342,29 +319,26 @@ namespace gr {
 /// write a not primary FIB with SI
 /////////////////////////////////////////////////
           do { //fill FIB with FIGs
-            //write one SI-FIG in FIB
-            std::memcpy(out + d_offset, d_SI_pointer[d_nSI_written], d_SI_size[d_nSI_written]);
-            //change content if subchannel specific SI
-            d_offset += d_SI_size[d_nSI_written];
-
-            //SI for each subchannel?
-            if (d_nSI_written + 1 >= d_num_SI_basic) //a subchannel specific FIG has to be written d_num_subch times
-            {
-              if (++d_subch_iterate >= d_num_subch) //all subchannels were written; go on with next SI
-              {
-                d_nSI_written++;
-                d_subch_iterate = 0;
+            if(d_label_counter == 0){
+              // write ensemble label
+              std::memcpy(out + d_offset, d_ensemble_label, d_size_label);
+              d_offset += d_size_label;
+              ++d_label_counter;
+            }
+            else{
+              // write service label
+              std::memcpy(out + d_offset, d_programme_service_label, d_size_label);
+              // change label
+              std::string label = d_service_labels.substr((d_label_counter-1)*16, 16);
+              write_label(out + d_offset + 32, label);
+              d_offset += d_size_label;
+              bit_adaption(out + d_offset - 144, d_label_counter-1, 8);
+              if(++d_label_counter > d_num_subch){
+                d_label_counter = 0;
               }
-            } else //basic SI -> just write once
-            {
-              d_nSI_written++;
+
             }
-            //start from first FIG when all FIGs are written
-            if (d_nSI_written >= d_num_SI_basic + d_num_SI_subch) {
-              d_nSI_written = 0;
-            }
-          } while ((8 * FIB_DATA_FIELD_LENGTH) - (d_offset % (8 * FIB_LENGTH)) >=
-                   d_SI_size[d_nSI_written]); //check if there is enough space for next FIG
+          } while ((8 * FIB_DATA_FIELD_LENGTH) - (d_offset % (8 * FIB_LENGTH)) >= 176); //check if there is enough space for next FIG
           //FIB is filled, set endmarker and padding
           if ((8 * FIB_DATA_FIELD_LENGTH) - (d_offset % (8 * FIB_LENGTH)) >=
               8) {//add EndMarker (111 11111) if there is minimum one byte left in FIG

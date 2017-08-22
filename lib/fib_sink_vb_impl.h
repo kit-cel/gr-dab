@@ -35,6 +35,8 @@ namespace gr {
 
       int process_fig(uint8_t type, const char *data, uint8_t length);
 
+      bool d_crc_passed;
+
       std::string d_json_ensemble_info;
       // service info
       std::string d_json_service_info;
@@ -72,6 +74,9 @@ namespace gr {
 
       virtual std::string get_programme_type()
       { return d_json_programme_type;}
+
+      virtual bool get_crc_passed()
+      { return d_crc_passed;}
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,

@@ -85,10 +85,12 @@ namespace gr {
           memcpy(out + d_nproduced * d_frame_size, in + d_nconsumed * d_frame_size, d_frame_size * 5);
           d_nproduced += 5;
           d_nconsumed += 5;
+          d_firecode_passed = true;
         } else {
           GR_LOG_DEBUG(d_logger, format("fire code failed at frame %d") % (nitems_read(0) / d_frame_size));
           // shift of one logical frame
           d_nconsumed++;
+          d_firecode_passed = false;
         }
       }
       // Tell runtime system how many input items we consumed on

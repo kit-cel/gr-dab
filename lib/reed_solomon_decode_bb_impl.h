@@ -50,6 +50,7 @@ namespace gr {
       void *rs_handle;
       uint8_t rs_packet[120];
       int corr_pos[10];
+      int d_corrected_errors;
 
       void DecodeSuperframe(uint8_t *sf, size_t sf_len);
 
@@ -57,6 +58,9 @@ namespace gr {
       reed_solomon_decode_bb_impl(int bit_rate_n);
 
       ~reed_solomon_decode_bb_impl();
+
+      virtual int get_corrected_errors()
+      { return d_corrected_errors; }
 
       // Where all the action really happens
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);

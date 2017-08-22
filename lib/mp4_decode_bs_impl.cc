@@ -65,7 +65,7 @@ namespace gr {
       set_output_multiple(960 * 4); //TODO: right? baudRate*0.12 for output of one superframe
       aacHandle = NeAACDecOpen();
       //memset(d_aac_frame, 0, 960);
-      d_sample_rate = 32000;
+      d_sample_rate = -1;
     }
 
     /*

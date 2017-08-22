@@ -47,6 +47,8 @@ namespace gr {
        * creating new instances.
        */
       static sptr make(int bit_rate_n);
+      
+      virtual int32_t get_sample_rate() = 0;
     };
 
   } // namespace dab

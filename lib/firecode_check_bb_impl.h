@@ -39,12 +39,16 @@ namespace gr {
       int d_frame_size;
       int d_bit_rate_n;
       int d_nproduced, d_nconsumed;
+      bool d_firecode_passed;
       firecode_checker fc;
 
     public:
       firecode_check_bb_impl(int bit_rate_n);
 
       ~firecode_check_bb_impl();
+
+      virtual bool get_firecode_passed()
+      { return d_firecode_passed; }
 
       // Where all the action really happens
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);

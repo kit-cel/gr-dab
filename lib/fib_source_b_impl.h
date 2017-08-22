@@ -32,7 +32,7 @@ namespace gr {
  * produces Fast Information Blocks (FIBs) according to the DAB standard and the input parameters
  *
  * @param transmission_mode transmission mode
- * @param num_subch number of subchannels to be transmitted
+ * @param num_subch number of subchannels to be transmitted, each in a speparated service
  * @param ensemble_label string label of the DAB ensemble (max 16 characters)
  * @param programme_service_label string label of the DAB service (max 16 characters)
  * @param service_comp_label string label of the DAB service component (max 16 characters)
@@ -43,6 +43,7 @@ namespace gr {
     class fib_source_b_impl : public fib_source_b {
     private:
       int d_transmission_mode; //transmission mode
+      std::vector <uint8_t> d_dabplus;
       int d_offset;
       uint16_t d_nFIBs_written; //counts totally written FIBs
       void bit_adaption(char *out_ptr, int number,
@@ -54,10 +55,10 @@ namespace gr {
       const static int d_size_ensemble_info = 56;
 
       void CIF_counter(char *out_ptr, int counter);//implementation of the mod 20 and mod 250 counter
-      const static char d_service_orga[40]; //const
+      const static char d_service_orga_header[16]; //*const
+      const static int d_size_service_orga_header = 16;
+      const static char d_service_orga[40]; //*services
       const static int d_size_service_orga = 40;
-      const static char d_service_comp_description[16]; //*numSubCh
-      const static int d_size_service_comp_description = 16;
       const static char d_subchannel_orga_header[16]; //const
       const static int d_size_subchannel_orga_header = 16;
       const static char d_subchannel_orga_field[32]; //*numSubCh
@@ -66,28 +67,20 @@ namespace gr {
       std::vector <uint8_t> d_protection_mode, d_data_rate_n;
 
       //Service Information
+      int d_label_counter;
+      const static int d_size_label = 176;
       static char d_ensemble_label[176]; //21*8+8, ensemble label (FIG 1/0)
       const static int d_size_ensemble_label = 176;
       static char d_programme_service_label[176]; //21*8+8, service label (FIG 1/0)
       const static int d_size_service_label = 176;
-      static char d_service_comp_label[184]; //21*8+8, service component label (FIG 1/0)
-      const static int d_size_service_comp_label = 184;
-      static char d_service_comp_language[32]; //3*8+8, service component language; short form (FIG 0/5)
-      const static int d_size_service_comp_language = 32;
-
-      const static int d_num_SI_basic = 4; //no subchannel specific SI
-      const static int d_num_SI_subch = 0; //SI for a specific subchannel
-      const static char *d_SI_pointer[d_num_SI_basic +
-                                      d_num_SI_subch]; //pointer to iterate the SI data in non-primary FIBs, saves the start adress from each SI_Array
-      const static int d_SI_size[d_num_SI_basic + d_num_SI_subch]; //Saves the lengths of the SI_Arrays
-      int d_nSI_written, d_subch_iterate;
+      std::string d_service_labels;
 
       int write_label(char *out_ptr, std::string label, int num_chars = 16);//default for 16 characters (16 byte)
 
     public:
       fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
-                        std::string programme_service_label, std::string service_comp_label, uint8_t service_comp_lang,
-                        const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n);
+                        std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
+                        const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus);
 
       ~fib_source_b_impl();
 

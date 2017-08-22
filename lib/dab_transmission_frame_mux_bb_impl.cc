@@ -85,6 +85,7 @@ namespace gr {
 
       // generate PRBS for padding
       generate_prbs(d_prbs, sizeof(d_prbs));
+      GR_LOG_DEBUG(d_logger, boost::format("key num_subch: %d") %d_num_subch);
     }
 
     /*
@@ -99,11 +100,9 @@ namespace gr {
     {
       // the first input is always the FIC
       ninput_items_required[0] = d_fic_len * (noutput_items / d_vlen_out);
-      // the second input is always the PRBS source
-      ninput_items_required[1] = d_cif_len * 8;
       for (int i = 0; i < d_num_subch; ++i) {
         // the amount of consumed data of each sub-channel depends on its size
-        ninput_items_required[i + 2] = d_subch_size[i] * d_cu_len * (noutput_items / d_vlen_out);
+        ninput_items_required[i + 1] = d_subch_size[i] * d_cu_len * d_num_cifs * (noutput_items / d_vlen_out);
       }
     }
 
@@ -133,7 +132,7 @@ namespace gr {
                                                      gr_vector_void_star &output_items)
     {
       unsigned char *out = (unsigned char *) output_items[0];
-      unsigned char *triggerout = (unsigned char *) output_items[1];
+      //unsigned char *triggerout = (unsigned char *) output_items[1];
       //const unsigned char *in;
 
       // create control stream for ofdm with trigger at start of frame and set zero

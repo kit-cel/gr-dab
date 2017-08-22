@@ -3,7 +3,7 @@
   <key>dab_fib_source_b</key>
   <category>[DAB]</category>
   <import>import dab</import>
-  <make>dab.fib_source_b($dab_mode, $num_subch, $ensemble_label, $programme_service_label, $service_comp_label, $service_comp_lang, $protection_mode, $data_rate_n)</make>
+  <make>dab.fib_source_b($dab_mode, $num_subch, $ensemble_label, $programme_service_labels, $service_comp_label, $service_comp_lang, $protection_mode, $data_rate_n)</make>
    <param>
     <name>DAB Mode</name>
     <key>dab_mode</key>
@@ -38,7 +38,7 @@
   </param>
   <param>
     <name>Service label</name>
-    <key>programme_service_label</key>
+    <key>programme_service_labels</key>
     <type>string</type>
   </param>
   <param>
@@ -59,6 +59,11 @@
   <param>
     <name>Data rate / 8kbit/s</name>
     <key>data_rate_n</key>
+    <type>raw</type>
+  </param>
+  <param>
+    <name>DAB+</name>
+    <key>dabplus</key>
     <type>raw</type>
   </param>
   <source>

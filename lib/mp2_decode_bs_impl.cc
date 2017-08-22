@@ -263,6 +263,7 @@ namespace gr {
       d_output_size = KJMP2_SAMPLES_PER_FRAME;
 
       set_output_multiple(d_output_size);
+      GR_LOG_DEBUG(d_logger, "mp2 decoder initialized");
     }
 
     /*
@@ -293,8 +294,9 @@ namespace gr {
           || ((frame[1] & 0xF6) != 0xF4)   // no MPEG-1/2 Audio Layer II?
           || ((frame[2] - 0x10) >= 0xE0))  // invalid bitrate?
         return 0;
-      return sample_rates[(((frame[1] & 0x08) >> 1) ^ 4)  // MPEG-1/2 switch
+      d_sample_rate = sample_rates[(((frame[1] & 0x08) >> 1) ^ 4)  // MPEG-1/2 switch
                           + ((frame[2] >> 2) & 3)];         // actual rate
+      return d_sample_rate;
     }
 
     struct quantizer_spec *mp2_decode_bs_impl::read_allocation(int sb, int b2_table)
@@ -639,10 +641,10 @@ namespace gr {
                   out_right[d_nproduced + n] = sample_buf[n*2+1];
                 }
                 d_nproduced += KJMP2_SAMPLES_PER_FRAME;
+                GR_LOG_DEBUG(d_logger, "mp2 decoding succeeded");
               } else {
                 GR_LOG_DEBUG(d_logger, "mp2 decoding failed");
               }
-
               d_mp2_header_OK = 0;
               d_mp2_header_count = 0;
               d_mp2_bit_count = 0;
@@ -656,8 +658,9 @@ namespace gr {
                   add_bit_to_mp2(d_mp2_frame, 1, d_mp2_bit_count++);
                 d_mp2_header_OK = 1;
               }
-            } else
+            }else {
               d_mp2_header_count = 0;
+            }
           } else if (d_mp2_header_OK == 1) {
             add_bit_to_mp2(d_mp2_frame, in[logical_frame_count * d_mp2_framesize + i], d_mp2_bit_count++);
             if (d_mp2_bit_count == 24) {
@@ -667,7 +670,6 @@ namespace gr {
           }
         }
       }
-
 
       // Tell runtime system how many input items we consumed on
       // each input stream.
