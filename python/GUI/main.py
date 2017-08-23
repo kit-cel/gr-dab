@@ -44,7 +44,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.address = 0
         self.size = 6
         self.protection = 2
-        self.audio_bit_rate = 32000
+        self.audio_bit_rate = 16000
         self.volume = 80
         self.subch = -1
         self.dabplus = True
@@ -79,6 +79,9 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.table_mci.cellClicked.connect(self.selected_subch)
         # a click on the play button compiles receiver with new subch info and plays the audio
         self.btn_play.clicked.connect(self.play_audio)
+        # adjust audio sampling rate
+        self.timer_audio_sampling_rate = QTimer()
+        self.timer_audio_sampling_rate.timeout.connect(self.adjust_audio_sampling_rate)
         # stop button click stops audio reception
         self.btn_stop.clicked.connect(self.stop_reception)
         # volume slider moved
@@ -126,31 +129,31 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             {"label": self.t_label_comp1, "data_rate_label": self.t_label_rate1, "data_rate": self.t_spin_rate1,
              "protection_label": self.t_label_prot1, "protection": self.t_combo_prot1, "enabled": True,
              "src_label": self.t_label_comp_src1, "src_path_disp": self.t_label_path_src1,
-             "src_btn": self.t_btn_path_src1, "src_path": "None", "label_label": self.t_label_label1, "edit_label": self.t_edit_service_label1, "combo_dabplus": self.t_combo_dabplus1, "btn_record": self.t_btn_record1},
+             "src_btn": self.t_btn_path_src1, "src_path": "None", "label_label": self.t_label_label1, "edit_label": self.t_edit_service_label1, "combo_dabplus": self.t_combo_dabplus1, "btn_record": self.t_btn_record1, "audio_rate_label": self.t_label_audio_rate1, "combo_audio_rate": self.t_combo_audio_rate1, "combo_audio_rate_dab": self.t_combo_audio_rate_dab1},
             {"label": self.t_label_comp2, "data_rate_label": self.t_label_rate2, "data_rate": self.t_spin_rate2,
              "protection_label": self.t_label_prot2, "protection": self.t_combo_prot2, "enabled": False,
              "src_label": self.t_label_comp_src2, "src_path_disp": self.t_label_path_src2,
-             "src_btn": self.t_btn_path_src2, "src_path": "None", "label_label": self.t_label_label2, "edit_label": self.t_edit_service_label2, "combo_dabplus": self.t_combo_dabplus2, "btn_record": self.t_btn_record2},
+             "src_btn": self.t_btn_path_src2, "src_path": "None", "label_label": self.t_label_label2, "edit_label": self.t_edit_service_label2, "combo_dabplus": self.t_combo_dabplus2, "btn_record": self.t_btn_record2, "audio_rate_label": self.t_label_audio_rate2, "combo_audio_rate": self.t_combo_audio_rate2, "combo_audio_rate_dab": self.t_combo_audio_rate_dab2},
             {"label": self.t_label_comp3, "data_rate_label": self.t_label_rate3, "data_rate": self.t_spin_rate3,
              "protection_label": self.t_label_prot3, "protection": self.t_combo_prot3, "enabled": False,
              "src_label": self.t_label_comp_src3, "src_path_disp": self.t_label_path_src3,
-             "src_btn": self.t_btn_path_src3, "src_path": "None", "label_label": self.t_label_label3, "edit_label": self.t_edit_service_label3, "combo_dabplus": self.t_combo_dabplus3, "btn_record": self.t_btn_record3},
+             "src_btn": self.t_btn_path_src3, "src_path": "None", "label_label": self.t_label_label3, "edit_label": self.t_edit_service_label3, "combo_dabplus": self.t_combo_dabplus3, "btn_record": self.t_btn_record3, "audio_rate_label": self.t_label_audio_rate3, "combo_audio_rate": self.t_combo_audio_rate3, "combo_audio_rate_dab": self.t_combo_audio_rate_dab3},
             {"label": self.t_label_comp4, "data_rate_label": self.t_label_rate4, "data_rate": self.t_spin_rate4,
              "protection_label": self.t_label_prot4, "protection": self.t_combo_prot4, "enabled": False,
              "src_label": self.t_label_comp_src4, "src_path_disp": self.t_label_path_src4,
-             "src_btn": self.t_btn_path_src4, "src_path": "None", "label_label": self.t_label_label4, "edit_label": self.t_edit_service_label4, "combo_dabplus": self.t_combo_dabplus4, "btn_record": self.t_btn_record4},
+             "src_btn": self.t_btn_path_src4, "src_path": "None", "label_label": self.t_label_label4, "edit_label": self.t_edit_service_label4, "combo_dabplus": self.t_combo_dabplus4, "btn_record": self.t_btn_record4, "audio_rate_label": self.t_label_audio_rate4, "combo_audio_rate": self.t_combo_audio_rate4, "combo_audio_rate_dab": self.t_combo_audio_rate_dab4},
             {"label": self.t_label_comp5, "data_rate_label": self.t_label_rate5, "data_rate": self.t_spin_rate5,
              "protection_label": self.t_label_prot5, "protection": self.t_combo_prot5, "enabled": False,
              "src_label": self.t_label_comp_src5, "src_path_disp": self.t_label_path_src5,
-             "src_btn": self.t_btn_path_src5, "src_path": "None", "label_label": self.t_label_label5, "edit_label": self.t_edit_service_label5, "combo_dabplus": self.t_combo_dabplus5, "btn_record": self.t_btn_record5},
+             "src_btn": self.t_btn_path_src5, "src_path": "None", "label_label": self.t_label_label5, "edit_label": self.t_edit_service_label5, "combo_dabplus": self.t_combo_dabplus5, "btn_record": self.t_btn_record5, "audio_rate_label": self.t_label_audio_rate5, "combo_audio_rate": self.t_combo_audio_rate5, "combo_audio_rate_dab": self.t_combo_audio_rate_dab5},
             {"label": self.t_label_comp6, "data_rate_label": self.t_label_rate6, "data_rate": self.t_spin_rate6,
              "protection_label": self.t_label_prot6, "protection": self.t_combo_prot6, "enabled": False,
              "src_label": self.t_label_comp_src6, "src_path_disp": self.t_label_path_src6,
-             "src_btn": self.t_btn_path_src6, "src_path": "None", "label_label": self.t_label_label6, "edit_label": self.t_edit_service_label6, "combo_dabplus": self.t_combo_dabplus6, "btn_record": self.t_btn_record6},
+             "src_btn": self.t_btn_path_src6, "src_path": "None", "label_label": self.t_label_label6, "edit_label": self.t_edit_service_label6, "combo_dabplus": self.t_combo_dabplus6, "btn_record": self.t_btn_record6, "audio_rate_label": self.t_label_audio_rate6, "combo_audio_rate": self.t_combo_audio_rate6, "combo_audio_rate_dab": self.t_combo_audio_rate_dab6},
             {"label": self.t_label_comp7, "data_rate_label": self.t_label_rate7, "data_rate": self.t_spin_rate7,
              "protection_label": self.t_label_prot7, "protection": self.t_combo_prot7, "enabled": False,
              "src_label": self.t_label_comp_src7, "src_path_disp": self.t_label_path_src7,
-             "src_btn": self.t_btn_path_src7, "src_path": "None", "label_label": self.t_label_label7, "edit_label": self.t_edit_service_label7, "combo_dabplus": self.t_combo_dabplus7, "btn_record": self.t_btn_record7}]
+             "src_btn": self.t_btn_path_src7, "src_path": "None", "label_label": self.t_label_label7, "edit_label": self.t_edit_service_label7, "combo_dabplus": self.t_combo_dabplus7, "btn_record": self.t_btn_record7, "audio_rate_label": self.t_label_audio_rate7, "combo_audio_rate": self.t_combo_audio_rate7, "combo_audio_rate_dab": self.t_combo_audio_rate_dab7}]
         # update service components initially to hide the service components 2-7
         self.t_update_service_components()
         # provide suggestions for language combo box
@@ -184,6 +187,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.t_btn_record5.pressed.connect(self.t_toggle_record5)
         self.t_btn_record6.pressed.connect(self.t_toggle_record6)
         self.t_btn_record7.pressed.connect(self.t_toggle_record7)
+        self.t_combo_dabplus1.currentIndexChanged.connect(self.change_audio_bit_rates1)
+        self.t_combo_dabplus2.currentIndexChanged.connect(self.change_audio_bit_rates2)
+        self.t_combo_dabplus3.currentIndexChanged.connect(self.change_audio_bit_rates3)
+        self.t_combo_dabplus4.currentIndexChanged.connect(self.change_audio_bit_rates4)
+        self.t_combo_dabplus5.currentIndexChanged.connect(self.change_audio_bit_rates5)
+        self.t_combo_dabplus6.currentIndexChanged.connect(self.change_audio_bit_rates6)
+        self.t_combo_dabplus7.currentIndexChanged.connect(self.change_audio_bit_rates7)
         # set volume if volume slider is changed
         self.t_slider_volume.valueChanged.connect(self.t_set_volume)
 
@@ -312,7 +322,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         conv_table = [12, 8, 6, 5]
         self.bit_rate = self.size * 8/conv_table[self.protection]
         self.dabplus = service_data['DAB+']
-        if dabplus:
+        if self.dabplus:
             if self.bit_rate < 100:
                 self.audio_bit_rate = 48000
             else:
@@ -398,7 +408,26 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # start timer for snr update again
         self.snr_timer.start(1000)
         self.firecode_timer.start(120)
-        # update dev mode
+        # start audio sampling rate timer
+        self.timer_audio_sampling_rate.start(500)
+
+    def adjust_audio_sampling_rate(self):
+        self.timer_audio_sampling_rate.stop()
+        new_sampling_rate = self.my_receiver.get_sample_rate()
+        print "key adjust"
+        if new_sampling_rate != self.audio_bit_rate and new_sampling_rate != -1:
+            self.audio_bit_rate = new_sampling_rate
+            self.statusBar.showMessage("Adjusting audio sampling rate to " + str(new_sampling_rate))
+            self.my_receiver.stop()
+            self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
+                                                       self.spinbox_frequency.value(), self.bit_rate,
+                                                       self.address, self.size,
+                                                       self.protection, self.audio_bit_rate, self.dabplus,
+                                                       self.src_is_USRP, self.file_path, self.recorder)
+
+            self.my_receiver.start()
+        elif new_sampling_rate == -1:
+            self.timer_audio_sampling_rate.start(200)
 
     def stop_reception(self):
         # close dev mode
@@ -633,7 +662,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.t_spin_listen_to_component.setMaximum(num_subch)
 
     def t_update_service_components(self):
-        # display/hide components after the info in components (dict)
+        # display/hide components referring to the info in components (dict)
         for component in self.components:
             if component["enabled"] is False:
                 component["label"].hide()
@@ -648,6 +677,9 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 component["edit_label"].hide()
                 component["combo_dabplus"].hide()
                 component["btn_record"].hide()
+                component["audio_rate_label"].hide()
+                component["combo_audio_rate"].hide()
+                component["combo_audio_rate_dab"].hide()
             else:
                 component["label"].show()
                 component["data_rate_label"].show()
@@ -661,6 +693,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 component["edit_label"].show()
                 component["combo_dabplus"].show()
                 component["btn_record"].show()
+                component["audio_rate_label"].show()
+                if component["combo_dabplus"].currentIndex() is 0:
+                    component["combo_audio_rate"].show()
+                    component["combo_audio_rate_dab"].hide()
+                else:
+                    component["combo_audio_rate_dab"].show()
+                    component["combo_audio_rate"].hide()
 
     def t_init_transmitter(self):
         self.statusBar.showMessage("initializing transmitter...")
@@ -669,6 +708,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # produce array for protection and data_rate and src_paths
         protection_array = [None] * self.t_spin_num_subch.value()
         data_rate_n_array = [None] * self.t_spin_num_subch.value()
+        audio_sampling_rate_array = [None] *  self.t_spin_num_subch.value()
         audio_paths = ["None"] * self.t_spin_num_subch.value()
         merged_service_string = ""
         dabplus_types = [True] * self.t_spin_num_subch.value()
@@ -678,6 +718,11 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             protection_array[i] = self.components[i]["protection"].currentIndex()
             # write array with data rates
             data_rate_n_array[i] = self.components[i]["data_rate"].value()/8
+            # write audio sampling rates in array
+            if self.components[i]["combo_dabplus"].currentIndex() is 0:
+                audio_sampling_rate_array[i] = 32000 if (self.components[i]["combo_audio_rate"].currentIndex() is 0) else 48000
+            else:
+                audio_sampling_rate_array[i] = 48000 if (self.components[i]["combo_audio_rate_dab"].currentIndex() is 0) else 24000
             # check audio paths
             if self.components[i]["src_path"] is "None":
                 # highlight the path which is not selected
@@ -716,7 +761,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                                   str(self.t_edit_ensemble_label.text()),
                                                                   merged_service_string,
                                                                   self.t_combo_language.currentIndex(),
-                                                                  protection_array, data_rate_n_array,
+                                                                  protection_array, data_rate_n_array, audio_sampling_rate_array,
                                                                   audio_paths,
                                                                   self.t_spin_listen_to_component.value(),
                                                                   self.t_rbtn_USRP.isChecked(),
@@ -845,6 +890,62 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def t_toggle_record7(self):
         self.t_label_path_src7.setText("microphone")
         self.components[6]["src_path"] = "mic"
+
+    def change_audio_bit_rates1(self):
+        if self.t_combo_dabplus1.currentIndex() is 0:
+            self.t_combo_audio_rate1.show()
+            self.t_combo_audio_rate_dab1.hide()
+        else:
+            self.t_combo_audio_rate_dab1.show()
+            self.t_combo_audio_rate1.hide()
+
+    def change_audio_bit_rates2(self):
+        if self.t_combo_dabplus2.currentIndex() is 0:
+            self.t_combo_audio_rate2.show()
+            self.t_combo_audio_rate_dab2.hide()
+        else:
+            self.t_combo_audio_rate_dab2.show()
+            self.t_combo_audio_rate2.hide()
+
+    def change_audio_bit_rates3(self):
+        if self.t_combo_dabplus3.currentIndex() is 0:
+            self.t_combo_audio_rate3.show()
+            self.t_combo_audio_rate_dab3.hide()
+        else:
+            self.t_combo_audio_rate_dab3.show()
+            self.t_combo_audio_rate3.hide()
+
+    def change_audio_bit_rates4(self):
+        if self.t_combo_dabplus4.currentIndex() is 0:
+            self.t_combo_audio_rate4.show()
+            self.t_combo_audio_rate_dab4.hide()
+        else:
+            self.t_combo_audio_rate_dab4.show()
+            self.t_combo_audio_rate4.hide()
+
+    def change_audio_bit_rates5(self):
+        if self.t_combo_dabplus5.currentIndex() is 0:
+            self.t_combo_audio_rate5.show()
+            self.t_combo_audio_rate_dab5.hide()
+        else:
+            self.t_combo_audio_rate_dab5.show()
+            self.t_combo_audio_rate5.hide()
+
+    def change_audio_bit_rates6(self):
+        if self.t_combo_dabplus6.currentIndex() is 0:
+            self.t_combo_audio_rate6.show()
+            self.t_combo_audio_rate_dab6.hide()
+        else:
+            self.t_combo_audio_rate_dab6.show()
+            self.t_combo_audio_rate6.hide()
+
+    def change_audio_bit_rates7(self):
+        if self.t_combo_dabplus7.currentIndex() is 0:
+            self.t_combo_audio_rate7.show()
+            self.t_combo_audio_rate_dab7.hide()
+        else:
+            self.t_combo_audio_rate_dab7.show()
+            self.t_combo_audio_rate7.hide()
 
 
 class lookup_tables:

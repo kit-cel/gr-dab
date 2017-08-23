@@ -30,7 +30,7 @@ import numpy as np
 
 
 class usrp_dab_tx(gr.top_block):
-    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
+    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, audio_sampling_rates, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -77,17 +77,17 @@ class usrp_dab_tx(gr.top_block):
         for i in range(0, self.num_subch):
             if not self.src_paths[i] is "mic":
                 # source
-                self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], False)
+                self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], True)
             # float to short
             self.f2s_left_converters[i] = blocks.float_to_short_make(1, 32767)
             self.f2s_right_converters[i] = blocks.float_to_short_make(1, 32767)
             if self.dabplus_types[i] is 1:
                 # mp4 encoder and Reed-Solomon encoder
-                self.mp4_encoders[i] = dab.mp4_encode_sb_make(self.data_rates_n[i], 2, 32000, 1)
+                self.mp4_encoders[i] = dab.mp4_encode_sb_make(self.data_rates_n[i], 2, audio_sampling_rates[i], 1)
                 self.rs_encoders[i] = dab.reed_solomon_encode_bb_make(self.data_rates_n[i])
             else:
                 # mp2 encoder
-                self.mp2_encoders[i] = dab.mp2_encode_sb_make(self.data_rates_n[i], 2, 48000)
+                self.mp2_encoders[i] = dab.mp2_encode_sb_make(self.data_rates_n[i], 2, audio_sampling_rates[i])
             # encoder
             self.msc_encoders[i] = dab.msc_encode(self.dp, self.data_rates_n[i], self.protections[i])
 
