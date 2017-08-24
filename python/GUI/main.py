@@ -52,6 +52,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.recorder = False
         self.file_path = "None"
         self.src_is_USRP = True
+        self.receiver_running = False
 
         # table preparations
         header = self.table_mci.horizontalHeader()
@@ -237,30 +238,38 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.label_path.setText(path)
 
     def init_receiver(self):
-        self.statusBar.showMessage("initializing receiver ...")
-        # stop any processes that access to an instance of usrp_dab_rx
-        self.snr_timer.stop()
-        self.firecode_timer.stop()
-        # check if file path is selected in case that file is the selected source
-        if (not self.src_is_USRP) and (self.file_path == "None"):
-            self.label_path.setStyleSheet('color: red')
+        if not self.receiver_running:
+            self.statusBar.showMessage("initializing receiver ...")
+            # stop any processes that access to an instance of usrp_dab_rx
+            self.snr_timer.stop()
+            self.firecode_timer.stop()
+            # check if file path is selected in case that file is the selected source
+            if (not self.src_is_USRP) and (self.file_path == "None"):
+                self.label_path.setStyleSheet('color: red')
+            else:
+                self.label_path.setStyleSheet('color: black')
+                # set up and start flowgraph
+                self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
+                                                  self.src_is_USRP, self.file_path, self.recorder)
+                self.my_receiver.start()
+                # status bar
+                self.statusBar.showMessage("Reception is running.")
+                # init dev mode
+                self.dev_mode_init()
+                # once scan ensemble automatically (after per clicking btn)
+                time.sleep(1)
+                self.update_service_info()
+                self.btn_update_info.setEnabled(True)
+                self.snr_update()
+                self.snr_timer.start(1000)
+                self.firecode_timer.start(120)
+                self.receiver_running = True
+                self.btn_init.setText("stop receiver")
         else:
-            self.label_path.setStyleSheet('color: black')
-            # set up and start flowgraph
-            self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
-                                              self.src_is_USRP, self.file_path, self.recorder)
-            self.my_receiver.start()
-            # status bar
-            self.statusBar.showMessage("Reception is running.")
-            # init dev mode
-            self.dev_mode_init()
-            # once scan ensemble automatically (after per clicking btn)
-            time.sleep(1)
-            self.update_service_info()
-            self.btn_update_info.setEnabled(True)
-            self.snr_update()
-            self.snr_timer.start(1000)
-            self.firecode_timer.start(120)
+            self.my_receiver.stop()
+            self.receiver_running = False
+            self.btn_init.setText("start receiver")
+            self.statusBar.showMessage("Receiver stopped.")
 
     def update_service_info(self):
         # set status bar message
