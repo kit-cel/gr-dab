@@ -30,7 +30,7 @@ import numpy as np
 
 
 class usrp_dab_tx(gr.top_block):
-    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, audio_sampling_rates, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
+    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, stereo_flags, audio_sampling_rates, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -129,16 +129,28 @@ class usrp_dab_tx(gr.top_block):
             if self.dabplus_types[i] is 1:
                 if self.src_paths[i] is "mic":
                     self.connect((self.recorder, 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i + 1))
-                    self.connect((self.recorder, 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                    if stereo_flags[i] == 0:
+                        self.connect((self.recorder, 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                    else:
+                        self.connect(self.f2s_left_converters[i], (self.mp4_encoders[i], 1))
                 else:
                     self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
-                    self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                    if stereo_flags[i] == 0:
+                        self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                    else:
+                        self.connect(self.f2s_left_converters[i], (self.mp4_encoders[i], 1))
             else:
                 self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp2_encoders[i], 0), self.msc_encoders[i], (self.mux, i + 1))
-                self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp2_encoders[i], 1))
+                if stereo_flags[i] == 0:
+                    self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp2_encoders[i], 1))
+                else:
+                    self.connect(self.f2s_left_converters[i], (self.mp2_encoders[i], 1))
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
-        self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
+        if use_usrp:
+            self.connect(self.mod, self.sink)
+        else:
+            self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
         #self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
         #self.connect((self.msc_sources[self.selected_audio-1], 1), self.gain_right, (self.audio, 1))
 

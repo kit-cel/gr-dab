@@ -777,6 +777,9 @@
                 <property name="checkable">
                  <bool>false</bool>
                 </property>
+                <property name="flat">
+                 <bool>false</bool>
+                </property>
                </widget>
               </item>
               <item>
@@ -2366,54 +2369,68 @@
                     <item row="6" column="0">
                      <widget class="QLabel" name="t_label_audio_rate1">
                       <property name="text">
-                       <string>Audio sampling rate</string>
+                       <string>Audio settings</string>
                       </property>
                      </widget>
                     </item>
                     <item row="12" column="0">
                      <widget class="QLabel" name="t_label_audio_rate2">
                       <property name="text">
-                       <string>Audio Sampling rate</string>
+                       <string>Audio settings</string>
                       </property>
                      </widget>
                     </item>
                     <item row="18" column="0">
                      <widget class="QLabel" name="t_label_audio_rate3">
                       <property name="text">
-                       <string>Audio sampling rate</string>
+                       <string>Audio sampling</string>
                       </property>
                      </widget>
                     </item>
                     <item row="24" column="0">
                      <widget class="QLabel" name="t_label_audio_rate4">
                       <property name="text">
-                       <string>Audio sampling rate</string>
+                       <string>Audio sampling</string>
                       </property>
                      </widget>
                     </item>
                     <item row="30" column="0">
                      <widget class="QLabel" name="t_label_audio_rate5">
                       <property name="text">
-                       <string>audio sampling rate</string>
+                       <string>audio sampling</string>
                       </property>
                      </widget>
                     </item>
                     <item row="36" column="0">
                      <widget class="QLabel" name="t_label_audio_rate6">
                       <property name="text">
-                       <string>Audio sampling rate</string>
+                       <string>Audio sampling</string>
                       </property>
                      </widget>
                     </item>
                     <item row="42" column="0">
                      <widget class="QLabel" name="t_label_audio_rate7">
                       <property name="text">
-                       <string>Audio sampling rate</string>
+                       <string>Audio sampling</string>
                       </property>
                      </widget>
                     </item>
                     <item row="6" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_2">
+                      <item>
+                       <widget class="QComboBox" name="t_combo_stereo1">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QComboBox" name="t_combo_audio_rate1">
                         <item>
@@ -2447,6 +2464,20 @@
                     <item row="12" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_33">
                       <item>
+                       <widget class="QComboBox" name="t_combo_stereo2">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item>
                        <widget class="QComboBox" name="t_combo_audio_rate2">
                         <item>
                          <property name="text">
@@ -2478,6 +2509,20 @@
                     </item>
                     <item row="18" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_34">
+                      <item>
+                       <widget class="QComboBox" name="t_combo_stereo3">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QComboBox" name="t_combo_audio_rate3">
                         <item>
@@ -2511,6 +2556,20 @@
                     <item row="24" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_35">
                       <item>
+                       <widget class="QComboBox" name="t_combo_stereo4">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item>
                        <widget class="QComboBox" name="t_combo_audio_rate4">
                         <item>
                          <property name="text">
@@ -2542,6 +2601,20 @@
                     </item>
                     <item row="30" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_36">
+                      <item>
+                       <widget class="QComboBox" name="t_combo_stereo5">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QComboBox" name="t_combo_audio_rate5">
                         <item>
@@ -2575,6 +2648,20 @@
                     <item row="36" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_37">
                       <item>
+                       <widget class="QComboBox" name="t_combo_stereo6">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
+                      <item>
                        <widget class="QComboBox" name="t_combo_audio_rate6">
                         <item>
                          <property name="text">
@@ -2606,6 +2693,20 @@
                     </item>
                     <item row="42" column="1">
                      <layout class="QHBoxLayout" name="horizontalLayout_38">
+                      <item>
+                       <widget class="QComboBox" name="t_combo_stereo7">
+                        <item>
+                         <property name="text">
+                          <string>stereo</string>
+                         </property>
+                        </item>
+                        <item>
+                         <property name="text">
+                          <string>mono</string>
+                         </property>
+                        </item>
+                       </widget>
+                      </item>
                       <item>
                        <widget class="QComboBox" name="t_combo_audio_rate7">
                         <item>
