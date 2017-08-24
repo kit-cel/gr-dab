@@ -43,7 +43,7 @@ class qa_fic_encode (gr_unittest.TestCase):
 
         # source
         self.dp = dab_parameters(1, 208.064e6, True)
-        self.fib_src = dab.fib_source_b_make(1, 1, "ensemble1", "service1        ", "musicmix", 4, [2], [15], [1])
+        self.fib_src = dab.fib_source_b_make(1, 1, 1, "ensemble1", "service1        ", "musicmix", 4, [2], [15], [1])
 
         # encoder
         self.fib_enc = fic_encode(self.dab_params)

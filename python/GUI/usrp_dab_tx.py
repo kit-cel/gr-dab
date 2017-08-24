@@ -30,7 +30,7 @@ import numpy as np
 
 
 class usrp_dab_tx(gr.top_block):
-    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, protections, data_rates_n, stereo_flags, audio_sampling_rates, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
+    def __init__(self, dab_mode, frequency, num_subch, ensemble_label, service_label, language, country_ID, protections, data_rates_n, stereo_flags, audio_sampling_rates, src_paths, selected_audio, use_usrp, dabplus_types, sink_path = "dab_iq_generated.dat"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -59,7 +59,7 @@ class usrp_dab_tx(gr.top_block):
         # FIC
         ########################
         # source
-        self.fic_src = dab.fib_source_b_make(self.dab_mode, self.num_subch, self.ensemble_label, self.service_label, "", self.language, self.protections, self.data_rates_n, self.dabplus_types)
+        self.fic_src = dab.fib_source_b_make(self.dab_mode, country_ID, self.num_subch, self.ensemble_label, self.service_label, "", self.language, self.protections, self.data_rates_n, self.dabplus_types)
         # encoder
         self.fic_enc = dab.fic_encode(self.dp)
 

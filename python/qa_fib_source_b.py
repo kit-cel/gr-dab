@@ -34,7 +34,7 @@ class qa_fib_source_b (gr_unittest.TestCase):
     # manual check if transmitted data is interpreted properly
     # trivial fib_source with only one sub-channel
     def test_001_t(self):
-        src = dab.fib_source_b_make(1,1,'Galaxy_News', 'Wasteland_Radio', 'Country_Mix', 0x09, [0], [8], [1])
+        src = dab.fib_source_b_make(1,1,1,'Galaxy_News', 'Wasteland_Radio', 'Country_Mix', 0x09, [0], [8], [1])
         fib_unpacked_to_packed = blocks.unpacked_to_packed_bb(1, gr.GR_MSB_FIRST)
         s2v = blocks.stream_to_vector(gr.sizeof_char, 32)
         crc16 = dab.crc16_bb(32, 0x1021, 0xffff)
@@ -45,7 +45,7 @@ class qa_fib_source_b (gr_unittest.TestCase):
 
     # multiple sub-channels
     def test_001_t(self):
-        src = dab.fib_source_b_make(1,7,'Galaxy_News', 'Wasteland_Radio1Wasteland_Radio2Wasteland_Radio3Wasteland_Radio4Wasteland_Radio5Wasteland_Radio6Wasteland_Radio7', 'Country_Mix', 0x09, [0, 1, 2, 3, 3, 2, 1], [8, 2, 8, 8, 2, 1, 4], [1, 1, 0, 1, 1, 0, 1])
+        src = dab.fib_source_b_make(1,1,7,'Galaxy_News', 'Wasteland_Radio1Wasteland_Radio2Wasteland_Radio3Wasteland_Radio4Wasteland_Radio5Wasteland_Radio6Wasteland_Radio7', 'Country_Mix', 0x09, [0, 1, 2, 3, 3, 2, 1], [8, 2, 8, 8, 2, 1, 4], [1, 1, 0, 1, 1, 0, 1])
         fib_unpacked_to_packed = blocks.unpacked_to_packed_bb(1, gr.GR_MSB_FIRST)
         s2v = blocks.stream_to_vector(gr.sizeof_char, 32)
         crc16 = dab.crc16_bb(32, 0x1021, 0xffff)

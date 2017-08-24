@@ -67,7 +67,7 @@ namespace gr {
 /// SI-FIGs, ready to transmit
 /////////////////////////////////////////////
     //Ensemble label
-    char fib_source_b_impl::d_ensemble_label[176] = {0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+    char fib_source_b_impl::d_ensemble_label[176] = {0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1,
                                                      0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0,
                                                      0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 1,
@@ -77,7 +77,7 @@ namespace gr {
                                                      1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1,
                                                      0, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0,
                                                      0};
-    //"001 10101  0000 0 000 0100 000000000000 01011111 01011111 01000111 01100001 01101100 01100001 01111000 01111001 01011111 01001110 01100101 01110111 01110011 01011111 01011111 01011111 0011100011111000"; // Ensemble label: "__Galaxy_News___"
+    //"001 10101  0000 0 000 0000 000000000000 01011111 01011111 01000111 01100001 01101100 01100001 01111000 01111001 01011111 01001110 01100101 01110111 01110011 01011111 01011111 01011111 0011100011111000"; // Ensemble label: "__Galaxy_News___"
 
     //Programme Service label
     char fib_source_b_impl::d_programme_service_label[176] = {0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0,
@@ -99,12 +99,12 @@ namespace gr {
     //001 10101 0000 0 001 0100000000000000 01011111 01000111 01100001 01101100 01100001 01111000 01111001 01011111 01010010 01100001 01100100 01101001 01101111 00110001 01011111 01011111 0111000111100100
 
     fib_source_b::sptr
-    fib_source_b::make(int transmission_mode, int num_subch, std::string ensemble_label,
+    fib_source_b::make(int transmission_mode, int country_ID, int num_subch, std::string ensemble_label,
                        std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
                        const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus)
     {
       return gnuradio::get_initial_sptr
-              (new fib_source_b_impl(transmission_mode, num_subch, ensemble_label,
+              (new fib_source_b_impl(transmission_mode, country_ID, num_subch, ensemble_label,
                                      programme_service_labels, service_comp_label, service_comp_lang, protection_mode,
                                      data_rate_n, dabplus));
     }
@@ -112,7 +112,7 @@ namespace gr {
     /*
      * The private constructor
      */
-    fib_source_b_impl::fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
+    fib_source_b_impl::fib_source_b_impl(int transmission_mode, int country_ID, int num_subch, std::string ensemble_label,
                                          std::string programme_service_labels, std::string service_comp_label,
                                          uint8_t service_comp_lang, const std::vector <uint8_t> &protection_mode,
                                          const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus)
@@ -120,7 +120,7 @@ namespace gr {
                              gr::io_signature::make(0, 0, 0),
                              gr::io_signature::make(1, 1, sizeof(char))),
               d_transmission_mode(transmission_mode), d_num_subch(num_subch), d_nFIBs_written(0),
-              d_protection_mode(protection_mode), d_data_rate_n(data_rate_n), d_dabplus(dabplus)
+              d_protection_mode(protection_mode), d_data_rate_n(data_rate_n), d_dabplus(dabplus), d_country_ID(country_ID)
     {
       if (d_transmission_mode != 3) set_output_multiple((8 * FIB_LENGTH) * 3);
       else set_output_multiple((8 * FIB_LENGTH) * 4);
@@ -291,7 +291,7 @@ namespace gr {
                 d_subch_size = 4 * d_data_rate_n[subch_count];
                 break;
               default:
-                //fehler
+                //error
                 break;
             }
             //write subchannel size
@@ -323,6 +323,8 @@ namespace gr {
               // write ensemble label
               std::memcpy(out + d_offset, d_ensemble_label, d_size_label);
               d_offset += d_size_label;
+              // change country ID
+              bit_adaption(out + d_offset-(d_size_label-20), d_country_ID, 4);
               ++d_label_counter;
             }
             else{

@@ -27,6 +27,11 @@
     </option>
   </param>
   <param>
+    <name>Country ID</name>
+    <key>country_ID</key>
+    <type>int</type>
+  </param>
+  <param>
     <name>Number sub-channels</name>
     <key>num_subch</key>
     <type>int</type>

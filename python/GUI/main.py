@@ -774,7 +774,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                                   self.t_spin_num_subch.value(),
                                                                   str(self.t_edit_ensemble_label.text()),
                                                                   merged_service_string,
-                                                                  self.t_combo_language.currentIndex(),
+                                                                  self.t_combo_language.currentIndex(), self.t_combo_country.currentIndex(),
                                                                   protection_array, data_rate_n_array, stereo_flags, audio_sampling_rate_array,
                                                                   audio_paths,
                                                                   self.t_spin_listen_to_component.value(),

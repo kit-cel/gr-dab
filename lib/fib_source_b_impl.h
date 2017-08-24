@@ -43,6 +43,7 @@ namespace gr {
     class fib_source_b_impl : public fib_source_b {
     private:
       int d_transmission_mode; //transmission mode
+      int d_country_ID;
       std::vector <uint8_t> d_dabplus;
       int d_offset;
       uint16_t d_nFIBs_written; //counts totally written FIBs
@@ -70,15 +71,13 @@ namespace gr {
       int d_label_counter;
       const static int d_size_label = 176;
       static char d_ensemble_label[176]; //21*8+8, ensemble label (FIG 1/0)
-      const static int d_size_ensemble_label = 176;
       static char d_programme_service_label[176]; //21*8+8, service label (FIG 1/0)
-      const static int d_size_service_label = 176;
       std::string d_service_labels;
 
       int write_label(char *out_ptr, std::string label, int num_chars = 16);//default for 16 characters (16 byte)
 
     public:
-      fib_source_b_impl(int transmission_mode, int num_subch, std::string ensemble_label,
+      fib_source_b_impl(int transmission_mode, int coutry_ID, int num_subch, std::string ensemble_label,
                         std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
                         const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus);
 
