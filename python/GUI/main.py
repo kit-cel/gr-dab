@@ -391,7 +391,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 dev_mode_opened = False
                 if self.dev_mode_active:
                     dev_mode_opened = True
-                self.dev_mode_close()
+                    self.dev_mode_close()
                 self.snr_timer.stop()
                 self.firecode_timer.stop()
                 self.my_receiver.stop()
