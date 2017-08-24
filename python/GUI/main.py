@@ -25,8 +25,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.screen_width = resolution_width
         self.screen_height = resolution_height
         # show logo if it exists
-        if os.path.exists("DAB_logo.png"):
-            self.label_logo.setText("<img src=\"DAB_logo.png\">")
+        self.label_logo.setText("<img src=\"" + str(os.path.dirname(os.path.realpath(__file__))) + "/DAB_logo.png\">")
 
         # tab definitions
         self.modes = {"rec": 0, "trans": 1, "dev": 2}
