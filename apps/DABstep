@@ -7,6 +7,7 @@ import time
 import dab.user_frontend as user_frontend
 import dab.usrp_dab_rx as usrp_dab_rx
 import dab.usrp_dab_tx as usrp_dab_tx
+import dab.constants as constants
 import math
 import json
 import sip
@@ -25,12 +26,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.screen_width = resolution_width
         self.screen_height = resolution_height
         # show logo if it exists
-        post_path = os.path.join('share', 'gr-dab')
-        if os.environ.get('PYBOMBS_PREFIX'):                                
-            path = os.path.join(os.environ.get('PYBOMBS_PREFIX'), post_path)
-        else:                                                               
-            path = os.path.join('/usr', 'local', post_path)
-        self.path = path
+        self.path = constants.icon_path
         self.label_logo.setText("<img src=\"" + str(self.path) + "/DAB_logo.png\">")
 
         # tab definitions
@@ -618,22 +614,22 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             # write msc status
             if not self.my_receiver.get_firecode_passed():
                 self.label_firecode.setText(self.label_firecode.text() + "<font color=\"red\">X </font>")
-                self.led_msc.setText("<img src=\"led_red.png\">")
+                self.led_msc.setText("<img src=\""+ self.path+ "/led_red.png\">")
             else:
                 errors = self.my_receiver.get_corrected_errors()
                 if errors < 10:
                     self.label_firecode.setText(self.label_firecode.text() + "<font color=\"green\">" + str(errors) + " < /font>")
-                    self.led_msc.setText("<img src=\"led_green.png\">")
+                    self.led_msc.setText("<img src=\""+ self.path+ "/led_green.png\">")
                 else:
                     self.label_firecode.setText(self.label_firecode.text() + "<font color=\"orange\">" + str(errors) + "</font>")
-                    self.led_msc.setText("<img src=\"led_orange.png\">")
+                    self.led_msc.setText("<img src=\""+ self.path+ "/led_orange.png\">")
             # write fic status
             if self.my_receiver.get_crc_passed():
                 self.label_fic.setText(self.label_fic.text() + "<font color=\"green\">0 </font>")
-                self.led_fic.setText("<img src=\"led_green.png\">")
+                self.led_fic.setText("<img src=\""+ self.path+ "/led_green.png\">")
             else:
                 self.label_fic.setText(self.label_fic.text() + "<font color=\"red\">X </font>")
-                self.led_fic.setText("<img src=\"led_red.png\">")
+                self.led_fic.setText("<img src=\""+ self.path+ "/led_red.png\">")
         self.label_fic.setWordWrap(True)
         self.label_firecode.setWordWrap(True)
         self.content_count += 1
