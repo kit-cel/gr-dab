@@ -20,7 +20,18 @@
 include(GrPython)
 
 GR_PYTHON_INSTALL(
-    PROGRAMS
-    DABstep
-    DESTINATION bin
+    FILES
+    usrp_dab_rx.py
+    usrp_dab_tx.py
+    user_frontend.py
+    DESTINATION ${GR_PYTHON_DIR}/dab
+    COMPONENT "dab_python"
+)
+set(GR_PKG_DAB_DATA_DIR ${GR_PKG_DATA_DIR})
+install(FILES                                                                   
+   DAB_logo.png
+   led_red.png
+   led_orange.png
+   led_green.png                                                             
+   DESTINATION ${GR_PKG_DAB_DATA_DIR}                                          
 )
