@@ -85,7 +85,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_reception">
        <attribute name="title">
@@ -858,7 +858,7 @@
               <item>
                <widget class="QPushButton" name="btn_stop">
                 <property name="enabled">
-                 <bool>false</bool>
+                 <bool>true</bool>
                 </property>
                 <property name="text">
                  <string>  Stop</string>

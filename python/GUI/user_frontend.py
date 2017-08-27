@@ -394,7 +394,7 @@ class Ui_MainWindow(object):
         self.btn_play.setObjectName(_fromUtf8("btn_play"))
         self.horizontalLayout_5.addWidget(self.btn_play)
         self.btn_stop = QtGui.QPushButton(self.tab_reception)
-        self.btn_stop.setEnabled(False)
+        self.btn_stop.setEnabled(True)
         icon = QtGui.QIcon.fromTheme(_fromUtf8("media-playback-stop"))
         self.btn_stop.setIcon(icon)
         self.btn_stop.setObjectName(_fromUtf8("btn_stop"))
@@ -1352,7 +1352,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(MainWindow)
-        self.mode_tabs.setCurrentIndex(1)
+        self.mode_tabs.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):

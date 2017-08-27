@@ -32,7 +32,7 @@ import time, math
 
 
 class usrp_dab_rx(gr.top_block):
-    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, src_path, record_audio = False, sink_path = "None"):
+    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, src_path, sink_path = "None"):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -41,7 +41,6 @@ class usrp_dab_rx(gr.top_block):
         self.dabplus = dabplus
         self.use_usrp = use_usrp
         self.src_path = src_path
-        self.record_audio = record_audio
         self.sink_path = sink_path
         gr.log.set_level("warn")
 
@@ -96,7 +95,7 @@ class usrp_dab_rx(gr.top_block):
         self.fic_dec = dab.fic_decode(self.dab_params)
 
         ########################
-        # MSC decoder and audio sink
+        # MSC decoder
         ########################
         if self.dabplus:
             self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
@@ -108,7 +107,14 @@ class usrp_dab_rx(gr.top_block):
             self.s2f_right = blocks.short_to_float_make(1, 32767)
             self.gain_left = blocks.multiply_const_ff(1, 1)
             self.gain_right = blocks.multiply_const_ff(1, 1)
+
+        ########################
+        # audio sink
+        ########################
+        self.valve_left = dab.valve_ff_make(True)
+        self.valve_right= dab.valve_ff_make(True)
         self.audio = audio.sink_make(audio_bit_rate)
+        self.wav_sink = blocks.wavfile_sink_make("dab_audio.wav", 2, audio_bit_rate)
 
         ########################
         # Connections
@@ -126,18 +132,17 @@ class usrp_dab_rx(gr.top_block):
             self.connect((self.mp2_dec, 0), self.s2f_left, self.gain_left)
             self.connect((self.mp2_dec, 1), self.s2f_right, self.gain_right)
         self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, self.constellation_plot)
-        # connect audio to sound card
+        # connect audio to sound card and file sink
         if self.dabplus:
             self.connect((self.dabplus, 0), (self.audio, 0))
             self.connect((self.dabplus, 1), (self.audio, 1))
+            self.connect((self.dabplus, 0), self.valve_left, (self.wav_sink, 0))
+            self.connect((self.dabplus, 1), self.valve_right, (self.wav_sink, 1))
         else:
             self.connect(self.gain_left, (self.audio, 0))
             self.connect(self.gain_right, (self.audio, 1))
-        # connect file sink if recording is selected
-        if self.record_audio:
-            self.sink = blocks.wavfile_sink_make("dab_audio.wav", 2, audio_bit_rate)
-            self.connect((self.dabplus, 0), (self.sink, 0))
-            self.connect((self.dabplus, 1), (self.sink, 1))
+            self.connect(self.gain_left, self.valve_left, (self.wav_sink, 0))
+            self.connect(self.gain_right, self.valve_right, (self.wav_sink, 1))
 
         # tune USRP frequency
         if self.use_usrp:
@@ -190,6 +195,10 @@ class usrp_dab_rx(gr.top_block):
         else:
             self.gain_left.set_k(volume)
             self.gain_right.set_k(volume)
+
+    def set_valve_closed(self, closed):
+        self.valve_left.set_closed(closed)
+        self.valve_right.set_closed(closed)
 
     def set_freq(self, freq):
         if self.src.set_center_freq(freq):
