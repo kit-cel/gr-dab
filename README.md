@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Google Summer of Code 2017
 ------------
 
-This repository is the result of the 2017 Google Summer of Code project "A DAB/DAB+ transceiver app" by Moritz Luca Schmid. It is a fork of the [gr-dab] (https://github.com/andrmuel/gr-dab) repository of Andreas Mueller which already contains the implementation of the DAB physical layer including OFDM. The following expanding work on gr-dab was done during GSoC 2017 by Moritz Luca Schmid:
+This repository is the result of the 2017 Google Summer of Code project "A DAB/DAB+ transceiver app" by Moritz Luca Schmid. It is a fork of the [gr-dab](https://github.com/andrmuel/gr-dab) repository of Andreas Mueller which already contains the implementation of the DAB physical layer including OFDM. The following expanding work on gr-dab was done during GSoC 2017 by Moritz Luca Schmid:
 
 * FIC source and expand FIC sink (GNU Radio blocks)
 * FIC encoder, including CRC, energy dispersal, convolutional encoding with puncturing (GNU Radio blocks)
@@ -51,7 +51,7 @@ This repository is the result of the 2017 Google Summer of Code project "A DAB/D
 * Graphical user interface for DAB/DAB+ transmission/reception (pyQt4)
 * "DABstep" as an executable application for DAB/DAB+ transmission/reception
 
-For more detailed information about the work which was done, containing changes in code and new code, check out the [commit history] (https://github.com/kit-cel/gr-dab/commits/master) of this repository.
+For more detailed information about the done work, containing changes in code and new code, check out the [commit history](https://github.com/kit-cel/gr-dab/commits/master) of this repository. Weekly reports containing updates about the working progress, additional information, highlights and challenging pieces during GSoC can be found on my [GSoC blog](https://dabtransceiver.wordpress.com/).
 
 
 Installation
