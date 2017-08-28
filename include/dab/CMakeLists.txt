@@ -64,5 +64,6 @@ install(FILES
     reed_solomon_encode_bb.h
     mp4_encode_sb.h
     mp2_encode_sb.h
-    valve_ff.h DESTINATION include/dab
+    valve_ff.h
+    peak_detector_fb.h DESTINATION include/dab
 )

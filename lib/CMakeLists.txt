@@ -93,7 +93,8 @@ list(APPEND dab_sources
     ${LIBTOOLAME-DAB_SOURCE_DIR}/psycho_n1.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/encode_new.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/portableio.c
-    valve_ff_impl.cc )
+    valve_ff_impl.cc
+    peak_detector_fb_impl.cc )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)
