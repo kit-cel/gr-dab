@@ -21,7 +21,7 @@
 
 from gnuradio import gr, blocks
 from gnuradio import fec
-import dab
+import dab_swig as dab
 
 class fic_encode(gr.hier_block2):
     """
