@@ -16,9 +16,11 @@ Contents
 
 4: Features
 
-5: (Current) Constraints
+5: Current Constraints
 
-6: Known Bugs
+6: Ideas
+
+7: Known Bugs
 
 License
 -------
@@ -45,13 +47,15 @@ This repository is the result of the 2017 Google Summer of Code project "A DAB/D
 * FIC source and expand FIC sink (GNU Radio blocks)
 * FIC encoder, including CRC, energy dispersal, convolutional encoding with puncturing (GNU Radio blocks)
 * MSC encoder and decoder, including CRC, energy dispersal/descramble, convolutional encoding/decoding with puncturing, time interleaving/deinterleaving (GNU Radio blocks)
-* DAB transmission frame multiplexer (GNU Radio blocks)
+* DAB transmission frame multiplexer (GNU Radio block)
 * MPEG Audio Layer II encoder/decoder for DAB tranmitter/receiver (GNU Radio blocks)
 * HE-AAC v2 (mp4) encoder/decoder for DAB+ transmitter/receiver (GNU Radio blocks)
 * Graphical user interface for DAB/DAB+ transmission/reception (pyQt4)
 * "DABstep" as an executable application for DAB/DAB+ transmission/reception
 
-For more detailed information about the done work, containing changes in code and new code, check out the [commit history](https://github.com/kit-cel/gr-dab/commits/master) of this repository. Weekly reports containing updates about the working progress, additional information, highlights and challenging pieces during GSoC can be found on my [GSoC blog](https://dabtransceiver.wordpress.com/).
+For more detailed information about the work done during GSoC, containing changes in code and new code, check out the [commit history](https://github.com/kit-cel/gr-dab/commits/master) of this repository. Weekly reports containing updates about the working progress, additional information, highlights and challenging pieces during GSoC can be found on my [GSoC blog](https://dabtransceiver.wordpress.com/).
+
+Summarizing, all set [milestones](https://dabtransceiver.wordpress.com/milestones/) for GSoC were fulfilled. But of course, there are many ideas of expanding and improving gr-dab in the future (see Ideas and Constraints below).
 
 
 Installation
@@ -93,13 +97,9 @@ To build this module, run these commands:
 Usage
 -----
 
-Receiving DAB+ broadcasts
-#########################
-
-
-Transmitting DAB+
-#################
-
+* Receiving and Transmitting DAB/DAB+ broadcasts with the application "DABstep"
+* Receiving or Transmitting DAB/DAB+ with prepaired GNU Radio Companion flowgraph under examples
+* Receiving or Transmitting DAB/DAB+ by building your own GNU Radio flowgraph with provided gr-dab blocks
 
 Features
 --------
@@ -107,11 +107,21 @@ Features
 * Transmits DAB+ Audio transmissions, metadata
 * Receives DAB+
 
-(Current) Constraints
+Current Constraints
 ---------------------
 
-TODO
+* only audio channels supported so far, no data channels
+* PAD interpretation and generation not supported so far
+* only EEP with protection profile set A supported so far, no set B and no UEP
+
+Ideas
+----------
+
+* FM simulation, calculating the audio noise out of the SNR and adding it to the audio
+* parallel FM receiver that fills in the audio in case a superframe is broken 
 
 Known Bugs
 ----------
+
+* OFDM demodulator gets out of sync sometimes causing burst errors
 
