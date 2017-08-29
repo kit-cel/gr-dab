@@ -55,7 +55,7 @@ This repository is the result of the 2017 Google Summer of Code project "A DAB/D
 
 For more detailed information about the work done during GSoC, containing changes in code and new code, check out the [commit history](https://github.com/kit-cel/gr-dab/commits/master) of this repository. Weekly reports containing updates about the working progress, additional information, highlights and challenging pieces during GSoC can be found on my [GSoC blog](https://dabtransceiver.wordpress.com/).
 
-Summarizing, all set [milestones](https://dabtransceiver.wordpress.com/milestones/) for GSoC were fulfilled. But of course, there are many ideas of expanding and improving gr-dab in the future (see [Ideas](https://github.com/kit-cel/gr-dab#Ideas) and [Constraints](https://github.com/kit-cel/gr-dab#Constraints)).
+Summarizing, all set [milestones](https://dabtransceiver.wordpress.com/milestones/) for GSoC were fulfilled. But of course, there are many ideas of expanding and improving gr-dab in the future (see Ideas and Constraints below).
 
 
 Installation
