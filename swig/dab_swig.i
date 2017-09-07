@@ -52,6 +52,7 @@
 #include "dab/mp2_encode_sb.h"
 #include "dab/valve_ff.h"
 #include "dab/peak_detector_fb.h"
+#include "dab/synchronization_ff.h"
 %}
 
 
@@ -146,3 +147,6 @@ GR_SWIG_BLOCK_MAGIC2(dab, mp2_encode_sb);
 GR_SWIG_BLOCK_MAGIC2(dab, valve_ff);
 %include "dab/peak_detector_fb.h"
 GR_SWIG_BLOCK_MAGIC2(dab, peak_detector_fb);
+
+%include "dab/synchronization_ff.h"
+GR_SWIG_BLOCK_MAGIC2(dab, synchronization_ff);

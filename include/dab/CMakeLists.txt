@@ -65,5 +65,6 @@ install(FILES
     mp4_encode_sb.h
     mp2_encode_sb.h
     valve_ff.h
-    peak_detector_fb.h DESTINATION include/dab
+    peak_detector_fb.h
+    synchronization_ff.h DESTINATION include/dab
 )

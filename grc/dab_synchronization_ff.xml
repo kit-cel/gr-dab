@@ -1,0 +1,25 @@
+<block>
+  <name>Synchronization ff</name>
+  <key>dab_synchronization_ff</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.synchronization_ff($symbol_length, $cyclic_prefix_length)</make>
+  <param>
+    <name>Symbol_length</name>
+    <key>symbol_length</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Cyclic_prefix_length</name>
+    <key>cyclic_prefix_length</key>
+    <type>int</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+</block>

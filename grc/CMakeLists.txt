@@ -71,5 +71,6 @@ install(FILES
     dab_mp4_encode_sb.xml
     dab_mp2_encode_sb.xml
     dab_valve_ff.xml
-    dab_peak_detector_fb.xml DESTINATION share/gnuradio/grc/blocks
+    dab_peak_detector_fb.xml
+    dab_synchronization_ff.xml DESTINATION share/gnuradio/grc/blocks
 )
