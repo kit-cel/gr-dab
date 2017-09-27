@@ -1,17 +1,17 @@
 /* -*- c++ -*- */
-/* 
- * Copyright 2017 <+YOU OR YOUR COMPANY+>.
- * 
+/*
+ * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -52,8 +52,7 @@ namespace gr {
               d_cyclic_prefix_length(cyclic_prefix_length),
               d_num_ofdm_symbols(num_ofdm_symbols)
     {
-      //set_history(cyclic_prefix_length);
-      set_min_noutput_items(symbol_length + cyclic_prefix_length);
+      set_min_noutput_items(symbol_length + cyclic_prefix_length+1);
       d_correlation = 0;
       d_energy_prefix = 1;
       d_energy_repetition = 1;
@@ -65,7 +64,6 @@ namespace gr {
       d_wait_for_NULL = true;
       d_on_peak = false;
       d_acquisition = false;
-      d_energy_threshold = 2;
     }
 
     /*
@@ -145,14 +143,13 @@ namespace gr {
 
       for (int i = 0; i < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++i) {
         if (d_wait_for_NULL) {
-          // search for next correlation peak
+          // acquisition mode: search for next correlation peak after a NULL symbol
           delayed_correlation(&in[i], false);
           if (detect_peak()) {
-            if (d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy * d_energy_threshold)) {
+            if (d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy * 2)) {
               // set tag at beginning of new frame (first symbol after null symbol)
-              add_item_tag(0, nitems_written(0) + i, pmt::mp("start"),
-                           pmt::from_float(d_correlation_normalized_magnitude));
-              GR_LOG_DEBUG(d_logger, format("  Found start of frame (i=%d)") % i);
+              add_item_tag(0, nitems_written(0) + i, pmt::mp("Start"),
+                           pmt::from_float(std::arg(d_correlation)));
               // reset NULL detector
               d_NULL_detected = false;
               // switch to tracking mode
@@ -161,117 +158,43 @@ namespace gr {
               //peak but not after NULL symbol
             }
           } else {
-            if (((!d_NULL_detected) && (d_energy_prefix / d_energy_repetition <
-                                        0.1))) { // ||((d_energy_prefix/d_energy_repetition < 0.2)&&(d_energy_prefix < d_NULL_symbol_energy)&&(d_NULL_detected))
-              // schreibe NULL energy wenn 1.) energy threshhold unterschritten und noch kein NULL davor detected, oder wenn 2.) schon davor NULL detected aber jetzt noch weniger energy und wieder unter threshold
+            if (((!d_NULL_detected) && (d_energy_prefix / d_energy_repetition < 0.1))) {
+              // NULL symbol detection, if energy is < 0.1 * energy a symbol time later
               d_NULL_symbol_energy = d_energy_prefix;
               d_NULL_detected = true;
-              add_item_tag(0, nitems_written(0) + i, pmt::mp("NULL"), pmt::from_float(d_energy_prefix));
-              GR_LOG_DEBUG(d_logger, format("  NULL detected"));
             }
           }
         }
         else if (++d_frame_length_count >= (d_symbol_length + d_cyclic_prefix_length)) {
-          //we are where the next peak is expected
+          // &in[i] points now to the sample where the next symbol start (=peak) is expected
           d_frame_length_count = 0;
-          // correlation has to be calculated completely new, because of skipping samples
+          // correlation has to be calculated completely new, because of skipping samples before
           delayed_correlation(&in[i], true);
-          GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
+          //GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
           // check if there is really a peak
-          if (d_correlation_normalized_magnitude > 0.5) {
+          if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge and not before peak
             d_frame_count++;
-            GR_LOG_DEBUG(d_logger, format("  Peak as expected %d") % d_frame_count);
-            // did we arrive at the last symbol?
+            // check if we arrived at the last symbol
             if (d_frame_count >= d_num_ofdm_symbols) {
               d_frame_count = 1;
               GR_LOG_DEBUG(d_logger, format("    End of Frame -> switch to acquisition mode"));
-              //TODO: skip forward more
+              //TODO: skip forward more to safe computing many computing steps
               // switch to acquisition mode again to get the start of the next frame exactly
               d_wait_for_NULL = true;
-              add_item_tag(0, nitems_written(0) + i, pmt::mp("end of frame"), pmt::from_float(d_energy_prefix));
             }
           } else {
             // no peak found -> out of track; search for next NULL symbol
             d_wait_for_NULL = true;
-            GR_LOG_DEBUG(d_logger, format("Lost track"));
-            add_item_tag(0, nitems_written(0) + i, pmt::mp("lost track"),
-                         pmt::from_float(d_correlation_normalized_magnitude));
+            GR_LOG_DEBUG(d_logger, format("Lost track, switching ot acquisition mode"));
             d_frame_count = 1;
           }
         }
-
       }
 
-      d_moving_average_counter = 0;
-      for (int j = 0; j < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++j) {
-        delayed_correlation(&in[j], false);
-        out[j] = d_correlation_normalized;
-      }
+      // pass iq samples through with set tags
+      memcpy(out, in, (noutput_items - d_cyclic_prefix_length - d_symbol_length)* sizeof(gr_complex));
 
       return noutput_items - d_cyclic_prefix_length - d_symbol_length;
-
-      /*
-      memset(out, 0, (noutput_items-d_symbol_length-d_cyclic_prefix_length)* sizeof(float));
-
-      int i = 0;
-      while(i < noutput_items-d_symbol_length-d_cyclic_prefix_length){
-        if(d_wait_for_NULL){
-          // search for next correlation peak
-          delayed_correlation(&in[i], false);
-          if(detect_peak()){
-            if(d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy*d_energy_threshold)){
-              // set tag at beginning of new frame (first symbol after null symbol)
-              add_item_tag(0, nitems_written(0) + i, pmt::mp("start"), pmt::from_float(d_correlation_normalized_magnitude));
-              GR_LOG_DEBUG(d_logger, format("  Found start of frame (i=%d)")%i);
-              // reset NULL detector
-              d_NULL_detected = false;
-              // switch to tracking mode
-              d_wait_for_NULL = false;
-            }
-            else{
-            }
-          }
-          else {
-            if(((!d_NULL_detected) && (d_energy_prefix/d_energy_repetition < 0.2))||((d_energy_prefix/d_energy_repetition < 0.2)&&(d_energy_prefix < d_NULL_symbol_energy)&&(d_NULL_detected))) {
-              // schreibe NULL energy wenn 1.) energy threshhold unterschritten und noch kein NULL davor detected, oder wenn 2.) schon davor NULL detected aber jetzt noch weniger energy und wieder unter threshold
-              d_NULL_symbol_energy = d_energy_prefix;
-              d_NULL_detected = true;
-              GR_LOG_DEBUG(d_logger, format("  NULL detected"));
-            }
-          }
-          out[i] = d_correlation_normalized_magnitude;
-        }
-        else{
-          // skip samples of 1 symbol length
-          memset(&out[i], 1, (d_symbol_length+d_cyclic_prefix_length-1)* sizeof(float));
-          i += (d_symbol_length + d_cyclic_prefix_length-1);
-          // correlation has to be calculated completely new, because of skipping samples
-          delayed_correlation(&in[i], true);
-          GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)")%d_correlation_normalized_magnitude %i);
-          out[i] = d_correlation_normalized_magnitude;
-          if(d_correlation_normalized_magnitude > 0.5){
-            d_frame_count++;
-            GR_LOG_DEBUG(d_logger, format("  Peak as expected %d") %d_frame_count);
-            if(d_frame_count >= d_num_ofdm_symbols){
-              d_frame_count = 1;
-              GR_LOG_DEBUG(d_logger, format("    End of Frame -> switch to acquisition mode"));
-              //TODO: skip forward more
-              d_wait_for_NULL = true;
-              add_item_tag(0, nitems_written(0) + i, pmt::mp("end of frame"), pmt::from_float(d_energy_prefix));
-            }
-          }
-          else{
-            // no peak found -> out of track; search for next NULL symbol
-            d_wait_for_NULL = true;
-            GR_LOG_DEBUG(d_logger, format("Lost track"));
-            add_item_tag(0, nitems_written(0) + i, pmt::mp("lost track"), pmt::from_float(d_correlation_normalized_magnitude));
-            d_frame_count = 1;
-          }
-        }
-        i++;
-      }
-
-      return noutput_items;*/
     }
 
   } /* namespace dab */
