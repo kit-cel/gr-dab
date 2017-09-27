@@ -46,7 +46,7 @@ namespace gr {
        * class. dab::synchronization_ff::make is the public interface for
        * creating new instances.
        */
-      static sptr make(int symbol_length, int cyclic_prefix_length);
+      static sptr make(int symbol_length, int cyclic_prefix_length, int num_ofdm_symbols);
     };
 
   } // namespace dab

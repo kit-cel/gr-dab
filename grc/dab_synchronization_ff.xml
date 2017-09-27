@@ -3,7 +3,7 @@
   <key>dab_synchronization_ff</key>
   <category>DAB</category>
   <import>import dab</import>
-  <make>dab.synchronization_ff($symbol_length, $cyclic_prefix_length)</make>
+  <make>dab.synchronization_ff($symbol_length, $cyclic_prefix_length, $num_ofdm_symbols)</make>
   <param>
     <name>Symbol_length</name>
     <key>symbol_length</key>
@@ -12,6 +12,11 @@
   <param>
     <name>Cyclic_prefix_length</name>
     <key>cyclic_prefix_length</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Num_ofdm_symbols</name>
+    <key>num_ofdm_symbols</key>
     <type>int</type>
   </param>
   <sink>

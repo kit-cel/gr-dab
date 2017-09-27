@@ -31,14 +31,31 @@ namespace gr {
      private:
       int d_symbol_length;
       int d_cyclic_prefix_length;
-      int d_recalculate;
+      int d_moving_average_counter;
       gr_complex d_correlation;
+      gr_complex d_correlation_normalized;
+      float d_correlation_normalized_magnitude;
+      float d_correlation_normalized_phase;
       float d_energy_prefix;
       float d_energy_repetition;
+      float d_NULL_symbol_energy;
+      bool d_NULL_detected;
+
+      int d_energy_threshold;
+
+      int d_num_ofdm_symbols;
+      int d_frame_count;
+      int d_frame_length_count;
+      bool d_wait_for_NULL;
+      bool d_on_peak;
+      bool d_acquisition;
 
      public:
-      synchronization_ff_impl(int symbol_length, int cyclic_prefix_length);
+      synchronization_ff_impl(int symbol_length, int cyclic_prefix_length, int num_ofdm_symbols);
       ~synchronization_ff_impl();
+
+      void delayed_correlation(const gr_complex *sample, bool new_calculation);
+      bool detect_peak();
 
       // Where all the action really happens
       int work(int noutput_items,

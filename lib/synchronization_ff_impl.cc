@@ -22,35 +22,50 @@
 #include "config.h"
 #endif
 
+#include <stdio.h>
+#include <sstream>
+#include <string>
+#include <boost/format.hpp>
 #include <gnuradio/io_signature.h>
 #include "synchronization_ff_impl.h"
+
+using namespace boost;
 
 namespace gr {
   namespace dab {
 
     synchronization_ff::sptr
-    synchronization_ff::make(int symbol_length, int cyclic_prefix_length)
+    synchronization_ff::make(int symbol_length, int cyclic_prefix_length, int num_ofdm_symbols)
     {
       return gnuradio::get_initial_sptr
-        (new synchronization_ff_impl(symbol_length, cyclic_prefix_length));
+              (new synchronization_ff_impl(symbol_length, cyclic_prefix_length, num_ofdm_symbols));
     }
 
     /*
      * The private constructor
      */
-    synchronization_ff_impl::synchronization_ff_impl(int symbol_length, int cyclic_prefix_length)
-      : gr::sync_block("synchronization_ff",
-              gr::io_signature::make(1, 1, sizeof(gr_complex)),
-              gr::io_signature::make(1, 1, sizeof(gr_complex))),
-        d_symbol_length(symbol_length),
-        d_cyclic_prefix_length(cyclic_prefix_length)
+    synchronization_ff_impl::synchronization_ff_impl(int symbol_length, int cyclic_prefix_length, int num_ofdm_symbols)
+            : gr::sync_block("synchronization_ff",
+                             gr::io_signature::make(1, 1, sizeof(gr_complex)),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex))),
+              d_symbol_length(symbol_length),
+              d_cyclic_prefix_length(cyclic_prefix_length),
+              d_num_ofdm_symbols(num_ofdm_symbols)
     {
       //set_history(cyclic_prefix_length);
-      set_min_noutput_items(symbol_length+cyclic_prefix_length);
+      set_min_noutput_items(symbol_length + cyclic_prefix_length);
       d_correlation = 0;
       d_energy_prefix = 1;
       d_energy_repetition = 1;
-      d_recalculate = 0;
+      d_NULL_symbol_energy = 1;
+      d_NULL_detected = false;
+      d_moving_average_counter = 0;
+      d_frame_count = 1;
+      d_frame_length_count = 0;
+      d_wait_for_NULL = true;
+      d_on_peak = false;
+      d_acquisition = false;
+      d_energy_threshold = 2;
     }
 
     /*
@@ -60,63 +75,203 @@ namespace gr {
     {
     }
 
+    void
+    synchronization_ff_impl::delayed_correlation(const gr_complex *sample, bool new_calculation)
+    {
+      if (d_moving_average_counter > 100000 || d_moving_average_counter == 0 || new_calculation) {
+        if (d_moving_average_counter == 0 && (!new_calculation)) {
+          // first value is calculated completely, next values are calculated with moving average
+          d_moving_average_counter++;
+        } else {
+          // reset counter
+          d_moving_average_counter = 0;
+        }
+        // calculate delayed correlation for this sample completely
+        d_correlation = 0;
+        for (int j = 0; j < d_cyclic_prefix_length; j++) {
+          d_correlation += sample[j] * conj(sample[d_symbol_length + j]);
+        }
+        // calculate energy of cyclic prefix for this sample completely
+        d_energy_prefix = 0;
+        for (int j = 0; j < d_cyclic_prefix_length; j++) {
+          d_energy_prefix += std::real(sample[j] * conj(sample[j]));
+        }
+        // calculate energy of its repetition for this sample completely
+        d_energy_repetition = 0;
+        for (int j = 0; j < d_cyclic_prefix_length; j++) {
+          d_energy_repetition += std::real(sample[j + d_symbol_length] * conj(sample[j + d_symbol_length]));
+        }
+      } else {
+        // calculate next step for moving average
+        d_correlation +=
+                sample[d_cyclic_prefix_length - 1] * conj(sample[d_symbol_length + d_cyclic_prefix_length - 1]);
+        d_energy_prefix += std::real(sample[d_cyclic_prefix_length - 1] * conj(sample[d_cyclic_prefix_length - 1]));
+        d_energy_repetition += std::real(sample[d_symbol_length + d_cyclic_prefix_length - 1] *
+                                         conj(sample[d_symbol_length + d_cyclic_prefix_length - 1]));
+        d_correlation -= sample[0] * conj(sample[d_symbol_length]);
+        d_energy_prefix -= std::real(sample[0] * conj(sample[0]));
+        d_energy_repetition -= std::real(sample[d_symbol_length] * conj(sample[d_symbol_length]));
+        d_moving_average_counter++;
+      }
+      // normalize
+      d_correlation_normalized = d_correlation / std::sqrt(d_energy_prefix * d_energy_repetition);
+      // calculate magnitude
+      d_correlation_normalized_magnitude = d_correlation_normalized.real() * d_correlation_normalized.real() +
+                                           d_correlation_normalized.imag() * d_correlation_normalized.imag();
+    }
+
+    bool
+    synchronization_ff_impl::detect_peak()
+    {
+      if (!d_on_peak && d_correlation_normalized_magnitude > 0.85) {
+        d_on_peak = true;
+        return false;
+      } else if (d_on_peak && d_correlation_normalized_magnitude < 0.8) {
+        // peak found
+        d_on_peak = false;
+        return true;
+      } else {
+        return false;
+      }
+    }
+
     int
     synchronization_ff_impl::work(int noutput_items,
-        gr_vector_const_void_star &input_items,
-        gr_vector_void_star &output_items)
+                                  gr_vector_const_void_star &input_items,
+                                  gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
 
-
-      for (int i = 0; i < noutput_items-d_symbol_length-d_cyclic_prefix_length; i++) {
-        if(d_recalculate > 100000){
-          d_correlation = 0;
-          for (int j = 0; j < d_cyclic_prefix_length; j++) {
-            d_correlation += in[i+j] * conj(in[d_symbol_length+i+j]);
+      for (int i = 0; i < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++i) {
+        if (d_wait_for_NULL) {
+          // search for next correlation peak
+          delayed_correlation(&in[i], false);
+          if (detect_peak()) {
+            if (d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy * d_energy_threshold)) {
+              // set tag at beginning of new frame (first symbol after null symbol)
+              add_item_tag(0, nitems_written(0) + i, pmt::mp("start"),
+                           pmt::from_float(d_correlation_normalized_magnitude));
+              GR_LOG_DEBUG(d_logger, format("  Found start of frame (i=%d)") % i);
+              // reset NULL detector
+              d_NULL_detected = false;
+              // switch to tracking mode
+              d_wait_for_NULL = false;
+            } else {
+              //peak but not after NULL symbol
+            }
+          } else {
+            if (((!d_NULL_detected) && (d_energy_prefix / d_energy_repetition <
+                                        0.1))) { // ||((d_energy_prefix/d_energy_repetition < 0.2)&&(d_energy_prefix < d_NULL_symbol_energy)&&(d_NULL_detected))
+              // schreibe NULL energy wenn 1.) energy threshhold unterschritten und noch kein NULL davor detected, oder wenn 2.) schon davor NULL detected aber jetzt noch weniger energy und wieder unter threshold
+              d_NULL_symbol_energy = d_energy_prefix;
+              d_NULL_detected = true;
+              add_item_tag(0, nitems_written(0) + i, pmt::mp("NULL"), pmt::from_float(d_energy_prefix));
+              GR_LOG_DEBUG(d_logger, format("  NULL detected"));
+            }
           }
-
-          d_energy_prefix = 0;
-          for (int j = 0; j < d_cyclic_prefix_length; j++) {
-            d_energy_prefix += std::real(in[i+j] * conj(in[i+j]));
-          }
-
-          d_energy_repetition = 0;
-          for (int j = 0; j < d_cyclic_prefix_length; j++) {
-            d_energy_repetition += std::real(in[i+j+d_symbol_length] * conj(in[i+j+d_symbol_length]));
-          }
-
-          d_recalculate = 0;
         }
-        else {
-          d_correlation += in[i + d_cyclic_prefix_length - 1] * conj(in[d_symbol_length+i + d_cyclic_prefix_length - 1]);
-          d_energy_prefix += std::real(in[i + d_cyclic_prefix_length - 1] * conj(in[i + d_cyclic_prefix_length - 1]));
-          d_energy_repetition += std::real(in[d_symbol_length + i + d_cyclic_prefix_length - 1]*conj(in[d_symbol_length+i + d_cyclic_prefix_length - 1]));
-          out[i] = d_energy_repetition;
-          d_correlation -= in[i] * conj(in[d_symbol_length+i]);
-          d_energy_prefix -= std::real(in[i] * conj(in[i]));
-          d_energy_repetition -= std::real(in[d_symbol_length+i]*conj(in[d_symbol_length+i]));
+        else if (++d_frame_length_count >= (d_symbol_length + d_cyclic_prefix_length)) {
+          //we are where the next peak is expected
+          d_frame_length_count = 0;
+          // correlation has to be calculated completely new, because of skipping samples
+          delayed_correlation(&in[i], true);
+          GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
+          // check if there is really a peak
+          if (d_correlation_normalized_magnitude > 0.5) {
+            d_frame_count++;
+            GR_LOG_DEBUG(d_logger, format("  Peak as expected %d") % d_frame_count);
+            // did we arrive at the last symbol?
+            if (d_frame_count >= d_num_ofdm_symbols) {
+              d_frame_count = 1;
+              GR_LOG_DEBUG(d_logger, format("    End of Frame -> switch to acquisition mode"));
+              //TODO: skip forward more
+              // switch to acquisition mode again to get the start of the next frame exactly
+              d_wait_for_NULL = true;
+              add_item_tag(0, nitems_written(0) + i, pmt::mp("end of frame"), pmt::from_float(d_energy_prefix));
+            }
+          } else {
+            // no peak found -> out of track; search for next NULL symbol
+            d_wait_for_NULL = true;
+            GR_LOG_DEBUG(d_logger, format("Lost track"));
+            add_item_tag(0, nitems_written(0) + i, pmt::mp("lost track"),
+                         pmt::from_float(d_correlation_normalized_magnitude));
+            d_frame_count = 1;
+          }
         }
 
-        out[i] = d_correlation/std::sqrt(d_energy_prefix*d_energy_repetition);
-
-        d_recalculate ++;
       }
 
-        //d_delay_correlation = d_delay_correlation - in[i]*conj(in[i+d_symbol_length]) + in[i+d_cyclic_prefix_length]*conj(in[i+d_cyclic_prefix_length+d_symbol_length]);
-        //d_energy_prefix = d_energy_prefix - std::real(in[i]*conj(in[i])) + std::real(in[i+d_cyclic_prefix_length]*conj(in[i+d_cyclic_prefix_length]));
-        //d_energy_repetition = d_energy_repetition - in[i+d_symbol_length]*conj(in[i+d_symbol_length]) + in[i+d_cyclic_prefix_length+d_symbol_length]*conj(in[i+d_cyclic_prefix_length+d_symbol_length]);
-        //out[i] = d_energy_prefix.real();
+      d_moving_average_counter = 0;
+      for (int j = 0; j < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++j) {
+        delayed_correlation(&in[j], false);
+        out[j] = d_correlation_normalized;
+      }
 
-        /*for (int j = 0; j < d_cyclic_prefix_length; ++j) {
-          //d_delay_correlation += in[i+j] * conj(in[i+j+d_symbol_length]);
-          d_energy_prefix += std::real(in[i+j] * conj(in[i+j]));
-          //d_energy_repetition += std::real(in[i+j+d_symbol_length] * conj(in[i+j+d_symbol_length]));
+      return noutput_items - d_cyclic_prefix_length - d_symbol_length;
+
+      /*
+      memset(out, 0, (noutput_items-d_symbol_length-d_cyclic_prefix_length)* sizeof(float));
+
+      int i = 0;
+      while(i < noutput_items-d_symbol_length-d_cyclic_prefix_length){
+        if(d_wait_for_NULL){
+          // search for next correlation peak
+          delayed_correlation(&in[i], false);
+          if(detect_peak()){
+            if(d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy*d_energy_threshold)){
+              // set tag at beginning of new frame (first symbol after null symbol)
+              add_item_tag(0, nitems_written(0) + i, pmt::mp("start"), pmt::from_float(d_correlation_normalized_magnitude));
+              GR_LOG_DEBUG(d_logger, format("  Found start of frame (i=%d)")%i);
+              // reset NULL detector
+              d_NULL_detected = false;
+              // switch to tracking mode
+              d_wait_for_NULL = false;
+            }
+            else{
+            }
+          }
+          else {
+            if(((!d_NULL_detected) && (d_energy_prefix/d_energy_repetition < 0.2))||((d_energy_prefix/d_energy_repetition < 0.2)&&(d_energy_prefix < d_NULL_symbol_energy)&&(d_NULL_detected))) {
+              // schreibe NULL energy wenn 1.) energy threshhold unterschritten und noch kein NULL davor detected, oder wenn 2.) schon davor NULL detected aber jetzt noch weniger energy und wieder unter threshold
+              d_NULL_symbol_energy = d_energy_prefix;
+              d_NULL_detected = true;
+              GR_LOG_DEBUG(d_logger, format("  NULL detected"));
+            }
+          }
+          out[i] = d_correlation_normalized_magnitude;
         }
-        out[i] = d_energy_prefix;*/
+        else{
+          // skip samples of 1 symbol length
+          memset(&out[i], 1, (d_symbol_length+d_cyclic_prefix_length-1)* sizeof(float));
+          i += (d_symbol_length + d_cyclic_prefix_length-1);
+          // correlation has to be calculated completely new, because of skipping samples
+          delayed_correlation(&in[i], true);
+          GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)")%d_correlation_normalized_magnitude %i);
+          out[i] = d_correlation_normalized_magnitude;
+          if(d_correlation_normalized_magnitude > 0.5){
+            d_frame_count++;
+            GR_LOG_DEBUG(d_logger, format("  Peak as expected %d") %d_frame_count);
+            if(d_frame_count >= d_num_ofdm_symbols){
+              d_frame_count = 1;
+              GR_LOG_DEBUG(d_logger, format("    End of Frame -> switch to acquisition mode"));
+              //TODO: skip forward more
+              d_wait_for_NULL = true;
+              add_item_tag(0, nitems_written(0) + i, pmt::mp("end of frame"), pmt::from_float(d_energy_prefix));
+            }
+          }
+          else{
+            // no peak found -> out of track; search for next NULL symbol
+            d_wait_for_NULL = true;
+            GR_LOG_DEBUG(d_logger, format("Lost track"));
+            add_item_tag(0, nitems_written(0) + i, pmt::mp("lost track"), pmt::from_float(d_correlation_normalized_magnitude));
+            d_frame_count = 1;
+          }
+        }
+        i++;
+      }
 
-      // Tell runtime system how many output items we produced.
-      return noutput_items-d_symbol_length-d_cyclic_prefix_length;
+      return noutput_items;*/
     }
 
   } /* namespace dab */
