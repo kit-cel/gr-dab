@@ -28,6 +28,7 @@
 #include <boost/format.hpp>
 #include <gnuradio/io_signature.h>
 #include "synchronization_ff_impl.h"
+#include <gnuradio/expj.h>
 
 using namespace boost;
 
@@ -57,6 +58,7 @@ namespace gr {
       d_energy_prefix = 1;
       d_energy_repetition = 1;
       d_NULL_symbol_energy = 1;
+      d_frequency_offset = 0;
       d_NULL_detected = false;
       d_moving_average_counter = 0;
       d_frame_count = 1;
@@ -150,6 +152,9 @@ namespace gr {
               // set tag at beginning of new frame (first symbol after null symbol)
               add_item_tag(0, nitems_written(0) + i, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
+              // calculate new frequency offset
+              d_frequency_offset = std::arg(d_correlation)/0.001246; // in rad/s
+              GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%std::arg(d_correlation));
               // reset NULL detector
               d_NULL_detected = false;
               // switch to tracking mode
@@ -177,7 +182,6 @@ namespace gr {
             // check if we arrived at the last symbol
             if (d_frame_count >= d_num_ofdm_symbols) {
               d_frame_count = 1;
-              GR_LOG_DEBUG(d_logger, format("    End of Frame -> switch to acquisition mode"));
               //TODO: skip forward more to safe computing many computing steps
               // switch to acquisition mode again to get the start of the next frame exactly
               d_wait_for_NULL = true;
@@ -189,11 +193,19 @@ namespace gr {
             d_frame_count = 1;
           }
         }
+        // copy sample correcting the frequency offset
+        out[i] = in[i] * gr_expj(-d_frequency_offset);
       }
 
       // pass iq samples through with set tags
-      memcpy(out, in, (noutput_items - d_cyclic_prefix_length - d_symbol_length)* sizeof(gr_complex));
+      // memcpy(out, in, (noutput_items - d_cyclic_prefix_length - d_symbol_length)* sizeof(gr_complex));
 
+      // debug output to check the delayed correlation
+      /*d_moving_average_counter = 0;
+      for (int j = 0; j < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++j) {
+        delayed_correlation(&in[j], false);
+        out[j] = d_correlation_normalized;
+      }*/
       return noutput_items - d_cyclic_prefix_length - d_symbol_length;
     }
 

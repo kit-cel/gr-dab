@@ -45,6 +45,7 @@ namespace gr {
       float d_energy_prefix;
       float d_energy_repetition;
       float d_NULL_symbol_energy;
+      float d_frequency_offset;
       bool d_NULL_detected;
       int d_num_ofdm_symbols;
       int d_frame_count;
