@@ -46,7 +46,7 @@ namespace gr {
      * The private constructor
      */
     synchronization_ff_impl::synchronization_ff_impl(int symbol_length, int cyclic_prefix_length, int num_ofdm_symbols)
-            : gr::sync_block("synchronization_ff",
+            : gr::block("synchronization_ff",
                              gr::io_signature::make(1, 1, sizeof(gr_complex)),
                              //gr::io_signature::make(1, 1, sizeof(gr_complex))),
                              gr::io_signature::make(1, 1, sizeof(float))),
@@ -54,7 +54,7 @@ namespace gr {
               d_cyclic_prefix_length(cyclic_prefix_length),
               d_num_ofdm_symbols(num_ofdm_symbols)
     {
-      set_min_noutput_items(symbol_length + cyclic_prefix_length+1);
+      //set_min_noutput_items(symbol_length + cyclic_prefix_length+1);
       d_correlation = 0;
       d_energy_prefix = 1;
       d_energy_repetition = 1;
@@ -74,6 +74,12 @@ namespace gr {
      */
     synchronization_ff_impl::~synchronization_ff_impl()
     {
+    }
+
+    void
+    synchronization_ff_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
+    {
+      ninput_items_required[0] = noutput_items;
     }
 
     void
@@ -169,16 +175,17 @@ namespace gr {
     }*/
 
     int
-    synchronization_ff_impl::work(int noutput_items,
+    synchronization_ff_impl::general_work(int noutput_items,
+                                          gr_vector_int &ninput_items,
                                   gr_vector_const_void_star &input_items,
                                   gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const gr_complex *) input_items[0];
       //gr_complex *out = (gr_complex *) output_items[0];
       float *out = (float *) output_items[0];
+      d_nwritten = 0;
 
       for (int i = 0; i < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++i) {
-        out[i] = 10;
         // just for measurement reasons
         if (d_wait_for_NULL) {
           // acquisition mode: search for next correlation peak after a NULL symbol
@@ -191,7 +198,7 @@ namespace gr {
               add_item_tag(0, nitems_written(0) + i, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
               GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%d_frequency_offset);
-              out[i] = d_frequency_offset;
+              out[d_nwritten++] = d_frequency_offset;
               // reset NULL detector
               d_NULL_detected = false;
               // switch to tracking mode
@@ -216,7 +223,7 @@ namespace gr {
           // check if there is really a peak
           if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge
             d_frequency_offset = std::arg(d_correlation)/0.001246; // in rad/s
-            out[i] = d_frequency_offset; // in rad/s
+            out[d_nwritten++] = d_frequency_offset; // in rad/s
             //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset));
             GR_LOG_DEBUG(d_logger, format("in track %d")%d_frequency_offset);
             d_frame_count++;
@@ -250,7 +257,8 @@ namespace gr {
         delayed_correlation(&in[j], false);
         out[j] = d_correlation_normalized;
       }*/
-      return noutput_items - d_cyclic_prefix_length - d_symbol_length;
+      consume_each(noutput_items - d_cyclic_prefix_length - d_symbol_length);
+      return d_nwritten;
     }
 
   } /* namespace dab */

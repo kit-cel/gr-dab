@@ -33,7 +33,7 @@ namespace gr {
      * \ingroup dab
      *
      */
-    class DAB_API synchronization_ff : virtual public gr::sync_block
+    class DAB_API synchronization_ff : virtual public gr::block
     {
      public:
       typedef boost::shared_ptr<synchronization_ff> sptr;

@@ -54,6 +54,8 @@ namespace gr {
       bool d_on_triangle;
       bool d_acquisition;
 
+      int d_nwritten;
+
      public:
       synchronization_ff_impl(int symbol_length, int cyclic_prefix_length, int num_ofdm_symbols);
       ~synchronization_ff_impl();
@@ -62,8 +64,10 @@ namespace gr {
       bool detect_peak();
       bool detect_start_of_symbol();
 
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
+
       // Where all the action really happens
-      int work(int noutput_items,
+      int general_work(int noutput_items, gr_vector_int &ninput_items,
          gr_vector_const_void_star &input_items,
          gr_vector_void_star &output_items);
     };
