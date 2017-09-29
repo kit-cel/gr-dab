@@ -51,7 +51,7 @@ namespace gr {
       int d_frame_count;
       int d_frame_length_count;
       bool d_wait_for_NULL;
-      bool d_on_peak;
+      bool d_on_triangle;
       bool d_acquisition;
 
      public:
@@ -60,6 +60,7 @@ namespace gr {
 
       void delayed_correlation(const gr_complex *sample, bool new_calculation);
       bool detect_peak();
+      bool detect_start_of_symbol();
 
       // Where all the action really happens
       int work(int noutput_items,
