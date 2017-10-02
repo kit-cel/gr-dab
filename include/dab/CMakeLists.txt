@@ -66,5 +66,7 @@ install(FILES
     mp2_encode_sb.h
     valve_ff.h
     peak_detector_fb.h
-    synchronization_ff.h DESTINATION include/dab
+    synchronization_ff.h
+    ofdm_synchronization_cvf.h
+    ofdm_coarse_frequency_correction_vcvc.h DESTINATION include/dab
 )

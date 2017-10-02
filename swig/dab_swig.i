@@ -53,6 +53,8 @@
 #include "dab/valve_ff.h"
 #include "dab/peak_detector_fb.h"
 #include "dab/synchronization_ff.h"
+#include "dab/ofdm_synchronization_cvf.h"
+#include "dab/ofdm_coarse_frequency_correction_vcvc.h"
 %}
 
 
@@ -150,3 +152,7 @@ GR_SWIG_BLOCK_MAGIC2(dab, peak_detector_fb);
 
 %include "dab/synchronization_ff.h"
 GR_SWIG_BLOCK_MAGIC2(dab, synchronization_ff);
+%include "dab/ofdm_synchronization_cvf.h"
+GR_SWIG_BLOCK_MAGIC2(dab, ofdm_synchronization_cvf);
+%include "dab/ofdm_coarse_frequency_correction_vcvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, ofdm_coarse_frequency_correction_vcvc);

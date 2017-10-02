@@ -1,0 +1,32 @@
+<block>
+  <name>Ofdm coarse frequency correction vcvc</name>
+  <key>dab_ofdm_coarse_frequency_correction_vcvc</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.ofdm_coarse_frequency_correction_vcvc($fft_length, $num_carriers, $cyclic_prefix_length)</make>
+  <param>
+    <name>Fft_length</name>
+    <key>fft_length</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Num_carriers</name>
+    <key>num_carriers</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Cyclic_prefix_length</name>
+    <key>cyclic_prefix_length</key>
+    <type>int</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+    <vlen>$fft_length</vlen>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+    <vlen>$num_carriers</vlen>
+  </source>
+</block>

@@ -1,0 +1,35 @@
+<block>
+  <name>Ofdm_synchronization cvf</name>
+  <key>dab_ofdm_synchronization_cvf</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.ofdm_synchronization_cvf($symbol_length, $cyclic_prefix_length, $fft_length, $symbols_per_frame)</make>
+  <param>
+    <name>Symbol_length</name>
+    <key>symbol_length</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Cyclic_prefix_length</name>
+    <key>cyclic_prefix_length</key>
+    <type>int</type>
+  </param>
+<param>
+    <name>Fft_length</name>
+    <key>fft_length</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Symbols_per_frame</name>
+    <key>symbols_per_frame</key>
+    <type>int</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+</block>
