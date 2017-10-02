@@ -156,3 +156,4 @@ GR_SWIG_BLOCK_MAGIC2(dab, synchronization_ff);
 GR_SWIG_BLOCK_MAGIC2(dab, ofdm_synchronization_cvf);
 %include "dab/ofdm_coarse_frequency_correction_vcvc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, ofdm_coarse_frequency_correction_vcvc);
+

@@ -29,6 +29,8 @@
 #include <gnuradio/io_signature.h>
 #include "ofdm_synchronization_cvf_impl.h"
 #include <gnuradio/expj.h>
+#include <gnuradio/fxpt.h>
+#include <cmath>
 
 using namespace boost;
 
@@ -59,7 +61,7 @@ namespace gr {
       d_energy_prefix = 1;
       d_energy_repetition = 1;
       d_NULL_symbol_energy = 1;
-      d_frequency_offset = 0;
+      d_frequency_offset_per_sample = 0;
       d_NULL_detected = false;
       d_moving_average_counter = 0;
       d_symbol_count = 0;
@@ -67,6 +69,7 @@ namespace gr {
       d_wait_for_NULL = true;
       d_on_triangle = false;
       d_control_counter = 0;
+      d_phase = 0;
     }
 
     /*
@@ -192,11 +195,11 @@ namespace gr {
           if (detect_start_of_symbol()) {
             if (d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy * 2)) {
               // calculate new frequency offset
-              d_frequency_offset = std::arg(d_correlation)/0.001246; // in rad/s
+              d_frequency_offset_per_sample = std::arg(d_correlation)/d_fft_length; // in rad/sample
               // set tag at beginning of new frame (first symbol after null symbol)
               add_item_tag(0, nitems_written(0) + i+1, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
-              GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%d_frequency_offset);
+              GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%(d_frequency_offset_per_sample*2048000/(2*3.1415)));
               /* The start of the first symbol after the NULL symbol has been detected. The ideal start to copy
                * the symbol is &in[i+d_cyclic_prefix_length] to minimize ISI.
                */
@@ -237,9 +240,9 @@ namespace gr {
             //GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
             // check if there is really a peak
             if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge
-              d_frequency_offset = std::arg(d_correlation) / 0.001246; // in rad/s
-              //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset));
-              //GR_LOG_DEBUG(d_logger, format("in track %d") % d_frequency_offset);
+              d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
+              //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset_per_sample));
+              GR_LOG_DEBUG(d_logger, format("in track %d") % (d_frequency_offset_per_sample*2048000/(2*3.1415)));
             } else {
               // no peak found -> out of track; search for next NULL symbol
               d_wait_for_NULL = true;
@@ -250,22 +253,26 @@ namespace gr {
           }
         }
         else if(d_cyclic_prefix_length <= d_symbol_element_count){
+          // calculate the complex frequency correction value
+          float oi, oq;
+          // fixed point sine and cosine
+          int32_t angle = gr::fxpt::float_to_fixed (d_phase);
+          gr::fxpt::sincos(angle, &oq, &oi);
+          gr_complex fine_frequency_correction = gr_complex(oi, oq);
           // now we start copying one symbol length to the output
-          out[d_nwritten++] = in[i] * gr_expj(-d_frequency_offset);
+          out[d_nwritten++] = in[i] * fine_frequency_correction;
         }
-        // copy sample correcting the frequency offset
-        //out[i] = d_correlation_normalized_magnitude;;
+        /* fine frequency correction:
+         * The frequency offset estimation is done above with the correlation.
+         * The modulated frequency runs parralel to the whole input stream, including the cyclic prefix, and is mixed
+         * to the output symbol samples.
+         */
+        d_phase += d_frequency_offset_per_sample;
+        //place phase in [-pi, +pi[
+        #define F_PI ((float)(M_PI))
+        d_phase   = std::fmod(d_phase + F_PI, 2.0f * F_PI) - F_PI;
       }
 
-      // pass iq samples through with set tags
-      // memcpy(out, in, (noutput_items - d_cyclic_prefix_length - d_symbol_length)* sizeof(gr_complex));
-
-      // debug output to check the delayed correlation
-      /*d_moving_average_counter = 0;
-      for (int j = 0; j < noutput_items - d_cyclic_prefix_length - d_symbol_length; ++j) {
-        delayed_correlation(&in[j], false);
-        out[j] = d_correlation_normalized;
-      }*/
       consume_each(noutput_items);
       return d_nwritten;
     }

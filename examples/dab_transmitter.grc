@@ -429,7 +429,15 @@
       <value></value>
     </param>
     <param>
+      <key>country_ID</key>
+      <value>1</value>
+    </param>
+    <param>
       <key>dab_mode</key>
+      <value>1</value>
+    </param>
+    <param>
+      <key>dabplus</key>
       <value>1</value>
     </param>
     <param>
@@ -481,8 +489,8 @@
       <value>1</value>
     </param>
     <param>
-      <key>programme_service_label</key>
-      <value>"jkdlsa"</value>
+      <key>programme_service_labels</key>
+      <value>""</value>
     </param>
   </block>
   <block>

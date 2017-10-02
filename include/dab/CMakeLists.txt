@@ -68,5 +68,6 @@ install(FILES
     peak_detector_fb.h
     synchronization_ff.h
     ofdm_synchronization_cvf.h
-    ofdm_coarse_frequency_correction_vcvc.h DESTINATION include/dab
+    ofdm_coarse_frequency_correction_vcvc.h
+    DESTINATION include/dab
 )

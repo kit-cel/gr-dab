@@ -46,7 +46,7 @@ namespace gr {
       float d_energy_prefix;
       float d_energy_repetition;
       float d_NULL_symbol_energy;
-      float d_frequency_offset;
+      float d_frequency_offset_per_sample;
       bool d_NULL_detected;
       int d_symbols_per_frame;
       int d_symbol_count;
@@ -54,6 +54,7 @@ namespace gr {
       bool d_wait_for_NULL;
       bool d_on_triangle;
       int d_control_counter;
+      float d_phase;
 
       int d_nwritten;
 
