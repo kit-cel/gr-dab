@@ -28,7 +28,6 @@
 #include <boost/format.hpp>
 #include <gnuradio/io_signature.h>
 #include "ofdm_synchronization_cvf_impl.h"
-#include <gnuradio/expj.h>
 #include <gnuradio/fxpt.h>
 #include <cmath>
 
@@ -199,7 +198,7 @@ namespace gr {
               // set tag at beginning of new frame (first symbol after null symbol)
               add_item_tag(0, nitems_written(0) + i+1, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
-              GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%(d_frequency_offset_per_sample*2048000/(2*3.1415)));
+              //GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%(d_frequency_offset_per_sample*2048000/(2*3.1415)));
               /* The start of the first symbol after the NULL symbol has been detected. The ideal start to copy
                * the symbol is &in[i+d_cyclic_prefix_length] to minimize ISI.
                */
@@ -242,7 +241,7 @@ namespace gr {
             if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge
               d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
               //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset_per_sample));
-              GR_LOG_DEBUG(d_logger, format("in track %d") % (d_frequency_offset_per_sample*2048000/(2*3.1415)));
+              //GR_LOG_DEBUG(d_logger, format("in track %d") % (d_frequency_offset_per_sample*2048000/(2*3.1415)));
             } else {
               // no peak found -> out of track; search for next NULL symbol
               d_wait_for_NULL = true;

@@ -110,7 +110,7 @@ namespace gr {
          */
         if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0)-i == 0) {
           measure_energy(&in[i * d_fft_length]);
-          fprintf(stderr, "New frame, first used sub-carrier: %d\n", d_freq_offset);
+          //fprintf(stderr, "New frame, first used sub-carrier: %d\n", d_freq_offset);
           tag_count++;
         }
         // copy the first half (left of central sub-carrier) of the sub-carriers to the output

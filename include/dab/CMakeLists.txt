@@ -69,5 +69,5 @@ install(FILES
     synchronization_ff.h
     ofdm_synchronization_cvf.h
     ofdm_coarse_frequency_correction_vcvc.h
-    DESTINATION include/dab
+    phase_correction_cc.h DESTINATION include/dab
 )

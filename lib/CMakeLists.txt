@@ -98,7 +98,7 @@ list(APPEND dab_sources
     synchronization_ff_impl.cc
     ofdm_synchronization_cvf_impl.cc
     ofdm_coarse_frequency_correction_vcvc_impl.cc
-    )
+    phase_correction_cc_impl.cc )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)

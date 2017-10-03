@@ -1,0 +1,20 @@
+<block>
+  <name>Phase correction cc</name>
+  <key>dab_phase_correction_cc</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.phase_correction_cc($num_carriers)</make>
+  <param>
+    <name>Num_carriers</name>
+    <key>num_carriers</key>
+    <type>int</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+  </source>
+</block>
