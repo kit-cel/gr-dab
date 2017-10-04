@@ -31,6 +31,7 @@
 namespace gr {
   namespace dab {
 
+    // lookup tabels for the generation of the pilot symbol samples
     const uint8_t phase_correction_cc_impl::d_lookup_n[48] = {1,2,0,1,3,2,2,3,2,1,2,3,1,2,3,3,2,2,2,1,1,3,1,2,3,1,1,1,2,2,1,0,2,2,3,3,0,2,1,3,3,3,3,0,3,0,1,1};
     const uint8_t phase_correction_cc_impl::d_lookup_h[4][32] = {{0,2,0,0,0,0,1,1,2,0,0,0,2,2,1,1,0,2,0,0,0,0,1,1,2,0,0,0,2,2,1,1},
                                                                  {0,3,2,3,0,1,3,0,2,1,2,3,2,3,3,0,0,3,2,3,0,1,3,0,2,1,2,3,2,3,3,0},
@@ -52,7 +53,9 @@ namespace gr {
               gr::io_signature::make(1, 1, sizeof(gr_complex)),
               gr::io_signature::make(1, 1, sizeof(gr_complex))),
         d_num_carriers(num_carriers)
-    {}
+    {
+      set_tag_propagation_policy(TPP_DONT);
+    }
 
     /*
      * Our virtual destructor.
@@ -67,6 +70,15 @@ namespace gr {
       ninput_items_required[0] = noutput_items;
     }
 
+    /*! \brief Calculates phase difference of one specific sample.
+     *
+     * The phase difference of one sample of the phase reference symbol is calculated by generating the ideal phase
+     * of this sample and comparing it to the actual phase.
+     *
+     * @param sample incoming complex sample
+     * @param k index of the sample within the phase reference symbol
+     * @return phase difference in radians in range [-pi, +pi[
+     */
     float
     phase_correction_cc_impl::calc_phase_diff(const gr_complex sample, int k){
       // calculate ideal phase of this phase reference sample
@@ -118,14 +130,12 @@ namespace gr {
             d_phase_difference /= d_num_carriers;
             //fprintf(stderr, "phase difference: %f\n", d_phase_difference);
             d_pilot_counter++;
+            // this is the first sample of the first symbol after the phase reference symbol so the start of the FIC
+            add_item_tag(0, (nitems_written(0)+i), pmt::mp("start_of_frame"),
+                         pmt::from_long(1));
           }
           // calculate the complex frequency correction value
-          float oi, oq;
-          // fixed point sine and cosine
-          //int32_t angle = gr::fxpt::float_to_fixed (d_phase_difference);
-          //gr::fxpt::sincos(angle, &oq, &oi);
-          //gr_complex phase_correction = gr_complex(oi, oq);
-          gr_complex phase_correction = gr_expj(F_PI/4);
+          gr_complex phase_correction = gr_expj(d_phase_difference);
           // copy samples from all non phase reference symbols to output
           out[offset++] = in[i] * phase_correction;
         }

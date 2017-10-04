@@ -25,6 +25,13 @@
 
 namespace gr {
   namespace dab {
+    /*! \brief phase correction with phase reference symbol
+     * The first symbol after each tag (=beginning of new frame) is the phase reference symbol.
+     * The phase of the samples of this symbol is known. The average phase difference from the incoming samples
+     * to the ideal phase is the value used for the phase correction.
+     *
+     * \param num_carriers number of used OFDM sub-carriers and therefore number of samples per symbol
+     */
 
     class phase_correction_cc_impl : public phase_correction_cc
     {
