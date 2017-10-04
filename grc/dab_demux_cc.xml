@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<block>
+  <name>demux_cc</name>
+  <key>dab_demux_cc</key>
+  <category>dab</category>
+  <import>import dab</import>
+  <make>dab.demux_cc($symbol_length, $symbols_fic, $symbol_msc, $fillval)</make>
+  <param>
+    <name>Symbol Length</name>
+    <key>symbol_length</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Symbols FIC</name>
+    <key>symbols_fic</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Symbol MSC</name>
+    <key>symbols_msc</key>
+    <type>int</type>
+  </param>
+  <param>
+    <name>Fillvalue</name>
+    <key>fillval</key>
+    <type>complex</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+  </sink>
+  <source>
+    <name>FIC</name>
+    <type>complex</type>
+  </source>
+  <source>
+    <name>MSC</name>
+    <type>complex</type>
+  </source>
+</block>

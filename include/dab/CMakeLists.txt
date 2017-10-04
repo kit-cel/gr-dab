@@ -71,5 +71,6 @@ install(FILES
     ofdm_coarse_frequency_correction_vcvc.h
     phase_correction_cc.h
     frequency_deinterleave_cc.h
-    complex_to_interleaved_float_cf.h DESTINATION include/dab
+    complex_to_interleaved_float_cf.h
+    demux_cc.h DESTINATION include/dab
 )
