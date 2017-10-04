@@ -76,5 +76,6 @@ install(FILES
     dab_ofdm_synchronization_cvf.xml
     dab_ofdm_coarse_frequency_correction_vcvc.xml
     dab_phase_correction_cc.xml
-    dab_frequency_deinterleave_cc.xml DESTINATION share/gnuradio/grc/blocks
+    dab_frequency_deinterleave_cc.xml
+    dab_complex_to_interleaved_float_cf.xml DESTINATION share/gnuradio/grc/blocks
 )

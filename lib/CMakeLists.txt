@@ -99,7 +99,8 @@ list(APPEND dab_sources
     ofdm_synchronization_cvf_impl.cc
     ofdm_coarse_frequency_correction_vcvc_impl.cc
     phase_correction_cc_impl.cc
-    frequency_deinterleave_cc_impl.cc )
+    frequency_deinterleave_cc_impl.cc
+    complex_to_interleaved_float_cf_impl.cc )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)
