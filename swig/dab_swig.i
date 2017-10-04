@@ -56,6 +56,7 @@
 #include "dab/ofdm_synchronization_cvf.h"
 #include "dab/ofdm_coarse_frequency_correction_vcvc.h"
 #include "dab/phase_correction_cc.h"
+#include "dab/frequency_deinterleave_cc.h"
 %}
 
 
@@ -160,3 +161,5 @@ GR_SWIG_BLOCK_MAGIC2(dab, ofdm_coarse_frequency_correction_vcvc);
 
 %include "dab/phase_correction_cc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, phase_correction_cc);
+%include "dab/frequency_deinterleave_cc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, frequency_deinterleave_cc);
