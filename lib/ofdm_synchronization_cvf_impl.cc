@@ -46,7 +46,8 @@ namespace gr {
     /*
      * The private constructor
      */
-    ofdm_synchronization_cvf_impl::ofdm_synchronization_cvf_impl(int symbol_length, int cyclic_prefix_length, int fft_length, int symbols_per_frame)
+    ofdm_synchronization_cvf_impl::ofdm_synchronization_cvf_impl(int symbol_length, int cyclic_prefix_length,
+                                                                 int fft_length, int symbols_per_frame)
             : gr::block("ofdm_synchronization_cvf",
                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
             //gr::io_signature::make(1, 1, sizeof(gr_complex))),
@@ -81,7 +82,7 @@ namespace gr {
     void
     ofdm_synchronization_cvf_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
     {
-      ninput_items_required[0] = noutput_items + d_symbol_length + d_cyclic_prefix_length+1;
+      ninput_items_required[0] = noutput_items + d_symbol_length + d_cyclic_prefix_length + 1;
     }
 
     void
@@ -135,52 +136,33 @@ namespace gr {
     bool
     ofdm_synchronization_cvf_impl::detect_start_of_symbol()
     {
-      if(d_on_triangle){
-        if(d_correlation_normalized_magnitude < 0.5){
+      if (d_on_triangle) {
+        if (d_correlation_normalized_magnitude < 0.5) {
           // we left the triangle
           d_on_triangle = false;
           return false;
-        }
-        else{
+        } else {
           // we are still on the triangle but we already picked our pre-peak value
           return false;
         }
-      }
-      else{
+      } else {
         // not on a correlation triangle yet
-        if(d_correlation_normalized_magnitude > 0.85){
+        if (d_correlation_normalized_magnitude > 0.85) {
           // no we are on the triangle
           d_on_triangle = true;
           return true;
-        }
-        else{
+        } else {
           // no triangle here
           return false;
         }
       }
     }
-/*
-    bool
-    ofdm_synchronization_cvf_impl::detect_peak() // on triangle used for detect_start_of_symbol()
-    {
-      if (!d_on_triangle && d_correlation_normalized_magnitude > 0.85) {
-        // over threshold, peak is coming soon
-        d_on_triangle = true;
-        return false;
-      } else if (d_on_triangle && d_correlation_normalized_magnitude < 0.8) {
-        // peak found
-        d_on_triangle = false;
-        return true;
-      } else {
-        return false;
-      }
-    }*/
 
     int
     ofdm_synchronization_cvf_impl::general_work(int noutput_items,
-                                          gr_vector_int &ninput_items,
-                                          gr_vector_const_void_star &input_items,
-                                          gr_vector_void_star &output_items)
+                                                gr_vector_int &ninput_items,
+                                                gr_vector_const_void_star &input_items,
+                                                gr_vector_void_star &output_items)
     {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
@@ -194,11 +176,8 @@ namespace gr {
           if (detect_start_of_symbol()) {
             if (d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy * 2)) {
               // calculate new frequency offset
-              d_frequency_offset_per_sample = std::arg(d_correlation)/d_fft_length; // in rad/sample
-              // set tag at beginning of new frame (first symbol after null symbol)
-              add_item_tag(0, nitems_written(0) + i+1, pmt::mp("Start"),
-                           pmt::from_float(std::arg(d_correlation)));
-              //GR_LOG_DEBUG(d_logger, format("Start of frame, freq offset %d")%(d_frequency_offset_per_sample*2048000/(2*3.1415)));
+              d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/sample
+              //GR_LOG_DEBUG(d_logger, format("Start of frame, abs offset %d")%(nitems_read(0)+i));
               /* The start of the first symbol after the NULL symbol has been detected. The ideal start to copy
                * the symbol is &in[i+d_cyclic_prefix_length] to minimize ISI.
                */
@@ -217,49 +196,59 @@ namespace gr {
               // NULL symbol detection, if energy is < 0.1 * energy a symbol time later
               d_NULL_symbol_energy = d_energy_prefix;
               d_NULL_detected = true;
+              //GR_LOG_DEBUG(d_logger, format("NULL detected"));
             }
           }
-        }
-        else if (++d_symbol_element_count >= (d_symbol_length + d_cyclic_prefix_length)) {
-          d_symbol_count++;
-          // next symbol expecting
-          // reset symbol_element_count because we arrived at the start of the next symbol
-          d_symbol_element_count = 0;
-          // check if we arrived at the next NULL symbol
-          if (d_symbol_count >= d_symbols_per_frame) {
-            //GR_LOG_DEBUG(d_logger, format("Sucessfully finished!!!"));
-            d_symbol_count = 0;
-            //TODO: skip forward more to safe computing many computing steps
-            // switch to acquisition mode again to get the start of the next frame exactly
-            d_wait_for_NULL = true;
-          }
-          else {
-            // correlation has to be calculated completely new, because of skipping samples before
-            delayed_correlation(&in[i], true);
-            //GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
-            // check if there is really a peak
-            if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge
-              d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
-              //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset_per_sample));
-              //GR_LOG_DEBUG(d_logger, format("in track %d") % (d_frequency_offset_per_sample*2048000/(2*3.1415)));
-            } else {
-              // no peak found -> out of track; search for next NULL symbol
+        } else { // tracking mode
+          if (d_symbol_element_count >= (d_symbol_length + d_cyclic_prefix_length)) {
+            // we expect the start of a new symbol here or the a NULL symbol if we arrived at the end of the frame
+            d_symbol_count++;
+            // next symbol expecting
+            // reset symbol_element_count because we arrived at the start of the next symbol
+            d_symbol_element_count = 0;
+            // check if we arrived at the next NULL symbol
+            if (d_symbol_count >= d_symbols_per_frame) {
+              //GR_LOG_DEBUG(d_logger, format("Sucessfully finished!!!"));
+              d_symbol_count = 0;
+              //TODO: skip forward more to safe computing many computing steps
+              // switch to acquisition mode again to get the start of the next frame exactly
               d_wait_for_NULL = true;
-              GR_LOG_DEBUG(d_logger, format("Lost track, switching ot acquisition mode (%d)")%d_correlation_normalized_magnitude);
-              /*add_item_tag(0, nitems_written(0) + i, pmt::mp("Lost"),
-                           pmt::from_float(d_correlation_normalized_magnitude));*/
+            } else {
+              // we expect the start of a new symbol here
+              // correlation has to be calculated completely new, because of skipping samples before
+              delayed_correlation(&in[i], true);
+              //GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
+              // check if there is really a peak
+              if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge
+                d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
+                //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset_per_sample));
+                //GR_LOG_DEBUG(d_logger, format("in track symbol %d") % (d_symbol_count));
+              } else {
+                // no peak found -> out of track; search for next NULL symbol
+                d_wait_for_NULL = true;
+                GR_LOG_DEBUG(d_logger, format("Lost track, switching ot acquisition mode (%d)") %
+                                       d_correlation_normalized_magnitude);
+                /*add_item_tag(0, nitems_written(0) + i, pmt::mp("Lost"),
+                             pmt::from_float(d_correlation_normalized_magnitude));*/
+              }
             }
+          } else if (d_cyclic_prefix_length <= d_symbol_element_count) {
+            // calculate the complex frequency correction value
+            float oi, oq;
+            // fixed point sine and cosine
+            int32_t angle = gr::fxpt::float_to_fixed(d_phase);
+            gr::fxpt::sincos(angle, &oq, &oi);
+            gr_complex fine_frequency_correction = gr_complex(oi, oq);
+            // set tag at next item if it is the first element of the first symbol
+            if (d_symbol_count == 0 && d_symbol_element_count == d_cyclic_prefix_length) {
+              //GR_LOG_DEBUG(d_logger, format("Set Tag %d")%(nitems_read(0)+i));
+              add_item_tag(0, nitems_written(0) + d_nwritten, pmt::mp("Start"),
+                           pmt::from_float(std::arg(d_correlation)));
+            }
+            // now we start copying one symbol length to the output
+            out[d_nwritten++] = in[i] * fine_frequency_correction;
           }
-        }
-        else if(d_cyclic_prefix_length <= d_symbol_element_count){
-          // calculate the complex frequency correction value
-          float oi, oq;
-          // fixed point sine and cosine
-          int32_t angle = gr::fxpt::float_to_fixed (d_phase);
-          gr::fxpt::sincos(angle, &oq, &oi);
-          gr_complex fine_frequency_correction = gr_complex(oi, oq);
-          // now we start copying one symbol length to the output
-          out[d_nwritten++] = in[i] * fine_frequency_correction;
+          d_symbol_element_count++;
         }
         /* fine frequency correction:
          * The frequency offset estimation is done above with the correlation.
@@ -268,8 +257,8 @@ namespace gr {
          */
         d_phase += d_frequency_offset_per_sample;
         //place phase in [-pi, +pi[
-        #define F_PI ((float)(M_PI))
-        d_phase   = std::fmod(d_phase + F_PI, 2.0f * F_PI) - F_PI;
+#define F_PI ((float)(M_PI))
+        d_phase = std::fmod(d_phase + F_PI, 2.0f * F_PI) - F_PI;
       }
 
       consume_each(noutput_items);
