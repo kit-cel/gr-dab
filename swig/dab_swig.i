@@ -59,6 +59,7 @@
 #include "dab/frequency_deinterleave_cc.h"
 #include "dab/complex_to_interleaved_float_cf.h"
 #include "dab/demux_cc.h"
+#include "dab/differential_phasor_vcvc.h"
 %}
 
 
@@ -169,3 +170,5 @@ GR_SWIG_BLOCK_MAGIC2(dab, frequency_deinterleave_cc);
 GR_SWIG_BLOCK_MAGIC2(dab, complex_to_interleaved_float_cf);
 %include "dab/demux_cc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, demux_cc);
+%include "dab/differential_phasor_vcvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, differential_phasor_vcvc);

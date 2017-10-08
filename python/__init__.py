@@ -44,5 +44,7 @@ from fic_encode import fic_encode
 from msc_encode import msc_encode
 from transmitter_c import transmitter_c
 from dabplus_audio_decoder_ff import dabplus_audio_decoder_ff
+from ofdm_demod_cc import ofdm_demod_cc
+from fic_decode_vc import fic_decode_vc
 import constants
 #

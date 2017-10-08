@@ -1,0 +1,27 @@
+<block>
+  <name>Differential phasor vcvc</name>
+  <key>dab_differential_phasor_vcvc</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.differential_phasor_vcvc($length, $symbols_per_frame)</make>
+  <param>
+    <name>Length</name>
+    <key>length</key>
+    <type>raw</type>
+  </param>
+  <param>
+    <name>Symbols_per_frame</name>
+    <key>symbols_per_frame</key>
+    <type>raw</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>complex</type>
+    <vlen>$length</vlen>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+    <vlen>$length</vlen>
+  </source>
+</block>

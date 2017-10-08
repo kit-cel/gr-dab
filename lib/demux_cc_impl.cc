@@ -45,17 +45,17 @@ namespace gr {
      */
     demux_cc_impl::demux_cc_impl(unsigned int symbol_length, unsigned int symbols_fic, unsigned int symbol_msc, gr_complex fillval)
       : gr::block("demux_cc",
-              gr::io_signature::make(1, 1, sizeof(gr_complex)),
-              gr::io_signature::make(1, 1, sizeof(gr_complex))),
+              gr::io_signature::make(1, 1, sizeof(gr_complex)*symbol_length),
+              gr::io_signature::make(2, 2, sizeof(gr_complex)*symbol_length)),
         d_symbol_lenght(symbol_length),
         d_symbols_fic(symbols_fic),
         d_symbols_msc(symbol_msc),
         d_fillval(fillval)
     {
-      set_output_multiple(symbol_length);
+      set_tag_propagation_policy(TPP_DONT);
       d_symbol_count = 0;
-      d_fic_syms_written = 0;
-      d_msc_syms_written = 0;
+      d_fic_counter = 0;
+      d_msc_counter = 0;
       d_on_fic = true;
     }
 
@@ -81,67 +81,69 @@ namespace gr {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *fic_out = (gr_complex *) output_items[0];
       gr_complex *msc_out = (gr_complex *) output_items[1];
+      unsigned int nconsumed = 0;
+      unsigned int fic_syms_written = 0;
+      unsigned int msc_syms_written = 0;
 
       // get tags for the beginning of a frame
       std::vector<gr::tag_t> tags;
       unsigned int tag_count = 0;
       get_tags_in_window(tags, 0, 0, noutput_items);
-      // check if there are any tags between a symbol start (that must not be the case)
-      for (int j = 0; j < tags.size(); ++j) {
-        if((tags[j].offset-nitems_read(0))%d_symbol_lenght != 0){
-          GR_LOG_WARN(d_logger, format("Tag detected on position (%d): not a multiple of %d!") %(int)(tags[j].offset-nitems_read(0)) %(int)d_symbol_lenght);
-        }
-      }
 
-      for (int i = 0; i < noutput_items/d_symbol_lenght; ++i) {
-        if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0)-i*d_symbol_lenght == 0) {
-          // a tag on this symbol: a new frame begins here
-          tag_count++;
-          // check if last written channel is full before starting new frame; when not, fill it with fillval
-          if(d_on_fic && d_symbol_count < d_symbols_fic){
-            GR_LOG_ERROR(d_logger, format("Tag received while in FIC, fill last %d symbols with fillval") %(int)(d_symbols_fic-d_symbol_count));
-            for (unsigned int j = 0; j < (d_symbols_fic-d_symbol_count)*d_symbol_lenght; ++j) {
-              fic_out[d_fic_syms_written*d_symbol_lenght + j] = d_fillval;
+      /*fprintf(stderr, "Work call ####################################\n");
+      fprintf(stderr, "nitems_read %d\n", nitems_read(0));
+      fprintf(stderr, "noutput_items %d\n", noutput_items);
+      fprintf(stderr, "Tags: %d\n", tags.size());
+      if(tags.size()>0){
+        fprintf(stderr, "Tag offset %d\n", tags[tag_count].offset);
+      }*/
+      for (int i = 0; i < noutput_items; ++i) {
+        if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0) - nconsumed == 0) {
+          //fprintf(stderr, "Tag detected\n");
+          // this input symbol is tagged: a new frame begins here
+          if(d_fic_counter%d_symbols_fic == 0 && d_msc_counter%d_symbols_msc == 0){
+            //fprintf(stderr, "Tag is at beginning of frame\n");
+            // we are at the beginning of a frame and also finished writing the last frame
+            // we can remove this first symbol of the frame (phase reference symbol) and copy the other symbols
+            tag_count++;
+            nconsumed++;
+            d_fic_counter = 0;
+            d_msc_counter = 0;
+          }
+          else{
+            // we did not finish the last frame, maybe we lost track in sync
+            // lets fill the remaining symbols with fillval before continuing with the new input frame
+            if(d_fic_counter%d_symbols_fic != 0){
+              memset(&fic_out[fic_syms_written++*d_symbol_lenght], 0, d_symbol_lenght * sizeof(gr_complex));
+              d_fic_counter++;
             }
-            d_fic_syms_written += d_symbols_fic-d_symbol_count;
-          }
-          if(!d_on_fic && d_symbol_count < d_symbols_msc){
-            GR_LOG_ERROR(d_logger, format("Tag received while in MSC, fill last %d symbols with fillval") %(int)(d_symbols_msc-d_symbol_count));
-            for (unsigned int j = 0; j < (d_symbols_msc-d_symbol_count)*d_symbol_lenght; ++j) {
-              msc_out[d_msc_syms_written*d_symbol_lenght + j] = d_fillval;
+            else{
+              memset(&msc_out[msc_syms_written++*d_symbol_lenght], 0, d_symbol_lenght * sizeof(gr_complex));
+              d_msc_counter++;
             }
-            d_msc_syms_written += d_symbols_msc-d_symbol_count;
-          }
-          d_symbol_count = 0;
-          // now we can start with the new frame, which always starts with fic symbols
-          d_on_fic = true;
-        }
-        if(d_on_fic){
-          // copy next symbol to fic output
-          memcpy(&fic_out[d_fic_syms_written++], &in[i*d_symbol_lenght], d_symbol_lenght* sizeof(gr_complex));
-          // check if all fic symbols for this frame have been sent
-          if(++d_symbol_count >= d_symbols_fic){
-            d_on_fic = false;
-            d_symbol_count = 0;
           }
         }
-        else{
-          // copy next symbol to msc output
-          memcpy(&msc_out[d_msc_syms_written++], &in[i*d_symbol_lenght], d_symbol_lenght* sizeof(gr_complex));
-          // check if all msc symbols for this frame have been sent
-          if(++d_symbol_count >= d_symbols_msc){
-            d_on_fic = true;
-            d_symbol_count = 0;
-          }
+        else if (d_fic_counter < d_symbols_fic){
+          // copy this symbol to fic output
+          memcpy(&fic_out[fic_syms_written++*d_symbol_lenght], &in[nconsumed++*d_symbol_lenght], d_symbol_lenght * sizeof(gr_complex));
+          d_fic_counter++;
+        }
+        else if (d_msc_counter < d_symbols_msc){
+          // copy this output to msc output
+          memcpy(&msc_out[msc_syms_written++*d_symbol_lenght], &in[nconsumed++*d_symbol_lenght], d_symbol_lenght * sizeof(gr_complex));
+          d_msc_counter++;
         }
       }
       // Tell runtime system how many input items we consumed on
       // each input stream.
-      consume_each (noutput_items);
+      consume_each (nconsumed);
 
       // Tell runtime system how many output items we produced on each output stream separately.
-      produce(0, d_fic_syms_written*d_symbol_lenght);
-      produce(1, d_msc_syms_written*d_symbol_lenght);
+      produce(0, fic_syms_written);
+      produce(1, msc_syms_written);
+      //fprintf(stderr, "fic_syms_written %d\n", fic_syms_written);
+      //fprintf(stderr, "msc_syms_written %d\n", msc_syms_written);
+      //fprintf(stderr, "nconsumed %d\n", nconsumed);
       return WORK_CALLED_PRODUCE;
     }
 

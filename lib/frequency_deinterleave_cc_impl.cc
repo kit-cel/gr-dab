@@ -69,8 +69,10 @@ namespace gr {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
 
-      for (int i = 0; i < noutput_items; ++i) {
-        out[d_interleaving_sequence[i]] = in[i];
+      for (int i = 0; i < noutput_items/d_length; ++i) {
+        for (int j = 0; j < d_length; ++j) {
+          out[i*d_length + d_interleaving_sequence[j]] = in[i*d_length + j];
+        }
       }
 
       // Tell runtime system how many output items we produced.

@@ -4,7 +4,7 @@
   <key>dab_demux_cc</key>
   <category>dab</category>
   <import>import dab</import>
-  <make>dab.demux_cc($symbol_length, $symbols_fic, $symbol_msc, $fillval)</make>
+  <make>dab.demux_cc($symbol_length, $symbols_fic, $symbols_msc, $fillval)</make>
   <param>
     <name>Symbol Length</name>
     <key>symbol_length</key>
@@ -28,13 +28,16 @@
   <sink>
     <name>in</name>
     <type>complex</type>
+    <vlen>$symbol_length</vlen>
   </sink>
   <source>
     <name>FIC</name>
     <type>complex</type>
+    <vlen>$symbol_length</vlen>
   </source>
   <source>
     <name>MSC</name>
     <type>complex</type>
+    <vlen>$symbol_length</vlen>
   </source>
 </block>

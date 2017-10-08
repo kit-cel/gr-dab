@@ -72,5 +72,6 @@ install(FILES
     phase_correction_cc.h
     frequency_deinterleave_cc.h
     complex_to_interleaved_float_cf.h
-    demux_cc.h DESTINATION include/dab
+    demux_cc.h
+    differential_phasor_vcvc.h DESTINATION include/dab
 )

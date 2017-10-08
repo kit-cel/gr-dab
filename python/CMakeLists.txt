@@ -53,7 +53,9 @@ GR_PYTHON_INSTALL(
     msc_encode.py
     transmitter_c.py
     ${CMAKE_CURRENT_BINARY_DIR}/constants.py
-    dabplus_audio_decoder_ff.py DESTINATION ${GR_PYTHON_DIR}/dab
+    dabplus_audio_decoder_ff.py
+    ofdm_demod_cc.py
+    fic_decode_vc.py DESTINATION ${GR_PYTHON_DIR}/dab
 )
 
 ########################################################################

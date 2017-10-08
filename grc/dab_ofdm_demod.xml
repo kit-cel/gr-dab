@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>DAB: OFDM Demodulator</name>
+  <name>DAB: OFDM Demodulator old</name>
   <key>dab_ofdm_demod</key>
   <category>[DAB]</category>
   <import>import dab</import>

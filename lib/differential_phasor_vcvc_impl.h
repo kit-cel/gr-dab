@@ -1,5 +1,5 @@
 /* -*- c++ -*- */
-/*
+/* 
  * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * This is free software; you can redistribute it and/or modify
@@ -18,35 +18,23 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_DAB_DEMUX_CC_IMPL_H
-#define INCLUDED_DAB_DEMUX_CC_IMPL_H
+#ifndef INCLUDED_DAB_DIFFERENTIAL_PHASOR_VCVC_IMPL_H
+#define INCLUDED_DAB_DIFFERENTIAL_PHASOR_VCVC_IMPL_H
 
-#include <dab/demux_cc.h>
+#include <dab/differential_phasor_vcvc.h>
 
 namespace gr {
   namespace dab {
-    /*! \brief Separation of FIC and MSC symbols.
-     * \param symbol_length number of samples per symbol
-     * \param symbols_fic number of symbols in the fic per transmission frame
-     * \param symobls_mic number of symbols in the msc per transmission frame
-     * \param fillval complex value to fill in if sync has been lost during frame
-     */
 
-    class demux_cc_impl : public demux_cc
+    class differential_phasor_vcvc_impl : public differential_phasor_vcvc
     {
      private:
-      unsigned int d_symbol_lenght;
-      unsigned int d_symbols_fic;
-      unsigned int d_fic_counter;
-      unsigned int d_symbols_msc;
-      unsigned int d_msc_counter;
-      unsigned int d_symbol_count;
-      bool d_on_fic;
-      gr_complex d_fillval;
+      unsigned int d_length;
+      unsigned int d_symbols_per_frame;
 
      public:
-      demux_cc_impl(unsigned int symbol_length, unsigned int symbols_fic, unsigned int symbol_msc, gr_complex fillval);
-      ~demux_cc_impl();
+      differential_phasor_vcvc_impl(unsigned int length, unsigned int symbols_per_frame);
+      ~differential_phasor_vcvc_impl();
 
       // Where all the action really happens
       void forecast (int noutput_items, gr_vector_int &ninput_items_required);
@@ -60,5 +48,5 @@ namespace gr {
   } // namespace dab
 } // namespace gr
 
-#endif /* INCLUDED_DAB_DEMUX_CC_IMPL_H */
+#endif /* INCLUDED_DAB_DIFFERENTIAL_PHASOR_VCVC_IMPL_H */
 
