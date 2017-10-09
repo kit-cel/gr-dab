@@ -76,11 +76,11 @@
   </param>
   <sink>
     <name>dat</name>
-    <type>complex</type>
-    <vlen>1536</vlen> <!-- TODO adapt to mode -->
+    <type>float</type>
+    <vlen>1536*2</vlen> <!-- TODO adapt to mode -->
   </sink>
   <sink>
-    <name>sync</name>
+    <name>dat</name>
     <type>byte</type>
   </sink>
   <source>

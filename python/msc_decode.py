@@ -27,7 +27,7 @@ class msc_decode(gr.hier_block2):
     """
     @brief block to extract and decode a sub-channel out of the MSC (Main Service Channel) of a demodulated transmission frame
 
-    - get demodulated FIC OFDM symbols from transmission frame
+    - get MSC from byte stream
     - repartition MSC to CIFs (Common Interleaved Frames)
     - select a subchannel and extraxt it (dump rest of CIF)
     - do time deinterleaving
@@ -40,16 +40,13 @@ class msc_decode(gr.hier_block2):
         gr.hier_block2.__init__(self,
                                 "msc_decode",
                                 # Input signature
-                                gr.io_signature(1, 1, gr.sizeof_gr_complex * dab_params.num_carriers),
+                                gr.io_signature2(2, 2, gr.sizeof_float * dab_params.num_carriers * 2, gr.sizeof_char),
                                 # Output signature
                                 gr.io_signature(1, 1, gr.sizeof_char))
         self.dp = dab_params
         self.address = address
-        print "address: " + str(self.address)
         self.size = size
-        print "size: " + str(self.size)
         self.protect = protection
-        print "protection: " + str(self.protect)
         self.verbose = verbose
         self.debug = debug
 
@@ -80,18 +77,24 @@ class msc_decode(gr.hier_block2):
         #sanity check
         assert(6*self.n == self.puncturing_L1[self.protect] + self.puncturing_L2[self.protect])
 
-        # complex to interleaved float: now we really have softbits (each float represents a bit on its exact place)
-        self.c2f = dab.complex_to_interleaved_float_vcf_make(self.dp.num_carriers)
 
-        # rearrange softbit vectors to CUs (capacity units)
-        self.v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.num_carriers*2)
-        self.s2v = blocks.stream_to_vector_make(gr.sizeof_float, self.dp.msc_cu_size)
-        self.select_subch = dab.select_cus_vcvc_make(self.dp.msc_cu_size, self.dp.num_cus, self.address, self.size)
+        # MSC selection and block partitioning
+        # select OFDM carriers with MSC
+        self.select_msc_syms = dab.select_vectors(gr.sizeof_float, self.dp.num_carriers * 2, self.dp.num_msc_syms,
+                                                  self.dp.num_fic_syms)
+        # repartition MSC data in CIFs (left out due to heavy burden for scheduler and not really necessary)
+        #self.repartition_msc_to_CIFs = dab.repartition_vectors_make(gr.sizeof_float, self.dp.num_carriers * 2,
+        #                                                            self.dp.cif_bits, self.dp.num_msc_syms,
+        #                                                            self.dp.num_cifs)
+        #repartition MSC to CUs
+        self.repartition_msc_to_cus = dab.repartition_vectors_make(gr.sizeof_float, self.dp.num_carriers*2, self.dp.msc_cu_size, self.dp.num_msc_syms, self.dp.num_cus * self.dp.num_cifs)
+
+        # select CUs of one subchannel of each CIF and form logical frame vector
+        self.select_subch = dab.select_subch_vfvf_make(self.dp.msc_cu_size, self.dp.msc_cu_size * self.size, self.address, self.dp.num_cus)
 
         # time deinterleaving
-        self.time_v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.msc_cu_size)
+        self.time_v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.msc_cu_size * self.size)
         self.time_deinterleaver = dab.time_deinterleave_ff_make(self.dp.msc_cu_size * self.size, self.dp.scrambling_vector)
-
         # unpuncture
         self.conv_v2s = blocks.vector_to_stream(gr.sizeof_float, self.msc_punctured_codeword_length)
         self.unpuncture = dab.unpuncture_ff_make(self.assembled_msc_puncturing_sequence, 0)
@@ -134,10 +137,11 @@ class msc_decode(gr.hier_block2):
 
         # connect blocks
         self.connect((self, 0),
-                     self.c2f,
-                     self.v2s,
-                     self.s2v,
-                     self.select_subch,
+                     (self.select_msc_syms, 0),
+                     #(self.repartition_msc_to_CIFs, 0),
+                     (self.repartition_msc_to_cus, 0),
+                     (self.select_subch, 0),
+                     #(self.repartition_cus_to_logical_frame, 0),
                      self.time_v2s,
                      self.time_deinterleaver,
                      #self.conv_v2s,
@@ -150,7 +154,14 @@ class msc_decode(gr.hier_block2):
                      self.pack_bits,
                      #self.energy_s2v, #better output stream or vector??
                      (self))
-        # connect prbs for energy descramble
+        #connect trigger chain
+        self.connect((self, 1),
+                     (self.select_msc_syms, 1),
+                     #(self.repartition_msc_to_CIFs, 1),
+                     (self.repartition_msc_to_cus, 1),
+                     #(self.select_subch, 1),
+                     #(self.repartition_CUs_to_logical_frame, 1);
+                     blocks.null_sink(gr.sizeof_char))
         self.connect(self.prbs_src, (self.add_mod_2, 1))
 
 

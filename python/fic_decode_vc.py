@@ -27,7 +27,7 @@ class fic_decode_vc(gr.hier_block2):
     """
     @brief block to decode FIBs (fast information blocks) from the FIC (fast information channel) of a demodulated DAB signal
 
-    - get demodulated FIC from transmission frame
+    - get demodulated FIC OFDM symbols from transmission frame
     - do convolutional decoding
     - undo energy dispersal
     - get FIC information

@@ -4,14 +4,37 @@
   <key>dab_msc_decode</key>
   <category>[DAB]</category>
   <import>import dab</import>
-  <make>dab.msc_decode($dab_params, $address, $size, $protection, $verbose, $debug)</make>
+  <make>dab.msc_decode(dab.parameters.dab_parameters(mode=$dab_mode, sample_rate=$samp_rate, verbose=False), $address, $size, $protection, $verbose, $debug)</make>
   <param>
-    <name>DAB parameter</name>
-    <key>dab_params</key>
-    <type>raw</type>
+    <name>DAB Mode</name>
+    <key>dab_mode</key>
+    <value>1</value>
+    <type>int</type>
+    <option>
+    	<name>Mode 1</name>
+    	<key>1</key>
+    </option>
+    <option>
+    	<name>Mode 2</name>
+    	<key>2</key>
+    </option>
+    <option>
+    	<name>Mode 3</name>
+    	<key>3</key>
+    </option>
+    <option>
+    	<name>Mode 4</name>
+    	<key>4</key>
+    </option>
   </param>
   <param>
-    <name>subchannel address</name>
+    <name>Sampling Rate</name>
+    <key>samp_rate</key>
+    <value>samp_rate</value>
+    <type>int</type>
+  </param>
+  <param>  
+    <name>Subchannel address</name>
     <key>address</key>
     <type>int</type>
   </param>
@@ -68,8 +91,9 @@
     </option>
   </param>
   <sink>
-    <name>data</name>
+    <name>MSC symbols</name>
     <type>float</type>
+    <vlen>1536*2</vlen>
   </sink>
   <sink>
     <name>trigger</name>
