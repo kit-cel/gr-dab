@@ -49,13 +49,14 @@
     <type>complex</type>
   </sink>
   <source>
-    <name>data</name>
-    <type>float</type>
-    <vlen>1536*2</vlen>
+    <name>FIC</name>
+    <type>complex</type>
+    <vlen>1536</vlen>
   </source>
   <source>
-    <name>trigger</name>
-    <type>byte</type>
+    <name>MSC</name>
+    <type>complex</type>
+    <vlen>1536</vlen>
   </source>
   <doc>
     Demodulates a whole DAB signal.

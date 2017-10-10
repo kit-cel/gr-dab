@@ -39,15 +39,14 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
             gr.hier_block2.__init__(self,
                                     "dabplus_audio_decoder_ff",
                                     # Input signature
-                                    gr.io_signature2(2, 2, gr.sizeof_float * dab_params.num_carriers * 2, gr.sizeof_char),
+                                    gr.io_signature(1, 1, gr.sizeof_gr_complex * dab_params.num_carriers),
                                     # Output signature
                                     gr.io_signature2(2, 2, gr.sizeof_float, gr.sizeof_float))
         else: # output signed 16 bit integers (directly from decoder)
             gr.hier_block2.__init__(self,
                                     "dabplus_audio_decoder_ff",
                                     # Input signature
-                                    gr.io_signature2(2, 2, gr.sizeof_float * dab_params.num_carriers * 2,
-                                                     gr.sizeof_char),
+                                    gr.io_signature(1, 1, gr.sizeof_float * dab_params.num_carriers),
                                     # Output signature
                                     gr.io_signature2(2, 2, gr.sizeof_short, gr.sizeof_short))
         self.dp = dab_params
@@ -75,8 +74,19 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
         # mp4 decoder
         self.mp4 = dab.mp4_decode_bs_make(self.bit_rate_n)
 
-        self.connect((self, 0), (self.msc_decoder, 0), self.firecode, self.rs, self.mp4)
-        self.connect((self, 1), (self.msc_decoder, 1))
+        # trigger hybrid solution
+        # complex to intereaved float for convolutional decoding
+        self.demux1 = dab.demux_cc_make(self.dp.num_carriers, 3, 72)
+
+        # FIB block partitioning
+        self.v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.num_carriers * 2)
+        self.s2v = blocks.stream_to_vector_make(gr.sizeof_float, self.dp.fic_punctured_codeword_length)
+        self.rm_pilot = dab.ofdm_remove_first_symbol_vcc(self.dp.num_carriers)
+        self.trigsrc = blocks.vector_source_b([1] + 75 * [0], True)
+        self.softbit_interleaver = dab.complex_to_interleaved_float_vcf(self.dp.num_carriers)
+
+        self.connect((self, 0), (self.rm_pilot, 0), self.softbit_interleaver, (self.msc_decoder, 0), self.firecode, self.rs, self.mp4)
+        self.connect(self.trigsrc, (self.rm_pilot, 1), (self.msc_decoder, 1))
 
         if self.output_float:
             # map short samples to the range [-1,1] in floats

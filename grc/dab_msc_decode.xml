@@ -92,12 +92,8 @@
   </param>
   <sink>
     <name>MSC symbols</name>
-    <type>float</type>
-    <vlen>1536*2</vlen>
-  </sink>
-  <sink>
-    <name>trigger</name>
-    <type>byte</type>
+    <type>complex</type>
+    <vlen>1536</vlen>
   </sink>
   <source>
     <name>out</name>

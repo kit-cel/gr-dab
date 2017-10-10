@@ -80,7 +80,7 @@ class usrp_dab_rx(gr.top_block):
         ########################
         # OFDM demod
         ########################
-        self.demod = dab.ofdm_demod(self.dab_params, self.rx_params, self.verbose)
+        self.demod = dab.ofdm_demod_cc(self.dab_params)
 
         ########################
         # SNR measurement
@@ -92,7 +92,7 @@ class usrp_dab_rx(gr.top_block):
         ########################
         # FIC decoder
         ########################
-        self.fic_dec = dab.fic_decode(self.dab_params)
+        self.fic_dec = dab.fic_decode_vc(self.dab_params)
 
         ########################
         # MSC decoder
@@ -121,11 +121,9 @@ class usrp_dab_rx(gr.top_block):
         ########################
         self.connect(self.src, self.fft_plot)
         self.connect(self.src, self.waterfall_plot)
-        self.connect(self.src, self.demod, (self.fic_dec, 0))
-        self.connect((self.demod, 1), (self.fic_dec, 1))
+        self.connect(self.src, self.demod, self.fic_dec)
         if self.dabplus:
-            self.connect((self.demod, 0), (self.dabplus, 0))
-            self.connect((self.demod, 1), (self.dabplus, 1))
+            self.connect((self.demod, 1), self.dabplus)
         else:
             self.connect((self.demod, 0), (self.msc_dec, 0), self.unpack, self.mp2_dec)
             self.connect((self.demod, 1), (self.msc_dec, 1))

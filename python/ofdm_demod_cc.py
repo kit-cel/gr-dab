@@ -38,7 +38,7 @@ class ofdm_demod_cc(gr.hier_block2):
         gr.hier_block2.__init__(self,
             "ofdm_demod_cc",
             gr.io_signature(1, 1, gr.sizeof_gr_complex),  # Input signature
-            gr.io_signature2(2, 2, gr.sizeof_float*2*1536, gr.sizeof_char))  # Output signature
+            gr.io_signature(2, 2, gr.sizeof_gr_complex*1536))  # Output signature
 
         self.dp = dab_params
 
@@ -68,7 +68,8 @@ class ofdm_demod_cc(gr.hier_block2):
         self.frequency_deinterleaver = dab.frequency_interleaver_vcc_make(self.dp.frequency_deinterleaving_sequence_array)
 
         # demux into FIC and MSC
-        self.demux = dab.demux_cc_make(self.dp.num_carriers, 75, 0)
+        self.demux1 = dab.demux_cc_make(self.dp.num_carriers, 3, 72)
+        self.null1 = blocks.null_sink_make(gr.sizeof_gr_complex*1536)
         self.rm_pilot = dab.ofdm_remove_first_symbol_vcc(self.dp.num_carriers)
         self.trigger_src = blocks.vector_source_b_make([1] + 75*[0], True)
         self.softbit_interleaver = dab.complex_to_interleaved_float_vcf(self.dp.num_carriers)
@@ -82,11 +83,13 @@ class ofdm_demod_cc(gr.hier_block2):
             #self.v2s_fft,
             self.differential_phasor,
             self.frequency_deinterleaver,
-            (self.rm_pilot, 0),
-            self.softbit_interleaver,
+            #self.demux1,
+            #(self.rm_pilot, 0),
+            #self.softbit_interleaver,
             (self, 0)
         )
-        #self.connect((self.demux, 1), (self, 1))
-        self.connect(self.trigger_src, (self.rm_pilot, 1), (self, 1))
+        #self.connect((self.demux1, 1), self.null1)
+        self.connect(self.frequency_deinterleaver, (self, 1))
+        #self.connect(self.trigger_src, (self.rm_pilot, 1), (self, 1))
         #self.v2s_debug = blocks.vector_to_stream_make(gr.sizeof_gr_complex, 1536)
         #self.connect(self.frequency_deinterleaver, self.v2s_debug, blocks.file_sink_make(gr.sizeof_gr_complex, "alle_symobols.dat"))

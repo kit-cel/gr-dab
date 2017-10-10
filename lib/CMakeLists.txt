@@ -102,7 +102,8 @@ list(APPEND dab_sources
     frequency_deinterleave_cc_impl.cc
     complex_to_interleaved_float_cf_impl.cc
     demux_cc_impl.cc
-    differential_phasor_vcvc_impl.cc )
+    differential_phasor_vcvc_impl.cc
+    select_cus_vcvc_impl.cc )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)

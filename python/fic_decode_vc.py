@@ -95,8 +95,11 @@ class fic_decode_vc(gr.hier_block2):
         # self.filesink = gr.file_sink(gr.sizeof_char, "debug/fic.dat")
         self.fibsink = dab.fib_sink_vb()
 
+        self.demux1 = dab.demux_cc_make(self.dp.num_carriers, 3, 72)
+
         # self.connect((self,0), (self.select_fic_syms,0), (self.repartition_fic,0), self.unpuncture, self.conv_v2s, self.conv_decode, self.conv_s2v, self.conv_prune, self.energy_v2s, self.add_mod_2, self.energy_s2v, (self.cut_into_fibs,0), gr.vector_to_stream(1,256), gr.unpacked_to_packed_bb(1,gr.GR_MSB_FIRST), self.filesink)
         self.connect((self, 0),
+                     self.demux1,
                      self.c2f,
                      self.v2s,
                      self.s2v,
@@ -114,3 +117,22 @@ class fic_decode_vc(gr.hier_block2):
                      self.fibout,
                      self.fibsink)
         self.connect(self.prbs_src, (self.add_mod_2, 1))
+        self.connect((self.demux1, 1), blocks.null_sink_make(gr.sizeof_gr_complex*1536))
+
+    def get_ensemble_info(self):
+        return self.fibsink.get_ensemble_info()
+
+    def get_service_info(self):
+        return self.fibsink.get_service_info()
+
+    def get_service_labels(self):
+        return self.fibsink.get_service_labels()
+
+    def get_subch_info(self):
+        return self.fibsink.get_subch_info()
+
+    def get_programme_type(self):
+        return self.fibsink.get_programme_type()
+
+    def get_crc_passed(self):
+        return self.fibsink.get_crc_passed()

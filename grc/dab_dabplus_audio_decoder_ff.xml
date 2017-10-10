@@ -75,13 +75,9 @@
     </option>
   </param>
   <sink>
-    <name>dat</name>
-    <type>float</type>
-    <vlen>1536*2</vlen> <!-- TODO adapt to mode -->
-  </sink>
-  <sink>
-    <name>dat</name>
-    <type>byte</type>
+    <name>MSC</name>
+    <type>complex</type>
+    <vlen>1536</vlen> <!-- TODO adapt to mode -->
   </sink>
   <source>
     <name>audio_left</name>
