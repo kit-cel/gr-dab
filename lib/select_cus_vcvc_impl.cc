@@ -74,7 +74,7 @@ namespace gr {
       for (int i = 0; i < noutput_items; ++i) {
         if(d_address <= (nitems_read(0)+i)%d_frame_len && (nitems_read(0)+i)%d_frame_len < d_address + d_size){
           //this cu is one of the selected subchannel -> copy it to ouput buffer
-          memcpy(&out[nwritten++*d_vlen], &in[i*d_vlen], d_vlen);
+          memcpy(&out[nwritten++*d_vlen], &in[i*d_vlen], d_vlen * sizeof(float));
         }
       }
       // Tell runtime system how many input items we consumed on

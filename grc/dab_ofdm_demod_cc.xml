@@ -45,7 +45,7 @@
     <type>int</type>
   </param>
   <sink>
-    <name>in</name>
+    <name>IQ samples</name>
     <type>complex</type>
   </sink>
   <source>

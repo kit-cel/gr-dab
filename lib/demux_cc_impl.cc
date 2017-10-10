@@ -87,15 +87,17 @@ namespace gr {
 
       // get tags for the beginning of a frame
       std::vector<gr::tag_t> tags;
+      const std::string s = "Start";
+      pmt::pmt_t d_key = pmt::string_to_symbol(s);
       unsigned int tag_count = 0;
-      get_tags_in_window(tags, 0, 0, noutput_items);
+      get_tags_in_window(tags, 0, 0, noutput_items, d_key);
 
       /*fprintf(stderr, "Work call ####################################\n");
       fprintf(stderr, "nitems_read %d\n", nitems_read(0));
       fprintf(stderr, "noutput_items %d\n", noutput_items);
       fprintf(stderr, "Tags: %d\n", tags.size());
-      if(tags.size()>0){
-        fprintf(stderr, "Tag offset %d\n", tags[tag_count].offset);
+      for(int i = 0; i < tags.size(); i++){
+        fprintf(stderr, "Tag offset %d\n", tags[i].offset);
       }*/
       for (int i = 0; i < noutput_items; ++i) {
         if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0) - nconsumed == 0) {
@@ -141,9 +143,9 @@ namespace gr {
       // Tell runtime system how many output items we produced on each output stream separately.
       produce(0, fic_syms_written);
       produce(1, msc_syms_written);
-      //fprintf(stderr, "fic_syms_written %d\n", fic_syms_written);
-      //fprintf(stderr, "msc_syms_written %d\n", msc_syms_written);
-      //fprintf(stderr, "nconsumed %d\n", nconsumed);
+      /*fprintf(stderr, "fic_syms_written %d\n", fic_syms_written);
+      fprintf(stderr, "msc_syms_written %d\n", msc_syms_written);
+      fprintf(stderr, "nconsumed %d\n", nconsumed);*/
       return WORK_CALLED_PRODUCE;
     }
 

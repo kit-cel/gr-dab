@@ -33,6 +33,7 @@ class ofdm_demod_cc(gr.hier_block2):
     - phase correction with phase reference symbol
     - frequency deinterleaving
     - demux into FIC and MSC
+    - output of complex qpsk symbols, separated after FIC and MSC
     """
     def __init__(self, dab_params):
         gr.hier_block2.__init__(self,
@@ -68,11 +69,7 @@ class ofdm_demod_cc(gr.hier_block2):
         self.frequency_deinterleaver = dab.frequency_interleaver_vcc_make(self.dp.frequency_deinterleaving_sequence_array)
 
         # demux into FIC and MSC
-        self.demux1 = dab.demux_cc_make(self.dp.num_carriers, 3, 72)
-        self.null1 = blocks.null_sink_make(gr.sizeof_gr_complex*1536)
-        self.rm_pilot = dab.ofdm_remove_first_symbol_vcc(self.dp.num_carriers)
-        self.trigger_src = blocks.vector_source_b_make([1] + 75*[0], True)
-        self.softbit_interleaver = dab.complex_to_interleaved_float_vcf(self.dp.num_carriers)
+        self.demux = dab.demux_cc_make(self.dp.num_carriers, self.dp.num_fic_syms, self.dp.num_msc_syms)
 
         self.connect(
             self,
@@ -80,16 +77,9 @@ class ofdm_demod_cc(gr.hier_block2):
             self.s2v_fft,
             self.fft,
             self.coarse_freq_corr,
-            #self.v2s_fft,
             self.differential_phasor,
             self.frequency_deinterleaver,
-            #self.demux1,
-            #(self.rm_pilot, 0),
-            #self.softbit_interleaver,
+            self.demux,
             (self, 0)
         )
-        #self.connect((self.demux1, 1), self.null1)
-        self.connect(self.frequency_deinterleaver, (self, 1))
-        #self.connect(self.trigger_src, (self.rm_pilot, 1), (self, 1))
-        #self.v2s_debug = blocks.vector_to_stream_make(gr.sizeof_gr_complex, 1536)
-        #self.connect(self.frequency_deinterleaver, self.v2s_debug, blocks.file_sink_make(gr.sizeof_gr_complex, "alle_symobols.dat"))
+        self.connect((self.demux, 1), (self, 1))
