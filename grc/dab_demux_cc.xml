@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <block>
-  <name>demux_cc</name>
+  <name>DAB: Demux</name>
   <key>dab_demux_cc</key>
-  <category>dab</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.demux_cc($symbol_length, $symbols_fic, $symbols_msc, $fillval)</make>
   <param>

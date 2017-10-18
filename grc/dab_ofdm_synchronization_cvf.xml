@@ -1,7 +1,7 @@
 <block>
-  <name>Ofdm_synchronization cvf</name>
+  <name>DAB: Synchronization</name>
   <key>dab_ofdm_synchronization_cvf</key>
-  <category>DAB</category>
+  <category>[DAB]</category>
   <import>import dab</import>
   <make>dab.ofdm_synchronization_cvf($symbol_length, $cyclic_prefix_length, $fft_length, $symbols_per_frame)</make>
   <param>
