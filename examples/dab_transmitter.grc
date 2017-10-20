@@ -105,7 +105,58 @@
     </param>
     <param>
       <key>value</key>
-      <value>2000000</value>
+      <value>2048000</value>
+    </param>
+  </block>
+  <block>
+    <key>blocks_file_sink</key>
+    <param>
+      <key>append</key>
+      <value>False</value>
+    </param>
+    <param>
+      <key>alias</key>
+      <value></value>
+    </param>
+    <param>
+      <key>comment</key>
+      <value></value>
+    </param>
+    <param>
+      <key>affinity</key>
+      <value></value>
+    </param>
+    <param>
+      <key>_enabled</key>
+      <value>True</value>
+    </param>
+    <param>
+      <key>file</key>
+      <value>/home/luca/Desktop/grc_trans_test.dat</value>
+    </param>
+    <param>
+      <key>_coordinate</key>
+      <value>(1120, 318)</value>
+    </param>
+    <param>
+      <key>_rotation</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>id</key>
+      <value>blocks_file_sink_0</value>
+    </param>
+    <param>
+      <key>type</key>
+      <value>complex</value>
+    </param>
+    <param>
+      <key>unbuffered</key>
+      <value>False</value>
+    </param>
+    <param>
+      <key>vlen</key>
+      <value>1</value>
     </param>
   </block>
   <block>
@@ -332,7 +383,7 @@
     </param>
     <param>
       <key>file</key>
-      <value>/home/luca/Desktop/SWR3.wav</value>
+      <value>/home/luca/Desktop/music.wav</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -454,7 +505,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(24, 163)</value>
+      <value>(24, 149)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -517,7 +568,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(224, 205)</value>
+      <value>(256, 205)</value>
     </param>
     <param>
       <key>_rotation</key>
@@ -732,34 +783,18 @@
     </param>
   </block>
   <block>
-    <key>qtgui_freq_sink_x</key>
+    <key>qtgui_const_sink_x</key>
     <param>
       <key>autoscale</key>
       <value>False</value>
-    </param>
-    <param>
-      <key>average</key>
-      <value>1.0</value>
-    </param>
-    <param>
-      <key>bw</key>
-      <value>samp_rate</value>
     </param>
     <param>
       <key>alias</key>
       <value></value>
     </param>
     <param>
-      <key>fc</key>
-      <value>0</value>
-    </param>
-    <param>
       <key>comment</key>
       <value></value>
-    </param>
-    <param>
-      <key>ctrlpanel</key>
-      <value>False</value>
     </param>
     <param>
       <key>affinity</key>
@@ -770,12 +805,8 @@
       <value>True</value>
     </param>
     <param>
-      <key>fftsize</key>
-      <value>1024</value>
-    </param>
-    <param>
       <key>_coordinate</key>
-      <value>(1104, 110)</value>
+      <value>(1136, 120)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -791,7 +822,7 @@
     </param>
     <param>
       <key>id</key>
-      <value>qtgui_freq_sink_x_0</value>
+      <value>qtgui_const_sink_x_0</value>
     </param>
     <param>
       <key>legend</key>
@@ -810,6 +841,14 @@
       <value></value>
     </param>
     <param>
+      <key>marker1</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style1</key>
+      <value>0</value>
+    </param>
+    <param>
       <key>width1</key>
       <value>1</value>
     </param>
@@ -819,11 +858,19 @@
     </param>
     <param>
       <key>color10</key>
-      <value>"dark blue"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label10</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker10</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style10</key>
+      <value>0</value>
     </param>
     <param>
       <key>width10</key>
@@ -842,6 +889,14 @@
       <value></value>
     </param>
     <param>
+      <key>marker2</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style2</key>
+      <value>0</value>
+    </param>
+    <param>
       <key>width2</key>
       <value>1</value>
     </param>
@@ -851,11 +906,19 @@
     </param>
     <param>
       <key>color3</key>
-      <value>"green"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label3</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker3</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style3</key>
+      <value>0</value>
     </param>
     <param>
       <key>width3</key>
@@ -867,11 +930,19 @@
     </param>
     <param>
       <key>color4</key>
-      <value>"black"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label4</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker4</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style4</key>
+      <value>0</value>
     </param>
     <param>
       <key>width4</key>
@@ -883,11 +954,19 @@
     </param>
     <param>
       <key>color5</key>
-      <value>"cyan"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label5</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker5</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style5</key>
+      <value>0</value>
     </param>
     <param>
       <key>width5</key>
@@ -899,11 +978,19 @@
     </param>
     <param>
       <key>color6</key>
-      <value>"magenta"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label6</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker6</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style6</key>
+      <value>0</value>
     </param>
     <param>
       <key>width6</key>
@@ -915,11 +1002,19 @@
     </param>
     <param>
       <key>color7</key>
-      <value>"yellow"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label7</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker7</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style7</key>
+      <value>0</value>
     </param>
     <param>
       <key>width7</key>
@@ -931,11 +1026,19 @@
     </param>
     <param>
       <key>color8</key>
-      <value>"dark red"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label8</key>
       <value></value>
+    </param>
+    <param>
+      <key>marker8</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style8</key>
+      <value>0</value>
     </param>
     <param>
       <key>width8</key>
@@ -947,23 +1050,23 @@
     </param>
     <param>
       <key>color9</key>
-      <value>"dark green"</value>
+      <value>"red"</value>
     </param>
     <param>
       <key>label9</key>
       <value></value>
     </param>
     <param>
+      <key>marker9</key>
+      <value>0</value>
+    </param>
+    <param>
+      <key>style9</key>
+      <value>0</value>
+    </param>
+    <param>
       <key>width9</key>
       <value>1</value>
-    </param>
-    <param>
-      <key>maxoutbuf</key>
-      <value>0</value>
-    </param>
-    <param>
-      <key>minoutbuf</key>
-      <value>0</value>
     </param>
     <param>
       <key>name</key>
@@ -974,12 +1077,8 @@
       <value>1</value>
     </param>
     <param>
-      <key>showports</key>
-      <value>True</value>
-    </param>
-    <param>
-      <key>freqhalf</key>
-      <value>True</value>
+      <key>size</key>
+      <value>1024</value>
     </param>
     <param>
       <key>tr_chan</key>
@@ -994,6 +1093,10 @@
       <value>qtgui.TRIG_MODE_FREE</value>
     </param>
     <param>
+      <key>tr_slope</key>
+      <value>qtgui.TRIG_SLOPE_POS</value>
+    </param>
+    <param>
       <key>tr_tag</key>
       <value>""</value>
     </param>
@@ -1006,16 +1109,20 @@
       <value>0.10</value>
     </param>
     <param>
-      <key>wintype</key>
-      <value>firdes.WIN_BLACKMAN_hARRIS</value>
+      <key>xmax</key>
+      <value>2</value>
+    </param>
+    <param>
+      <key>xmin</key>
+      <value>-2</value>
     </param>
     <param>
       <key>ymax</key>
-      <value>10</value>
+      <value>2</value>
     </param>
     <param>
       <key>ymin</key>
-      <value>-140</value>
+      <value>-2</value>
     </param>
   </block>
   <block>
@@ -1729,7 +1836,7 @@
     </param>
     <param>
       <key>_enabled</key>
-      <value>True</value>
+      <value>0</value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -1948,7 +2055,13 @@
   </connection>
   <connection>
     <source_block_id>dab_ofdm_mod_0</source_block_id>
-    <sink_block_id>qtgui_freq_sink_x_0</sink_block_id>
+    <sink_block_id>blocks_file_sink_0</sink_block_id>
+    <source_key>0</source_key>
+    <sink_key>0</sink_key>
+  </connection>
+  <connection>
+    <source_block_id>dab_ofdm_mod_0</source_block_id>
+    <sink_block_id>qtgui_const_sink_x_0</sink_block_id>
     <source_key>0</source_key>
     <sink_key>0</sink_key>
   </connection>

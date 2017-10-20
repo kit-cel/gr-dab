@@ -74,5 +74,6 @@ install(FILES
     complex_to_interleaved_float_cf.h
     demux_cc.h
     differential_phasor_vcvc.h
-    select_cus_vcvc.h DESTINATION include/dab
+    select_cus_vcvc.h
+    qpsk_mapper_vbvc.h DESTINATION include/dab
 )

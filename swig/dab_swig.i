@@ -61,6 +61,7 @@
 #include "dab/demux_cc.h"
 #include "dab/differential_phasor_vcvc.h"
 #include "dab/select_cus_vcvc.h"
+#include "dab/qpsk_mapper_vbvc.h"
 %}
 
 
@@ -175,3 +176,5 @@ GR_SWIG_BLOCK_MAGIC2(dab, demux_cc);
 GR_SWIG_BLOCK_MAGIC2(dab, differential_phasor_vcvc);
 %include "dab/select_cus_vcvc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, select_cus_vcvc);
+%include "dab/qpsk_mapper_vbvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, qpsk_mapper_vbvc);

@@ -1,0 +1,22 @@
+<block>
+  <name>Qpsk mapper vbvc</name>
+  <key>dab_qpsk_mapper_vbvc</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.qpsk_mapper_vbvc($symbol_length)</make>
+  <param>
+    <name>Symbol_length</name>
+    <key>symbol_length</key>
+    <type>raw</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>byte</type>
+    <vlen>$symbol_length/4</vlen>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>complex</type>
+    <vlen>$symbol_length</vlen>
+  </source>
+</block>
