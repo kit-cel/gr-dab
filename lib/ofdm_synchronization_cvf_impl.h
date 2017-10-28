@@ -55,7 +55,8 @@ namespace gr {
       bool d_on_triangle;
       int d_control_counter;
       float d_phase;
-
+      bool d_peak_set;
+      float d_correlation_maximum;
       int d_nwritten;
 
     public:

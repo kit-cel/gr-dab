@@ -70,6 +70,8 @@ namespace gr {
       d_on_triangle = false;
       d_control_counter = 0;
       d_phase = 0;
+      d_correlation_maximum = 0;
+      d_peak_set = false;
     }
 
     /*
@@ -136,22 +138,34 @@ namespace gr {
     bool
     ofdm_synchronization_cvf_impl::detect_start_of_symbol()
     {
-      if (d_on_triangle) {
-        if (d_correlation_normalized_magnitude < 0.5) {
-          // we left the triangle
+      if(d_on_triangle){
+        if(d_correlation_normalized_magnitude > d_correlation_maximum){
+          d_correlation_maximum = d_correlation_normalized_magnitude;
+
+        }
+        if(d_correlation_normalized_magnitude < d_correlation_maximum-0.05 && !d_peak_set){
+          // we are right behind the peak
+          d_peak_set = true;
+          return true;
+        }
+        if(d_correlation_normalized_magnitude < 0.25){
+          d_peak_set = false;
           d_on_triangle = false;
-          return false;
-        } else {
-          // we are still on the triangle but we already picked our pre-peak value
+          d_correlation_maximum = 0;
+        }
+        else{
+          // we are still on the triangle but have not reached the end
           return false;
         }
-      } else {
+      }
+      else{
         // not on a correlation triangle yet
-        if (d_correlation_normalized_magnitude > 0.85) {
+        if(d_correlation_normalized_magnitude > 0.35){
           // no we are on the triangle
           d_on_triangle = true;
-          return true;
-        } else {
+          return false;
+        }
+        else{
           // no triangle here
           return false;
         }
@@ -174,7 +188,7 @@ namespace gr {
           // acquisition mode: search for next correlation peak after a NULL symbol
           delayed_correlation(&in[i], false);
           if (detect_start_of_symbol()) {
-            if (d_NULL_detected && (d_energy_prefix > d_NULL_symbol_energy * 2)) {
+            if (d_NULL_detected /*&& (d_energy_prefix > d_NULL_symbol_energy * 2)*/) {
               // calculate new frequency offset
               d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/sample
               //GR_LOG_DEBUG(d_logger, format("Start of frame, abs offset %d")%(nitems_read(0)+i));
@@ -190,9 +204,10 @@ namespace gr {
               d_wait_for_NULL = false;
             } else {
               //peak but not after NULL symbol
+              d_NULL_detected = false;
             }
           } else {
-            if (((!d_NULL_detected) && (d_energy_prefix / d_energy_repetition < 0.1))) {
+            if (((!d_NULL_detected) && (d_energy_prefix / d_energy_repetition < 0.4))) {
               // NULL symbol detection, if energy is < 0.1 * energy a symbol time later
               d_NULL_symbol_energy = d_energy_prefix;
               d_NULL_detected = true;
@@ -219,20 +234,20 @@ namespace gr {
               delayed_correlation(&in[i], true);
               //GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
               // check if there is really a peak
-              if (d_correlation_normalized_magnitude > 0.5) { //TODO: check if we are on right edge
+              if (d_correlation_normalized_magnitude > 0.3) { //TODO: check if we are on right edge
                 d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
                 //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset_per_sample));
                 //GR_LOG_DEBUG(d_logger, format("in track symbol %d") % (d_symbol_count));
               } else {
                 // no peak found -> out of track; search for next NULL symbol
                 d_wait_for_NULL = true;
-                GR_LOG_DEBUG(d_logger, format("Lost track, switching ot acquisition mode (%d)") %
+                GR_LOG_DEBUG(d_logger, format("Lost track at %d, switching ot acquisition mode (%d)") %d_symbol_count %
                                        d_correlation_normalized_magnitude);
                 /*add_item_tag(0, nitems_written(0) + i, pmt::mp("Lost"),
                              pmt::from_float(d_correlation_normalized_magnitude));*/
               }
             }
-          } else if (d_cyclic_prefix_length <= d_symbol_element_count) {
+          } else if (d_cyclic_prefix_length*0.75 <= d_symbol_element_count && d_symbol_element_count < d_cyclic_prefix_length*0.75 + d_symbol_length) {
             // calculate the complex frequency correction value
             float oi, oq;
             // fixed point sine and cosine
@@ -244,6 +259,7 @@ namespace gr {
               //GR_LOG_DEBUG(d_logger, format("Set Tag %d")%(nitems_read(0)+i));
               add_item_tag(0, nitems_written(0) + d_nwritten, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
+
             }
             // now we start copying one symbol length to the output
             out[d_nwritten++] = in[i] * fine_frequency_correction;
