@@ -3,11 +3,10 @@
   <key>dab_fib_source_b</key>
   <category>[DAB]</category>
   <import>import dab</import>
-  <make>dab.fib_source_b($dab_mode, $num_subch, $ensemble_label, $programme_service_labels, $service_comp_label, $service_comp_lang, $protection_mode, $data_rate_n)</make>
-   <param>
-    <name>DAB Mode</name>
-    <key>dab_mode</key>
-    <value>1</value>
+  <make>dab.fib_source_b($transmission_mode, $coutry_ID, $num_subch, $ensemble_label, $programme_service_labels, "", $service_comp_lang, $protection_mode, $data_rate_n, $dabplus)</make>
+  <param>
+    <name>Mode</name>
+    <key>transmission_mode</key>
     <type>int</type>
     <option>
     	<name>Mode 1</name>
@@ -28,11 +27,11 @@
   </param>
   <param>
     <name>Country ID</name>
-    <key>country_ID</key>
+    <key>coutry_ID</key>
     <type>int</type>
   </param>
   <param>
-    <name>Number sub-channels</name>
+    <name>Number of sub-channels</name>
     <key>num_subch</key>
     <type>int</type>
   </param>
@@ -42,32 +41,27 @@
     <type>string</type>
   </param>
   <param>
-    <name>Service label</name>
+    <name>Programme service labels</name>
     <key>programme_service_labels</key>
     <type>string</type>
   </param>
   <param>
-    <name>Service comp Label</name>
-    <key>service_comp_label</key>
-    <type>string</type>
-  </param>
-  <param>
-    <name>Service comp Lang</name>
+    <name>Service language</name>
     <key>service_comp_lang</key>
     <type>raw</type>
   </param>
   <param>
-    <name>Protection mode</name>
+    <name>Protection modes</name>
     <key>protection_mode</key>
     <type>raw</type>
   </param>
   <param>
-    <name>Data rate / 8kbit/s</name>
+    <name>Data rates / 8kbit/s</name>
     <key>data_rate_n</key>
     <type>raw</type>
   </param>
   <param>
-    <name>DAB+</name>
+    <name>Dabplus</name>
     <key>dabplus</key>
     <type>raw</type>
   </param>

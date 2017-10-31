@@ -31,7 +31,7 @@ install(FILES
     dab_complex_to_interleaved_float_vcf.xml
     dab_modulo_ff.xml
     dab_measure_processing_rate.xml
-    dab_fic_decode.xml
+#   dab_fic_decode.xml
     dab_ofdm_demod.xml
     dab_ofdm_mod.xml
     dab_select_vectors.xml

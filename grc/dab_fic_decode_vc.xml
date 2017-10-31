@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <block>
-  <name>DAB: FIC decoder2</name>
+  <name>DAB: FIC decoder</name>
   <key>dab_fic_decode_vc</key>
   <category>[DAB]</category>
   <import>import dab</import>
