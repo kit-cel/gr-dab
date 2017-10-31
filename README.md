@@ -133,7 +133,6 @@ Ideas
 Known Bugs
 ----------
 
-* OFDM demodulator gets out of sync sometimes causing burst errors
 
 Documentation
 --------------
