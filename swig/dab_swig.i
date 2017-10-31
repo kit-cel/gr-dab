@@ -52,6 +52,16 @@
 #include "dab/mp2_encode_sb.h"
 #include "dab/valve_ff.h"
 #include "dab/peak_detector_fb.h"
+#include "dab/synchronization_ff.h"
+#include "dab/ofdm_synchronization_cvf.h"
+#include "dab/ofdm_coarse_frequency_correction_vcvc.h"
+#include "dab/phase_correction_cc.h"
+#include "dab/frequency_deinterleave_cc.h"
+#include "dab/complex_to_interleaved_float_cf.h"
+#include "dab/demux_cc.h"
+#include "dab/differential_phasor_vcvc.h"
+#include "dab/select_cus_vcvc.h"
+#include "dab/qpsk_mapper_vbvc.h"
 %}
 
 
@@ -146,3 +156,25 @@ GR_SWIG_BLOCK_MAGIC2(dab, mp2_encode_sb);
 GR_SWIG_BLOCK_MAGIC2(dab, valve_ff);
 %include "dab/peak_detector_fb.h"
 GR_SWIG_BLOCK_MAGIC2(dab, peak_detector_fb);
+
+%include "dab/synchronization_ff.h"
+GR_SWIG_BLOCK_MAGIC2(dab, synchronization_ff);
+%include "dab/ofdm_synchronization_cvf.h"
+GR_SWIG_BLOCK_MAGIC2(dab, ofdm_synchronization_cvf);
+%include "dab/ofdm_coarse_frequency_correction_vcvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, ofdm_coarse_frequency_correction_vcvc);
+
+%include "dab/phase_correction_cc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, phase_correction_cc);
+%include "dab/frequency_deinterleave_cc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, frequency_deinterleave_cc);
+%include "dab/complex_to_interleaved_float_cf.h"
+GR_SWIG_BLOCK_MAGIC2(dab, complex_to_interleaved_float_cf);
+%include "dab/demux_cc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, demux_cc);
+%include "dab/differential_phasor_vcvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, differential_phasor_vcvc);
+%include "dab/select_cus_vcvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, select_cus_vcvc);
+%include "dab/qpsk_mapper_vbvc.h"
+GR_SWIG_BLOCK_MAGIC2(dab, qpsk_mapper_vbvc);

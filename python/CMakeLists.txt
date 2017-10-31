@@ -25,7 +25,6 @@ if(NOT PYTHONINTERP_FOUND)
     return()
   endif()
 
-
 ########################################################################
 # Insert ICON PATH macro Insert ICON PATH macro into constants.py
 ########################################################################
@@ -54,7 +53,9 @@ GR_PYTHON_INSTALL(
     msc_encode.py
     transmitter_c.py
     ${CMAKE_CURRENT_BINARY_DIR}/constants.py
-    dabplus_audio_decoder_ff.py DESTINATION ${GR_PYTHON_DIR}/dab
+    dabplus_audio_decoder_ff.py
+    ofdm_demod_cc.py
+    fic_decode_vc.py DESTINATION ${GR_PYTHON_DIR}/dab
 )
 
 ########################################################################
@@ -87,3 +88,5 @@ GR_ADD_TEST(qa_mp4_encode_sb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa
 GR_ADD_TEST(qa_mp2_encode_sb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_mp2_encode_sb.py)
 GR_ADD_TEST(qa_valve_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_valve_ff.py)
 GR_ADD_TEST(qa_peak_detector_fb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_peak_detector_fb.py)
+GR_ADD_TEST(qa_synchronization_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_synchronization_ff.py)
+GR_ADD_TEST(qa_ofdm_synchronization_cvf ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_ofdm_synchronization_cvf.py)

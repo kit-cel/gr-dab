@@ -94,7 +94,17 @@ list(APPEND dab_sources
     ${LIBTOOLAME-DAB_SOURCE_DIR}/encode_new.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/portableio.c
     valve_ff_impl.cc
-    peak_detector_fb_impl.cc )
+    peak_detector_fb_impl.cc
+    synchronization_ff_impl.cc
+    ofdm_synchronization_cvf_impl.cc
+    ofdm_coarse_frequency_correction_vcvc_impl.cc
+    phase_correction_cc_impl.cc
+    frequency_deinterleave_cc_impl.cc
+    complex_to_interleaved_float_cf_impl.cc
+    demux_cc_impl.cc
+    differential_phasor_vcvc_impl.cc
+    select_cus_vcvc_impl.cc
+    qpsk_mapper_vbvc_impl.cc )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)

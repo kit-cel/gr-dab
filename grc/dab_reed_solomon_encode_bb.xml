@@ -1,5 +1,5 @@
 <block>
-  <name>DAB: Reed Solomon Encoder</name>
+  <name>DAB: RS Encoder</name>
   <key>reed_solomon_encode_bb</key>
   <category>[DAB]</category>
   <import>import dab</import>

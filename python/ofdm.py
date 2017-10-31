@@ -61,10 +61,11 @@ class ofdm_mod(gr.hier_block2):
 
 
 		# symbol mapping
-		self.mapper_v2s = blocks.vector_to_stream_make(gr.sizeof_char, 384)
-		self.mapper_unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
-		self.mapper = dab.mapper_bc_make(dp.num_carriers)
-		self.mapper_s2v = blocks.stream_to_vector_make(gr.sizeof_gr_complex, 1536)
+		#self.mapper_v2s = blocks.vector_to_stream_make(gr.sizeof_char, 384)
+		#self.mapper_unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
+		#self.mapper = dab.mapper_bc_make(dp.num_carriers)
+		#self.mapper_s2v = blocks.stream_to_vector_make(gr.sizeof_gr_complex, 1536)
+		self.mapper = dab.qpsk_mapper_vbvc(dp.num_carriers)
 
 		# add pilot symbol
 		self.insert_pilot = dab.ofdm_insert_pilot_vcc(dp.prn)
@@ -84,6 +85,9 @@ class ofdm_mod(gr.hier_block2):
 		# cyclic prefixer
 		self.prefixer = digital.ofdm_cyclic_prefixer(dp.fft_length, dp.symbol_length)
 
+		# normalize to energy = 1 after IFFT
+		self.multiply_const = blocks.multiply_const_cc(1/2048.0)
+
 		# convert back to vectors
 		self.s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, dp.symbol_length)
 
@@ -95,15 +99,16 @@ class ofdm_mod(gr.hier_block2):
 		#
 
 		# data
-		self.connect((self,0), self.mapper_v2s, self.mapper_unpack, self.mapper, self.mapper_s2v, (self.insert_pilot,0), (self.sum_phase,0), self.interleave, self.move_and_insert_carrier, self.ifft, self.prefixer, self.s2v, (self.insert_null,0))
+		#self.connect((self,0), self.mapper_v2s, self.mapper_unpack, self.mapper, self.mapper_s2v, (self.insert_pilot,0), (self.sum_phase,0), self.interleave, self.move_and_insert_carrier, self.ifft, self.prefixer, self.s2v, (self.insert_null,0))
+		self.connect((self,0), self.mapper, (self.insert_pilot,0), (self.sum_phase,0), self.interleave, self.move_and_insert_carrier, self.ifft, self.prefixer, self.multiply_const, self.s2v, (self.insert_null,0))
 		self.connect(self.insert_null, self)
 
 		# control signal (frame start)
 		self.connect((self,1), (self.insert_pilot,1), (self.sum_phase,1), (self.insert_null,1))
 
-		if debug:
-			#self.connect(self.mapper, blocks.file_sink(gr.sizeof_gr_complex*dp.num_carriers, "debug/generated_signal_mapper.dat"))
-			self.connect(self.insert_pilot, blocks.file_sink(gr.sizeof_gr_complex*dp.num_carriers, "debug/generated_signal_insert_pilot.dat"))
+		if False:
+			self.connect(self.mapper, blocks.file_sink(gr.sizeof_gr_complex*dp.num_carriers, "debug/generated_signal_mapper.dat"))
+			self.connect(self.insert_pilot, blocks.file_sink(gr.sizeof_gr_complex*dp.num_carriers, "debug/generated_signal_pilot_inserted.dat"))
 			self.connect(self.sum_phase, blocks.file_sink(gr.sizeof_gr_complex*dp.num_carriers, "debug/generated_signal_sum_phase.dat"))
 			self.connect(self.interleave, blocks.file_sink(gr.sizeof_gr_complex*dp.num_carriers, "debug/generated_signal_interleave.dat"))
 			self.connect(self.move_and_insert_carrier, blocks.file_sink(gr.sizeof_gr_complex*dp.fft_length, "debug/generated_signal_move_and_insert_carrier.dat"))

@@ -35,9 +35,8 @@ class usrp_dab_tx(gr.top_block):
 
         self.dab_mode = dab_mode
         self.frequency = frequency
-        interp = 64
-        self.sample_rate = 128e6 / interp
-        self.dp = dab.parameters.dab_parameters(self.dab_mode, 2000000, False)
+        self.sample_rate = 2048000
+        self.dp = dab.parameters.dab_parameters(self.dab_mode, 2048000, False)
         self.num_subch = num_subch
         self.ensemble_label = ensemble_label
         self.service_label = service_label

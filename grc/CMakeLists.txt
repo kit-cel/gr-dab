@@ -31,7 +31,7 @@ install(FILES
     dab_complex_to_interleaved_float_vcf.xml
     dab_modulo_ff.xml
     dab_measure_processing_rate.xml
-    dab_fic_decode.xml
+#   dab_fic_decode.xml
     dab_ofdm_demod.xml
     dab_ofdm_mod.xml
     dab_select_vectors.xml
@@ -71,5 +71,17 @@ install(FILES
     dab_mp4_encode_sb.xml
     dab_mp2_encode_sb.xml
     dab_valve_ff.xml
-    dab_peak_detector_fb.xml DESTINATION share/gnuradio/grc/blocks
+    dab_peak_detector_fb.xml
+    dab_synchronization_ff.xml
+    dab_ofdm_synchronization_cvf.xml
+    dab_ofdm_coarse_frequency_correction_vcvc.xml
+    dab_phase_correction_cc.xml
+    dab_frequency_deinterleave_cc.xml
+    dab_complex_to_interleaved_float_cf.xml
+    dab_demux_cc.xml
+    dab_ofdm_demod_cc.xml
+    dab_differential_phasor_vcvc.xml
+    dab_fic_decode_vc.xml
+    dab_select_cus_vcvc.xml
+    dab_qpsk_mapper_vbvc.xml DESTINATION share/gnuradio/grc/blocks
 )

@@ -65,5 +65,15 @@ install(FILES
     mp4_encode_sb.h
     mp2_encode_sb.h
     valve_ff.h
-    peak_detector_fb.h DESTINATION include/dab
+    peak_detector_fb.h
+    synchronization_ff.h
+    ofdm_synchronization_cvf.h
+    ofdm_coarse_frequency_correction_vcvc.h
+    phase_correction_cc.h
+    frequency_deinterleave_cc.h
+    complex_to_interleaved_float_cf.h
+    demux_cc.h
+    differential_phasor_vcvc.h
+    select_cus_vcvc.h
+    qpsk_mapper_vbvc.h DESTINATION include/dab
 )

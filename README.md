@@ -22,6 +22,8 @@ Contents
 
 7: Known Bugs
 
+8: Documentation
+
 License
 -------
 Copyright (C) Andreas Müller, 2011, Moritz Luca Schmid, 2017
@@ -55,8 +57,11 @@ This repository is the result of the 2017 Google Summer of Code project "A DAB/D
 
 For more detailed information about the work done during GSoC, containing changes in code and new code, check out the [commit history](https://github.com/kit-cel/gr-dab/commits/master) of this repository. Weekly reports containing updates about the working progress, additional information, highlights and challenging pieces during GSoC can be found on my [GSoC blog](https://dabtransceiver.wordpress.com/).
 
-Summarizing, all set [milestones](https://dabtransceiver.wordpress.com/milestones/) for GSoC were fulfilled. But of course, there are many ideas of expanding and improving gr-dab in the future (see Ideas and Constraints below).
-
+Summarizing, all set
+[milestones](https://dabtransceiver.wordpress.com/milestones/) for GSoC were
+fulfilled. All my code got merged into the master branch of this repository.
+This fork will serve as upstream repository for further development of the OFDM
+receiver (especially with respect to synchronization), and other improvements.
 
 Installation
 ------------
@@ -94,18 +99,22 @@ To build this module, run these commands:
  
 
 
-Usage
------
-
-* Receiving and Transmitting DAB/DAB+ broadcasts with the application "DABstep"
-* Receiving or Transmitting DAB/DAB+ with prepaired GNU Radio Companion flowgraph under examples
-* Receiving or Transmitting DAB/DAB+ by building your own GNU Radio flowgraph with provided gr-dab blocks
-
 Features
 --------
 
-* Transmits DAB+ Audio transmissions, metadata
-* Receives DAB+
+* Receiving and Transmitting DAB/DAB+ broadcasts with the graphical application "DABstep"
+* Receiving or Transmitting DAB/DAB+ with prepaired GNU Radio Companion flowgraph in examples/
+* Receiving or Transmitting DAB/DAB+ by building your own GNU Radio flowgraph with provided gr-dab blocks
+
+Usage
+-------
+
+* GUI
+  * execute "DABstep" over command line
+  * run python/GUI/main.py
+
+* Flowgraphs
+  * run the flowgraphs in examples/ with GNU Radio Companion
 
 Current Constraints
 ---------------------
@@ -113,6 +122,7 @@ Current Constraints
 * only audio channels supported so far, no data channels
 * PAD interpretation and generation not supported so far
 * only EEP with protection profile set A supported so far, no set B and no UEP
+
 
 Ideas
 ----------
@@ -124,4 +134,10 @@ Known Bugs
 ----------
 
 * OFDM demodulator gets out of sync sometimes causing burst errors
+
+Documentation
+--------------
+
+You can build the Doxygen documentation of the c++ classes in lib/ with this command:
+    $ doxygen doxygen-config
 

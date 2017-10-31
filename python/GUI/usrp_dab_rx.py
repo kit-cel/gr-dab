@@ -37,7 +37,7 @@ class usrp_dab_rx(gr.top_block):
 
         self.dab_mode = dab_mode
         self.verbose = False
-        self.sample_rate = 2e6
+        self.sample_rate = 2048e3
         self.dabplus = dabplus
         self.use_usrp = use_usrp
         self.src_path = src_path
@@ -49,6 +49,7 @@ class usrp_dab_rx(gr.top_block):
         ########################
         if self.use_usrp:
             self.src = uhd.usrp_source("", uhd.io_type.COMPLEX_FLOAT32, 1)
+            self.src.set_clock_rate(self.sample_rate*20)
             self.src.set_samp_rate(self.sample_rate)
             self.src.set_antenna("TX/RX")
         else:
@@ -80,19 +81,20 @@ class usrp_dab_rx(gr.top_block):
         ########################
         # OFDM demod
         ########################
-        self.demod = dab.ofdm_demod(self.dab_params, self.rx_params, self.verbose)
+        self.demod = dab.ofdm_demod_cc(self.dab_params)
 
         ########################
         # SNR measurement
         ########################
-        self.v2s_snr = blocks.vector_to_stream_make(gr.sizeof_gr_complex, self.dab_params.num_carriers)
+        self.v2s_snr = blocks.vector_to_stream(gr.sizeof_gr_complex*1, self.dab_params.num_carriers)
         self.snr_measurement = digital.mpsk_snr_est_cc_make(digital.SNR_EST_SIMPLE, 10000)
         self.constellation_plot = qtgui.const_sink_c_make(1024, "", 1)
+        self.constellation_plot.enable_grid(True)
 
         ########################
         # FIC decoder
         ########################
-        self.fic_dec = dab.fic_decode(self.dab_params)
+        self.fic_dec = dab.fic_decode_vc(self.dab_params)
 
         ########################
         # MSC decoder
@@ -121,17 +123,16 @@ class usrp_dab_rx(gr.top_block):
         ########################
         self.connect(self.src, self.fft_plot)
         self.connect(self.src, self.waterfall_plot)
-        self.connect(self.src, self.demod, (self.fic_dec, 0))
-        self.connect((self.demod, 1), (self.fic_dec, 1))
+        self.connect(self.src, self.demod, self.fic_dec)
         if self.dabplus:
-            self.connect((self.demod, 0), (self.dabplus, 0))
-            self.connect((self.demod, 1), (self.dabplus, 1))
+            self.connect((self.demod, 1), self.dabplus)
         else:
             self.connect((self.demod, 0), (self.msc_dec, 0), self.unpack, self.mp2_dec)
             self.connect((self.demod, 1), (self.msc_dec, 1))
             self.connect((self.mp2_dec, 0), self.s2f_left, self.gain_left)
             self.connect((self.mp2_dec, 1), self.s2f_right, self.gain_right)
-        self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, self.constellation_plot)
+        self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, blocks.null_sink_make(gr.sizeof_gr_complex))
+        self.connect(self.v2s_snr, self.constellation_plot)
         # connect audio to sound card and file sink
         if self.dabplus:
             self.connect((self.dabplus, 0), (self.audio, 0))
