@@ -29,7 +29,6 @@ install(FILES
 #   dab_frequency_interleaver_vcc.xml
     dab_qpsk_demapper_vcb.xml
     dab_complex_to_interleaved_float_vcf.xml
-    dab_modulo_ff.xml
     #   dab_fic_decode.xml
     dab_ofdm_demod.xml
     dab_ofdm_mod.xml
