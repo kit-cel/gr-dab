@@ -25,7 +25,6 @@ include(GrPlatform) #define LIB_SUFFIX
 include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC-DAB_INCLUDE_DIRS} ${LIBTOOLAME-DAB_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dab_sources
-    ofdm_sampler_impl.cc
     diff_phasor_vcc_impl.cc
     frequency_interleaver_vcc_impl.cc
     qpsk_demapper_vcb_impl.cc

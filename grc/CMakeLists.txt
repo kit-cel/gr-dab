@@ -20,7 +20,6 @@ install(FILES
     dab_ofdm_sync_dab.xml
     dab_ofdm_sync_dab2.xml
     dab_detect_null.xml
-    dab_ofdm_sampler.xml
     dab_diff_phasor_vcc.xml
     #   dab_frequency_interleaver_vcc.xml
     dab_qpsk_demapper_vcb.xml

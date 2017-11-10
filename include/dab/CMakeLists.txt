@@ -22,7 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    ofdm_sampler.h
     diff_phasor_vcc.h
     frequency_interleaver_vcc.h
     qpsk_demapper_vcb.h
