@@ -38,7 +38,6 @@ install(FILES
     unpuncture_vff.h
     prune_vectors.h
     fib_sink_vb.h
-    magnitude_equalizer_vcc.h
     qpsk_mapper_vbc.h
     ofdm_insert_pilot_vcc.h
     sum_phasor_trig_vcc.h

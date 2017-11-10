@@ -24,7 +24,6 @@
 #include "dab/unpuncture_vff.h"
 #include "dab/prune_vectors.h"
 #include "dab/fib_sink_vb.h"
-#include "dab/magnitude_equalizer_vcc.h"
 #include "dab/qpsk_mapper_vbc.h"
 #include "dab/ofdm_insert_pilot_vcc.h"
 #include "dab/sum_phasor_trig_vcc.h"
@@ -94,8 +93,6 @@ GR_SWIG_BLOCK_MAGIC2(dab, prune_vectors);
 %include "dab/fib_sink_vb.h"
 GR_SWIG_BLOCK_MAGIC2(dab, fib_sink_vb);
 
-%include "dab/magnitude_equalizer_vcc.h"
-GR_SWIG_BLOCK_MAGIC2(dab, magnitude_equalizer_vcc);
 %include "dab/qpsk_mapper_vbc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, qpsk_mapper_vbc);
 %include "dab/ofdm_insert_pilot_vcc.h"

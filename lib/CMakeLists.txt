@@ -42,7 +42,6 @@ list(APPEND dab_sources
     prune_vectors_impl.cc
     fib_sink_vb_impl.cc
     crc16.cc
-    magnitude_equalizer_vcc_impl.cc
     qpsk_mapper_vbc_impl.cc
     ofdm_insert_pilot_vcc_impl.cc
     sum_phasor_trig_vcc_impl.cc
