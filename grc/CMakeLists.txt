@@ -64,7 +64,6 @@ install(FILES
     dab_synchronization_ff.xml
     dab_ofdm_synchronization_cvf.xml
     dab_ofdm_coarse_frequency_correction_vcvc.xml
-    dab_phase_correction_cc.xml
     dab_frequency_deinterleave_cc.xml
     dab_demux_cc.xml
     dab_ofdm_demod_cc.xml

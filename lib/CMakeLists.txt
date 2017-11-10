@@ -87,7 +87,6 @@ list(APPEND dab_sources
     synchronization_ff_impl.cc
     ofdm_synchronization_cvf_impl.cc
     ofdm_coarse_frequency_correction_vcvc_impl.cc
-    phase_correction_cc_impl.cc
     frequency_deinterleave_cc_impl.cc
     demux_cc_impl.cc
     select_cus_vcvc_impl.cc

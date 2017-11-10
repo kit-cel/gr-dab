@@ -58,7 +58,6 @@ install(FILES
     synchronization_ff.h
     ofdm_synchronization_cvf.h
     ofdm_coarse_frequency_correction_vcvc.h
-    phase_correction_cc.h
     frequency_deinterleave_cc.h
     demux_cc.h
     select_cus_vcvc.h
