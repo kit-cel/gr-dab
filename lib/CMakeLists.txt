@@ -27,7 +27,6 @@ link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dab_sources
     ofdm_sampler_impl.cc
     diff_phasor_vcc_impl.cc
-    ofdm_remove_first_symbol_vcc_impl.cc
     frequency_interleaver_vcc_impl.cc
     qpsk_demapper_vcb_impl.cc
     complex_to_interleaved_float_vcf_impl.cc

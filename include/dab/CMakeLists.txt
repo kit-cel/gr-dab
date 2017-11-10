@@ -24,7 +24,6 @@ install(FILES
     api.h
     ofdm_sampler.h
     diff_phasor_vcc.h
-    ofdm_remove_first_symbol_vcc.h
     frequency_interleaver_vcc.h
     qpsk_demapper_vcb.h
     complex_to_interleaved_float_vcf.h
