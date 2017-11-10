@@ -30,7 +30,6 @@ install(FILES
     repartition_vectors.h
     unpuncture_vff.h
     fib_sink_vb.h
-    qpsk_mapper_vbc.h
     ofdm_insert_pilot_vcc.h
     sum_phasor_trig_vcc.h
     ofdm_move_and_insert_zero.h

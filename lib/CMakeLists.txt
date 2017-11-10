@@ -34,7 +34,6 @@ list(APPEND dab_sources
     unpuncture_vff_impl.cc
     fib_sink_vb_impl.cc
     crc16.cc
-    qpsk_mapper_vbc_impl.cc
     ofdm_insert_pilot_vcc_impl.cc
     sum_phasor_trig_vcc_impl.cc
     ofdm_move_and_insert_zero_impl.cc

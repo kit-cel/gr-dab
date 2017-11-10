@@ -16,7 +16,6 @@
 #include "dab/repartition_vectors.h"
 #include "dab/unpuncture_vff.h"
 #include "dab/fib_sink_vb.h"
-#include "dab/qpsk_mapper_vbc.h"
 #include "dab/ofdm_insert_pilot_vcc.h"
 #include "dab/sum_phasor_trig_vcc.h"
 #include "dab/ofdm_move_and_insert_zero.h"
@@ -71,8 +70,6 @@ GR_SWIG_BLOCK_MAGIC2(dab, unpuncture_vff);
 %include "dab/fib_sink_vb.h"
 GR_SWIG_BLOCK_MAGIC2(dab, fib_sink_vb);
 
-%include "dab/qpsk_mapper_vbc.h"
-GR_SWIG_BLOCK_MAGIC2(dab, qpsk_mapper_vbc);
 %include "dab/ofdm_insert_pilot_vcc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, ofdm_insert_pilot_vcc);
 %include "dab/sum_phasor_trig_vcc.h"
