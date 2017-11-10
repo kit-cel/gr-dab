@@ -22,7 +22,6 @@ install(FILES
     dab_detect_null.xml
     dab_ofdm_ffe_all_in_one.xml
     dab_ofdm_sampler.xml
-    dab_ofdm_coarse_frequency_correct.xml
     dab_diff_phasor_vcc.xml
     dab_ofdm_remove_first_symbol_vcc.xml
 #   dab_frequency_interleaver_vcc.xml
