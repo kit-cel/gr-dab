@@ -32,7 +32,6 @@ install(FILES
     qpsk_demapper_vcb.h
     complex_to_interleaved_float_vcf.h
     modulo_ff.h
-    measure_processing_rate.h
     select_vectors.h
     repartition_vectors.h
     unpuncture_vff.h
