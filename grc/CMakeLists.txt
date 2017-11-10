@@ -39,7 +39,6 @@ install(FILES
 #    dab_unpuncture_vff.xml
     dab_prune_vectors.xml
     dab_fib_sink_vb.xml
-    dab_estimate_sample_rate_bf.xml
     dab_fractional_interpolator_triggered_update_cc.xml
     dab_magnitude_equalizer_vcc.xml
     dab_qpsk_mapper_vbc.xml
