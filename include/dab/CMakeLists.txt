@@ -22,7 +22,6 @@
 ########################################################################
 install(FILES
     api.h
-    moving_sum_ff.h
     ofdm_ffe_all_in_one.h
     ofdm_sampler.h
     ofdm_coarse_frequency_correct.h
