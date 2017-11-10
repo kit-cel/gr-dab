@@ -27,7 +27,6 @@ install(FILES
     qpsk_demapper_vcb.h
     complex_to_interleaved_float_vcf.h
     select_vectors.h
-    repartition_vectors.h
     unpuncture_vff.h
     fib_sink_vb.h
     ofdm_insert_pilot_vcc.h

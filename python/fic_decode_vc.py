@@ -85,8 +85,6 @@ class fic_decode_vc(gr.hier_block2):
         # self.energy_v2s = blocks.vector_to_stream(gr.sizeof_char, self.dp.energy_dispersal_fic_vector_length)
         self.add_mod_2 = blocks.xor_bb()
         self.energy_s2v = blocks.stream_to_vector(gr.sizeof_char, self.dp.energy_dispersal_fic_vector_length)
-        self.cut_into_fibs = dab.repartition_vectors(gr.sizeof_char, self.dp.energy_dispersal_fic_vector_length,
-                                                     self.dp.fib_bits, 1, self.dp.energy_dispersal_fic_fibs_per_vector)
 
         # connect all
         self.nullsink = blocks.null_sink(gr.sizeof_char)

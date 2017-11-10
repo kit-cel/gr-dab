@@ -13,7 +13,6 @@
 #include "dab/qpsk_demapper_vcb.h"
 #include "dab/complex_to_interleaved_float_vcf.h"
 #include "dab/select_vectors.h"
-#include "dab/repartition_vectors.h"
 #include "dab/unpuncture_vff.h"
 #include "dab/fib_sink_vb.h"
 #include "dab/ofdm_insert_pilot_vcc.h"
@@ -62,8 +61,7 @@ GR_SWIG_BLOCK_MAGIC2(dab, complex_to_interleaved_float_vcf);
 
 %include "dab/select_vectors.h"
 GR_SWIG_BLOCK_MAGIC2(dab, select_vectors);
-%include "dab/repartition_vectors.h"
-GR_SWIG_BLOCK_MAGIC2(dab, repartition_vectors);
+
 %include "dab/unpuncture_vff.h"
 GR_SWIG_BLOCK_MAGIC2(dab, unpuncture_vff);
 

@@ -28,8 +28,7 @@ install(FILES
     dab_ofdm_demod.xml
     dab_ofdm_mod.xml
     dab_select_vectors.xml
-    dab_repartition_vectors.xml
-#    dab_unpuncture_vff.xml
+    #    dab_unpuncture_vff.xml
     dab_fib_sink_vb.xml
     #   dab_ofdm_insert_pilot_vcc.xml
     dab_sum_phasor_trig_vcc.xml
