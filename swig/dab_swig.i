@@ -8,7 +8,6 @@
 %include "dab_swig_doc.i"
 
 %{
-#include "dab/ofdm_ffe_all_in_one.h"
 #include "dab/ofdm_sampler.h"
 #include "dab/diff_phasor_vcc.h"
 #include "dab/ofdm_remove_first_symbol_vcc.h"
@@ -55,8 +54,6 @@
 #include "dab/qpsk_mapper_vbvc.h"
 %}
 
-%include "dab/ofdm_ffe_all_in_one.h"
-GR_SWIG_BLOCK_MAGIC2(dab, ofdm_ffe_all_in_one);
 %include "dab/ofdm_sampler.h"
 GR_SWIG_BLOCK_MAGIC2(dab, ofdm_sampler);
 
