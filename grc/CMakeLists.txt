@@ -30,7 +30,6 @@ install(FILES
     dab_select_vectors.xml
     dab_repartition_vectors.xml
 #    dab_unpuncture_vff.xml
-    dab_prune_vectors.xml
     dab_fib_sink_vb.xml
     dab_qpsk_mapper_vbc.xml
 #   dab_ofdm_insert_pilot_vcc.xml

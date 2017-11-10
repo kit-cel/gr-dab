@@ -29,7 +29,6 @@ install(FILES
     select_vectors.h
     repartition_vectors.h
     unpuncture_vff.h
-    prune_vectors.h
     fib_sink_vb.h
     qpsk_mapper_vbc.h
     ofdm_insert_pilot_vcc.h

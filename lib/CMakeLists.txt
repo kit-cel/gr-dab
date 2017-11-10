@@ -32,7 +32,6 @@ list(APPEND dab_sources
     select_vectors_impl.cc
     repartition_vectors_impl.cc
     unpuncture_vff_impl.cc
-    prune_vectors_impl.cc
     fib_sink_vb_impl.cc
     crc16.cc
     qpsk_mapper_vbc_impl.cc
