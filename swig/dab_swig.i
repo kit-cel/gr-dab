@@ -58,7 +58,6 @@
 #include "dab/phase_correction_cc.h"
 #include "dab/frequency_deinterleave_cc.h"
 #include "dab/demux_cc.h"
-#include "dab/differential_phasor_vcvc.h"
 #include "dab/select_cus_vcvc.h"
 #include "dab/qpsk_mapper_vbvc.h"
 %}
@@ -170,8 +169,7 @@ GR_SWIG_BLOCK_MAGIC2(dab, frequency_deinterleave_cc);
 
 %include "dab/demux_cc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, demux_cc);
-%include "dab/differential_phasor_vcvc.h"
-GR_SWIG_BLOCK_MAGIC2(dab, differential_phasor_vcvc);
+
 %include "dab/select_cus_vcvc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, select_cus_vcvc);
 %include "dab/qpsk_mapper_vbvc.h"

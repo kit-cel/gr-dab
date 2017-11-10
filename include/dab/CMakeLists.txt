@@ -72,7 +72,6 @@ install(FILES
     phase_correction_cc.h
     frequency_deinterleave_cc.h
     demux_cc.h
-    differential_phasor_vcvc.h
     select_cus_vcvc.h
     qpsk_mapper_vbvc.h DESTINATION include/dab
 )

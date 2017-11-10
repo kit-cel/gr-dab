@@ -79,7 +79,6 @@ install(FILES
     dab_frequency_deinterleave_cc.xml
     dab_demux_cc.xml
     dab_ofdm_demod_cc.xml
-    dab_differential_phasor_vcvc.xml
     dab_fic_decode_vc.xml
     dab_select_cus_vcvc.xml
     dab_qpsk_mapper_vbvc.xml DESTINATION share/gnuradio/grc/blocks

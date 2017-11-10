@@ -101,7 +101,6 @@ list(APPEND dab_sources
     phase_correction_cc_impl.cc
     frequency_deinterleave_cc_impl.cc
     demux_cc_impl.cc
-    differential_phasor_vcvc_impl.cc
     select_cus_vcvc_impl.cc
     qpsk_mapper_vbvc_impl.cc )
 
