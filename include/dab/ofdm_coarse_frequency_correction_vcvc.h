@@ -38,6 +38,8 @@ namespace gr {
      public:
       typedef boost::shared_ptr<ofdm_coarse_frequency_correction_vcvc> sptr;
 
+      virtual float get_snr() = 0;
+
       /*!
        * \brief Return a shared_ptr to a new instance of dab::ofdm_coarse_frequency_correction_vcvc.
        *

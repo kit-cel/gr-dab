@@ -33,12 +33,17 @@ namespace gr {
       int d_num_carriers;
       int d_cyclic_prefix_length;
       unsigned int d_freq_offset;
+      float d_snr;
 
      public:
       ofdm_coarse_frequency_correction_vcvc_impl(int fft_length, int num_carriers, int cyclic_prefix_length);
       ~ofdm_coarse_frequency_correction_vcvc_impl();
 
       void measure_energy(const gr_complex*);
+      void measure_snr(const gr_complex*);
+
+      virtual float get_snr()
+      { return d_snr;}
 
       // Where all the action really happens
       int work(int noutput_items,

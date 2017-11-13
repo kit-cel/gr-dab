@@ -372,24 +372,23 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.statusBar.showMessage("Play/Record the selected service component.")
 
     def snr_update(self):
-        print "update snr"
         # display snr in progress bar if an instance of usrp_dab_rx is existing
         if hasattr(self, 'my_receiver'):
             SNR = self.my_receiver.get_snr()
-            if SNR > 10:
+            if SNR > 20.0:
                 self.setStyleSheet("""QProgressBar::chunk { background: "green"; }""")
-                if SNR > 20:
-                    SNR = 20
-            elif 5 < SNR <= 10:
+                if SNR > 60.0:
+                    SNR = 60
+            elif 10 < SNR <= 15:
                 self.setStyleSheet("""QProgressBar::chunk { background: "yellow"; }""")
             else:
                 self.setStyleSheet("""QProgressBar::chunk { background: "red"; }""")
-                if SNR < -20 or math.isnan(SNR):
-                    SNR = -20
-            self.bar_snr.setValue(SNR)
+                if SNR < 0 or math.isnan(SNR):
+                    SNR = 0
+            self.bar_snr.setValue(int(SNR))
             self.lcd_snr.display(SNR)
         else:
-            self.bar_snr.setValue(-20)
+            self.bar_snr.setValue(0)
             self.label_snr.setText("SNR: no reception")
         self.snr_timer.start(1000)
 

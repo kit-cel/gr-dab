@@ -87,7 +87,6 @@ class usrp_dab_rx(gr.top_block):
         # SNR measurement
         ########################
         self.v2s_snr = blocks.vector_to_stream(gr.sizeof_gr_complex*1, self.dab_params.num_carriers)
-        self.snr_measurement = digital.mpsk_snr_est_cc_make(digital.SNR_EST_SIMPLE, 10000)
         self.constellation_plot = qtgui.const_sink_c_make(1024, "", 1)
         self.constellation_plot.enable_grid(True)
 
@@ -131,8 +130,7 @@ class usrp_dab_rx(gr.top_block):
             self.connect((self.demod, 1), (self.msc_dec, 1))
             self.connect((self.mp2_dec, 0), self.s2f_left, self.gain_left)
             self.connect((self.mp2_dec, 1), self.s2f_right, self.gain_right)
-        self.connect((self.demod, 0), self.v2s_snr, self.snr_measurement, blocks.null_sink_make(gr.sizeof_gr_complex))
-        self.connect(self.v2s_snr, self.constellation_plot)
+        self.connect((self.demod, 0), self.v2s_snr, self.constellation_plot)
         # connect audio to sound card and file sink
         if self.dabplus:
             self.connect((self.dabplus, 0), (self.audio, 0))
@@ -176,7 +174,7 @@ class usrp_dab_rx(gr.top_block):
         return self.dabplus.get_sample_rate()
 
     def get_snr(self):
-        return self.snr_measurement.snr()
+        return self.demod.get_snr()
 
     def get_firecode_passed(self):
         return self.dabplus.get_firecode_passed()

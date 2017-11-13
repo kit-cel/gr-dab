@@ -62,9 +62,6 @@ class ofdm_demod_cc(gr.hier_block2):
         # differential phasor
         self.differential_phasor = dab.diff_phasor_vcc_make(1536)
 
-        # phase correction with phase reference symbol
-        self.phase_correction = dab.phase_correction_cc_make(self.dp.num_carriers)
-
         # frequency deinterleaving
         self.frequency_deinterleaver = dab.frequency_interleaver_vcc_make(self.dp.frequency_deinterleaving_sequence_array)
 
@@ -83,3 +80,6 @@ class ofdm_demod_cc(gr.hier_block2):
             (self, 0)
         )
         self.connect((self.demux, 1), (self, 1))
+
+    def get_snr(self):
+        return self.coarse_freq_corr.get_snr()

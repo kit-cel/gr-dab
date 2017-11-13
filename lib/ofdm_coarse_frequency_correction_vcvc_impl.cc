@@ -24,6 +24,7 @@
 
 #include <gnuradio/io_signature.h>
 #include "ofdm_coarse_frequency_correction_vcvc_impl.h"
+#include <math.h>
 
 namespace gr {
   namespace dab {
@@ -47,6 +48,7 @@ namespace gr {
         d_cyclic_prefix_length(cyclic_prefix_length)
     {
       d_freq_offset = 0;
+      d_snr = 0;
     }
 
     /*
@@ -93,6 +95,38 @@ namespace gr {
       d_freq_offset = index;
     }
 
+    /*! SNR measurement by comparing the energy of occupied sub-carriers with the ones of empty sub-carriers
+     * @return estimated SNR float value
+     */
+     void
+     ofdm_coarse_frequency_correction_vcvc_impl::measure_snr(const gr_complex *symbol)
+    {
+      // measure normalized energy of occupied sub-carriers
+      float energy = 0;
+      for (int i=0; i<d_num_carriers+1; i++) {
+        if (i != d_num_carriers/2)
+          energy+=std::real(symbol[i+d_freq_offset]*conj(symbol[i+d_freq_offset]));
+      }
+
+      // measure normalized energy of empty sub-carriers
+      float noise = 0;
+      for (int i=0; i<d_freq_offset; i++) {
+        noise+=std::real(symbol[i]*conj(symbol[i]));
+      }
+      noise += std::real(symbol[d_freq_offset+d_num_carriers/2]*conj(symbol[d_freq_offset+d_num_carriers/2]));
+      for (int i=0; i<d_fft_length-d_num_carriers-d_freq_offset-1; i++) {
+        noise+=std::real(symbol[i+d_freq_offset+d_num_carriers+1]*conj(symbol[i+d_freq_offset+d_num_carriers+1]));
+      }
+      // normalize
+      energy = energy/d_num_carriers;
+      noise = noise/(d_fft_length-d_num_carriers);
+      // check if ratio is in the definition range of the log
+      if(energy > noise){
+        // now we can calculate the SNR in dB
+        d_snr = 10*log((energy-noise)/noise);
+      }
+    }
+
     int
     ofdm_coarse_frequency_correction_vcvc_impl::work(int noutput_items,
         gr_vector_const_void_star &input_items,
@@ -110,7 +144,7 @@ namespace gr {
          */
         if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0)-i == 0) {
           measure_energy(&in[i * d_fft_length]);
-          //fprintf(stderr, "New frame, first used sub-carrier: %d\n", d_freq_offset);
+          measure_snr(&in[i * d_fft_length]);
           tag_count++;
         }
         // copy the first half (left of central sub-carrier) of the sub-carriers to the output
