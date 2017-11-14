@@ -32,6 +32,7 @@ import dab
 from threading import Timer
 from time import sleep
 from math import pi
+from math import sqrt
 
 """
 modulator and demodulator for the DAB physical layer 
@@ -86,7 +87,7 @@ class ofdm_mod(gr.hier_block2):
 		self.prefixer = digital.ofdm_cyclic_prefixer(dp.fft_length, dp.symbol_length)
 
 		# normalize to energy = 1 after IFFT
-		self.multiply_const = blocks.multiply_const_cc(1/2048.0)
+		self.multiply_const = blocks.multiply_const_cc(1.0/sqrt(2048))
 
 		# convert back to vectors
 		self.s2v = blocks.stream_to_vector(gr.sizeof_gr_complex, dp.symbol_length)

@@ -20,6 +20,7 @@
 from gnuradio import gr, blocks
 from gnuradio import fft
 from gnuradio import digital
+from math import sqrt
 import dab
 
 class ofdm_demod_cc(gr.hier_block2):
@@ -52,6 +53,7 @@ class ofdm_demod_cc(gr.hier_block2):
         # FFT
         self.s2v_fft = blocks.stream_to_vector_make(gr.sizeof_gr_complex, self.dp.fft_length)
         self.fft = fft.fft_vcc(self.dp.fft_length, True, [], True)
+        self.multiply = blocks.multiply_const_vcc([1.0/sqrt(2048)]*self.dp.fft_length)
 
         # coarse frequency correction (sub-carrier assignment)
         self.coarse_freq_corr = dab.ofdm_coarse_frequency_correction_vcvc_make(self.dp.fft_length,
@@ -73,6 +75,7 @@ class ofdm_demod_cc(gr.hier_block2):
             self.sync,
             self.s2v_fft,
             self.fft,
+            self.multiply,
             self.coarse_freq_corr,
             self.differential_phasor,
             self.frequency_deinterleaver,
