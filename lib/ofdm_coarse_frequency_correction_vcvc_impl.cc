@@ -107,7 +107,6 @@ namespace gr {
         if (i != d_num_carriers/2)
           energy+=std::real(symbol[i+d_freq_offset]*conj(symbol[i+d_freq_offset]));
       }
-
       // measure normalized energy of empty sub-carriers
       float noise = 0;
       for (int i=0; i<d_freq_offset; i++) {
@@ -123,7 +122,7 @@ namespace gr {
       // check if ratio is in the definition range of the log
       if(energy > noise){
         // now we can calculate the SNR in dB
-        d_snr = 10*log((energy-noise)/noise);
+        d_snr = 10*log10((energy-noise)/noise);
       }
     }
 

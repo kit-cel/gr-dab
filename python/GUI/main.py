@@ -288,6 +288,11 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.receiver_running = True
                 self.btn_init.setText("stop receiver")
         else:
+        # stop receiver was pressed
+            self.dev_mode_close()
+            # remove service table
+            while (self.table_mci.rowCount() > 0):
+                self.table_mci.removeRow(0)
             self.my_receiver.stop()
             self.receiver_running = False
             self.btn_init.setText("start receiver")
@@ -300,6 +305,21 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.btn_stop.hide()
             self.audio_playing = False
             self.statusBar.showMessage("Receiver stopped.")
+            self.bar_snr.setValue(0)
+        # reset variables
+            self.bit_rate = 8
+            self.address = 0
+            self.size = 6
+            self.protection = 2
+            self.audio_bit_rate = 16000
+            self.volume = 80
+            self.subch = -1
+            self.dabplus = True
+            self.need_new_init = True
+            self.file_path = "None"
+            self.receiver_running = False
+            self.audio_playing = False
+            self.recording = False
 
     def update_service_info(self):
         # set status bar message
@@ -386,7 +406,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
     def snr_update(self):
         # display snr in progress bar if an instance of usrp_dab_rx is existing
-        if hasattr(self, 'my_receiver'):
+        if hasattr(self, 'my_receiver') and self.receiver_running:
             SNR = self.my_receiver.get_snr()
             if SNR > 20.0:
                 self.setStyleSheet("""QProgressBar::chunk { background: "green"; }""")

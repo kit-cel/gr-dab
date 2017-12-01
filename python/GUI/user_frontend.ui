@@ -411,7 +411,7 @@
                  <string notr="true">tfadsf</string>
                 </property>
                 <property name="minimum">
-                 <number>-20</number>
+                 <number>0</number>
                 </property>
                 <property name="maximum">
                  <number>20</number>
@@ -427,7 +427,7 @@
               <item>
                <widget class="QLabel" name="label_snr">
                 <property name="text">
-                 <string>reception: </string>
+                 <string>SNR:</string>
                 </property>
                </widget>
               </item>
