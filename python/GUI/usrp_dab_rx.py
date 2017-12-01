@@ -27,12 +27,13 @@ from gnuradio import gr, uhd, blocks
 from gnuradio import audio, digital
 from gnuradio import qtgui
 from gnuradio import fft
+import osmosdr
 import dab
 import time, math
 
 
 class usrp_dab_rx(gr.top_block):
-    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, src_path, sink_path = "None"):
+    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, use_rtl, src_path, sink_path = "None", prev_src=None):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -40,21 +41,10 @@ class usrp_dab_rx(gr.top_block):
         self.sample_rate = 2048e3
         self.dabplus = dabplus
         self.use_usrp = use_usrp
+        self.use_rtl = use_rtl
         self.src_path = src_path
         self.sink_path = sink_path
         gr.log.set_level("warn")
-
-        ########################
-        # source
-        ########################
-        if self.use_usrp:
-            self.src = uhd.usrp_source("", uhd.io_type.COMPLEX_FLOAT32, 1)
-            self.src.set_clock_rate(self.sample_rate*20)
-            self.src.set_samp_rate(self.sample_rate)
-            self.src.set_antenna("TX/RX")
-        else:
-            print "using file source"
-            self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, False)
 
         # set paramters to default mode
         self.softbits = True
@@ -71,6 +61,36 @@ class usrp_dab_rx(gr.top_block):
                                                             self.resample_fixed,
                                                             self.verbose, self.correct_ffe,
                                                             self.equalize_magnitude)
+
+        ########################
+        # source
+        ########################
+        if self.use_usrp:
+            self.src = uhd.usrp_source("", uhd.io_type.COMPLEX_FLOAT32, 1)
+            self.src.set_clock_rate(self.sample_rate*8)
+            self.src.set_samp_rate(self.sample_rate)
+            self.src.set_antenna("TX/RX")
+
+        elif self.use_rtl:
+            if(prev_src is None):
+                self.src = osmosdr.source()
+            else:
+                self.src = prev_src
+            self.src.set_sample_rate(self.sample_rate)
+            self.src.set_center_freq(self.frequency, 0)
+            self.src.set_freq_corr(0, 0)
+            self.src.set_dc_offset_mode(2, 0)
+            self.src.set_iq_balance_mode(0, 0)
+            self.src.set_gain_mode(False, 0)
+            self.src.set_gain(40, 0)
+            self.src.set_if_gain(20, 0)
+            self.src.set_bb_gain(20, 0)
+            self.src.set_antenna("", 0)
+            self.src.set_bandwidth(0, 0)
+        else:
+            print "using file source"
+            self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, False)
+
         ########################
         # FFT and waterfall plot
         ########################

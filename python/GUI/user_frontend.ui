@@ -115,6 +115,13 @@
                </widget>
               </item>
               <item>
+               <widget class="QRadioButton" name="rbtn_RTL">
+                <property name="text">
+                 <string>RTL-SDR</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="horizontalSpacer">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -954,7 +961,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>239</width>
+               <width>143</width>
                <height>602</height>
               </rect>
              </property>
@@ -1151,7 +1158,7 @@
                <property name="geometry">
                 <rect>
                  <x>0</x>
-                 <y>-1028</y>
+                 <y>0</y>
                  <width>525</width>
                  <height>1514</height>
                 </rect>

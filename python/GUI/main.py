@@ -51,6 +51,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.need_new_init = True
         self.file_path = "None"
         self.src_is_USRP = True
+        self.src_is_RTL = False
         self.receiver_running = False
         self.audio_playing = False
         self.recording = False
@@ -70,6 +71,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.snr_timer.timeout.connect(self.snr_update)
         # change of source by radio buttons
         self.rbtn_USRP.clicked.connect(self.src2USRP)
+        self.rbtn_RTL.clicked.connect(self.src2RTL)
         self.rbtn_File.clicked.connect(self.src2File)
         # set file path
         self.btn_file_path.clicked.connect(self.set_file_path)
@@ -225,6 +227,16 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.spinbox_frequency.setEnabled(True)
         self.label_frequency.setEnabled(True)
         self.src_is_USRP = True
+        self.src_is_RTL = False
+
+    def src2RTL(self):
+        # enable/disable buttons
+        self.btn_file_path.setEnabled(False)
+        self.label_path.setEnabled(False)
+        self.spinbox_frequency.setEnabled(True)
+        self.label_frequency.setEnabled(True)
+        self.src_is_RTL = True
+        self.src_is_USRP = False
 
     def src2File(self):
         # enable/disable buttons
@@ -233,6 +245,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.spinbox_frequency.setEnabled(False)
         self.label_frequency.setEnabled(False)
         self.src_is_USRP = False
+        self.src_is_RTL = False
 
     def set_file_path(self):
         path = QtGui.QFileDialog.getOpenFileName(self, "Pick a file with recorded IQ samples")
@@ -247,13 +260,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.snr_timer.stop()
             self.firecode_timer.stop()
             # check if file path is selected in case that file is the selected source
-            if (not self.src_is_USRP) and (self.file_path == "None"):
+            if (not self.src_is_USRP) and (not self.src_is_RTL) and (self.file_path == "None"):
                 self.label_path.setStyleSheet('color: red')
             else:
                 self.label_path.setStyleSheet('color: black')
                 # set up and start flowgraph
                 self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
-                                                  self.src_is_USRP, self.file_path)
+                                                  self.src_is_USRP, self.src_is_RTL, self.file_path)
                 self.my_receiver.set_volume(0)
                 self.my_receiver.start()
                 # status bar
@@ -404,11 +417,12 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
             self.snr_timer.stop()
             self.firecode_timer.stop()
             self.my_receiver.stop()
+            self.temp_src = self.my_receiver.src
             self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(),
                                                                self.spinbox_frequency.value(), self.bit_rate,
                                                                self.address, self.size,
                                                                self.protection, self.audio_bit_rate, self.dabplus,
-                                                               self.src_is_USRP, self.file_path)
+                                                               self.src_is_USRP, self.src_is_RTL, self.file_path, prev_src=self.temp_src)
             self.my_receiver.set_volume(float(self.slider_volume.value()) / 100)
             self.my_receiver.start()
             self.statusBar.showMessage("Audio playing.")
@@ -444,7 +458,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                        self.spinbox_frequency.value(), self.bit_rate,
                                                        self.address, self.size,
                                                        self.protection, self.audio_bit_rate, self.dabplus,
-                                                       self.src_is_USRP, self.file_path)
+                                                       self.src_is_USRP, self.src_is_RTL, self.file_path, prev_src=self.temp_src)
 
             self.my_receiver.start()
         elif new_sampling_rate == -1:
