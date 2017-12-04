@@ -86,6 +86,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         # adjust audio sampling rate
         self.timer_audio_sampling_rate = QTimer()
         self.timer_audio_sampling_rate.timeout.connect(self.adjust_audio_sampling_rate)
+        # gain setter
+        self.gain_spin.valueChanged.connect(self.set_rx_gain)
         # stop button click stops audio reception
         self.btn_stop.hide()
         self.btn_stop.clicked.connect(self.stop_audio)
@@ -178,6 +180,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.t_btn_stop.pressed.connect(self.t_stop_transmitter)
         # path for File sink path
         self.t_btn_file_path.pressed.connect(self.t_set_file_path)
+        # gain setter
+        self.tx_gain.valueChanged.connect(self.set_tx_gain)
         # path selection for all 7 (possible) sub channels
         self.t_btn_path_src1.pressed.connect(self.t_set_subch_path1)
         self.t_btn_path_src2.pressed.connect(self.t_set_subch_path2)
@@ -985,6 +989,14 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         else:
             self.t_combo_audio_rate_dab7.show()
             self.t_combo_audio_rate7.hide()
+
+    def set_rx_gain(self):
+        if hasattr(self, 'my_receiver'):
+            self.my_receiver.set_gain(self.gain_spin.value())
+
+    def set_tx_gain(self):
+        if hasattr(self, 'my_transmitter'):
+            self.my_transmitter.set_gain(self.tx_gain.value())
 
 
 class lookup_tables:

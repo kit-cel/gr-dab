@@ -77,12 +77,12 @@ class usrp_dab_rx(gr.top_block):
             else:
                 self.src = prev_src
             self.src.set_sample_rate(self.sample_rate)
-            self.src.set_center_freq(self.frequency, 0)
+            self.src.set_center_freq(uhd.tune_request(self.frequency, 2*self.sample_rate))
             self.src.set_freq_corr(0, 0)
             self.src.set_dc_offset_mode(2, 0)
             self.src.set_iq_balance_mode(0, 0)
             self.src.set_gain_mode(False, 0)
-            self.src.set_gain(40, 0)
+            self.src.set_gain(50, 0)
             self.src.set_if_gain(20, 0)
             self.src.set_bb_gain(20, 0)
             self.src.set_antenna("", 0)
@@ -166,11 +166,7 @@ class usrp_dab_rx(gr.top_block):
         # tune USRP frequency
         if self.use_usrp:
             self.set_freq(self.frequency)
-            # set gain
-            # if no gain was specified, use the mid-point in dB
-            g = self.src.get_gain_range()
-            self.rx_gain = float(g.start() + g.stop()) / 2
-            self.src.set_gain(self.rx_gain)
+
 
 ########################
 # getter methods
@@ -227,6 +223,10 @@ class usrp_dab_rx(gr.top_block):
         else:
             print "-> error - cannot tune to " + str(freq) + " Hz"
             return False
+
+    def set_gain(self, gain):
+        if hasattr(self, 'src'):
+            self.src.set_gain(gain, 0)
 
     def receive(self):
         rx = usrp_dab_rx()

@@ -107,9 +107,14 @@ class usrp_dab_tx(gr.top_block):
         ########################
         if self.use_usrp:
             self.sink = uhd.usrp_sink("", uhd.io_type.COMPLEX_FLOAT32, 1)
+            self.sink.set_clock_rate(self.sample_rate * 8)
             self.sink.set_samp_rate(self.sample_rate)
+            self.sink.set_clock_source("gpsdo", 0)
+            self.sink.set_time_source("gpsdo", 0)
             self.sink.set_antenna("TX/RX")
-            self.sink.set_center_freq(self.frequency)
+            self.sink.set_gain(30, 0)
+            self.sink.set_center_freq(uhd.tune_request(self.frequency, 2*self.sample_rate))
+            self.multiply = blocks.multiply_const_cc_make(0.3)
         else:
             self.sink = blocks.file_sink_make(gr.sizeof_gr_complex, self.sink_path)
         # audio sink
@@ -147,7 +152,7 @@ class usrp_dab_tx(gr.top_block):
         self.connect((self.mux, 0), self.s2v_mod, (self.mod, 0))
         self.connect(self.trigsrc, (self.mod, 1))
         if use_usrp:
-            self.connect(self.mod, self.sink)
+            self.connect(self.mod, self.multiply, self.sink)
         else:
             self.connect(self.mod, blocks.throttle_make(gr.sizeof_gr_complex, 2e6), self.sink)
         #self.connect((self.msc_sources[self.selected_audio-1], 0), self.gain_left, (self.audio, 0))
@@ -161,3 +166,6 @@ class usrp_dab_tx(gr.top_block):
         self.gain_left.set_k(volume)
         self.gain_right.set_k(volume)
 
+    def set_gain(self, gain):
+        if hasattr(self, 'sink'):
+            self.sink.set_gain(gain, 0)
