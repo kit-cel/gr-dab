@@ -414,7 +414,7 @@
                  <number>0</number>
                 </property>
                 <property name="maximum">
-                 <number>20</number>
+                 <number>40</number>
                 </property>
                 <property name="value">
                  <number>0</number>

@@ -219,7 +219,7 @@ class Ui_MainWindow(object):
         self.bar_snr = QtGui.QProgressBar(self.tab_reception)
         self.bar_snr.setStyleSheet(_fromUtf8("tfadsf"))
         self.bar_snr.setMinimum(0)
-        self.bar_snr.setMaximum(20)
+        self.bar_snr.setMaximum(40)
         self.bar_snr.setProperty("value", 0)
         self.bar_snr.setFormat(_fromUtf8(""))
         self.bar_snr.setObjectName(_fromUtf8("bar_snr"))

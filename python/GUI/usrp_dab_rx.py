@@ -69,6 +69,7 @@ class usrp_dab_rx(gr.top_block):
             self.src = uhd.usrp_source("", uhd.io_type.COMPLEX_FLOAT32, 1)
             self.src.set_clock_rate(self.sample_rate*8)
             self.src.set_samp_rate(self.sample_rate)
+            self.src.set_gain(50, 0)
             self.src.set_antenna("TX/RX")
 
         elif self.use_rtl:
@@ -82,7 +83,7 @@ class usrp_dab_rx(gr.top_block):
             self.src.set_dc_offset_mode(2, 0)
             self.src.set_iq_balance_mode(0, 0)
             self.src.set_gain_mode(False, 0)
-            self.src.set_gain(50, 0)
+            self.src.set_gain(20, 0)
             self.src.set_if_gain(20, 0)
             self.src.set_bb_gain(20, 0)
             self.src.set_antenna("", 0)
@@ -225,7 +226,7 @@ class usrp_dab_rx(gr.top_block):
             return False
 
     def set_gain(self, gain):
-        if hasattr(self, 'src'):
+        if hasattr(self, 'src') and self.use_usrp:
             self.src.set_gain(gain, 0)
 
     def receive(self):
