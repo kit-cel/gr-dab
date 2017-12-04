@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1146</width>
+    <width>1203</width>
     <height>739</height>
    </rect>
   </property>
@@ -85,7 +85,7 @@
        <bool>true</bool>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab_reception">
        <attribute name="title">
@@ -995,7 +995,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>143</width>
+               <width>200</width>
                <height>602</height>
               </rect>
              </property>
@@ -1193,7 +1193,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>525</width>
+                 <width>553</width>
                  <height>1514</height>
                 </rect>
                </property>

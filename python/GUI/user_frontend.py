@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1146, 739)
+        MainWindow.resize(1203, 739)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setEnabled(True)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
@@ -453,7 +453,7 @@ class Ui_MainWindow(object):
         self.dev_scroll_area.setWidgetResizable(True)
         self.dev_scroll_area.setObjectName(_fromUtf8("dev_scroll_area"))
         self.dev_scroll_area_content = QtGui.QWidget()
-        self.dev_scroll_area_content.setGeometry(QtCore.QRect(0, 0, 143, 602))
+        self.dev_scroll_area_content.setGeometry(QtCore.QRect(0, 0, 200, 602))
         self.dev_scroll_area_content.setObjectName(_fromUtf8("dev_scroll_area_content"))
         self.verticalLayout_12 = QtGui.QVBoxLayout(self.dev_scroll_area_content)
         self.verticalLayout_12.setObjectName(_fromUtf8("verticalLayout_12"))
@@ -546,7 +546,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName(_fromUtf8("scrollArea"))
         self.scrollAreaWidgetContents = QtGui.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 525, 1514))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 553, 1514))
         self.scrollAreaWidgetContents.setObjectName(_fromUtf8("scrollAreaWidgetContents"))
         self.verticalLayout_9 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_9.setObjectName(_fromUtf8("verticalLayout_9"))
@@ -1381,7 +1381,7 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusBar)
 
         self.retranslateUi(MainWindow)
-        self.mode_tabs.setCurrentIndex(1)
+        self.mode_tabs.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
