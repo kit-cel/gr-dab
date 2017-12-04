@@ -206,6 +206,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
         self.t_combo_dabplus7.currentIndexChanged.connect(self.change_audio_bit_rates7)
         # set volume if volume slider is changed
         self.t_slider_volume.valueChanged.connect(self.t_set_volume)
+        self.transmitter_running = False
 
     ################################
     # general functions
@@ -742,81 +743,87 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                     component["combo_audio_rate"].hide()
 
     def t_init_transmitter(self):
-        self.statusBar.showMessage("initializing transmitter...")
-        # boolean is set to True if info is missing to init the transmitter
-        arguments_incomplete = False
-        # produce array for protection and data_rate and src_paths and stereo flags
-        num_subch = self.t_spin_num_subch.value()
-        protection_array = [None] * num_subch
-        data_rate_n_array = [None] * num_subch
-        audio_sampling_rate_array = [None] *  num_subch
-        audio_paths = [None] * num_subch
-        stereo_flags = [None] * num_subch
-        merged_service_string = ""
-        dabplus_types = [True] * num_subch
-        record_states = [False] * num_subch
-        for i in range(0, num_subch):
-            # write array with protection modes
-            protection_array[i] = self.components[i]["protection"].currentIndex()
-            # write array with data rates
-            data_rate_n_array[i] = self.components[i]["data_rate"].value()/8
-            # write stereo flags
-            stereo_flags[i] = self.components[i]["combo_stereo"].currentIndex()
-            # write audio sampling rates in array
-            if self.components[i]["combo_dabplus"].currentIndex() is 0:
-                audio_sampling_rate_array[i] = 32000 if (self.components[i]["combo_audio_rate"].currentIndex() is 0) else 48000
-            else:
-                audio_sampling_rate_array[i] = 48000 if (self.components[i]["combo_audio_rate_dab"].currentIndex() is 0) else 24000
-            # check audio paths
-            if self.components[i]["src_path"] is "None":
-                # highlight the path which is not selected
-                self.components[i]["src_path_disp"].setStyleSheet('color: red')
-                arguments_incomplete = True
-                self.statusBar.showMessage("path " + str(i+1) + " not selected")
-            # check if length of label is <= 16 chars
-            elif len(str(self.components[i]["edit_label"].text())) > 16:
-                self.components[i]["edit_label"].setStyleSheet('color: red')
-                arguments_incomplete = True
-                self.statusBar.showMessage("Warning: Label is longer than 16 characters!")
-            else:
-                audio_paths[i] = self.components[i]["src_path"]
-            # write service labels appended in one string
-                merged_service_string = merged_service_string + str(self.components[i]["edit_label"].text()).ljust(16)
-                self.components[i]["edit_label"].setStyleSheet('color: black')
-            # write dabplus types
-                dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() is 0 else 0)
-
-        # check if length of ensemble label is <= 16 chars
-        if len(str(self.t_edit_ensemble_label.text())) > 16:
-            self.t_edit_ensemble_label.setStyleSheet('color: red')
-            arguments_incomplete = True
+        if self.transmitter_running:
+            self.transmitter_running = False
+            self.t_btn_init.setText("start transmitter")
         else:
-            self.t_edit_ensemble_label.setStyleSheet('color: black')
-        # check if File path for sink is chosen if option enabled
-        if self.t_rbtn_File.isChecked() and (str(self.t_label_sink.text()) == "select path"):
-            self.t_label_sink.setStyleSheet('color: red')
-            arguments_incomplete = True
+            self.transmitter_running = True
+            self.t_btn_init.setText("stop transmitter")
+            self.statusBar.showMessage("initializing transmitter...")
+            # boolean is set to True if info is missing to init the transmitter
+            arguments_incomplete = False
+            # produce array for protection and data_rate and src_paths and stereo flags
+            num_subch = self.t_spin_num_subch.value()
+            protection_array = [None] * num_subch
+            data_rate_n_array = [None] * num_subch
+            audio_sampling_rate_array = [None] *  num_subch
+            audio_paths = [None] * num_subch
+            stereo_flags = [None] * num_subch
+            merged_service_string = ""
+            dabplus_types = [True] * num_subch
+            record_states = [False] * num_subch
+            for i in range(0, num_subch):
+                # write array with protection modes
+                protection_array[i] = self.components[i]["protection"].currentIndex()
+                # write array with data rates
+                data_rate_n_array[i] = self.components[i]["data_rate"].value()/8
+                # write stereo flags
+                stereo_flags[i] = self.components[i]["combo_stereo"].currentIndex()
+                # write audio sampling rates in array
+                if self.components[i]["combo_dabplus"].currentIndex() is 0:
+                    audio_sampling_rate_array[i] = 32000 if (self.components[i]["combo_audio_rate"].currentIndex() is 0) else 48000
+                else:
+                    audio_sampling_rate_array[i] = 48000 if (self.components[i]["combo_audio_rate_dab"].currentIndex() is 0) else 24000
+                # check audio paths
+                if self.components[i]["src_path"] is "None":
+                    # highlight the path which is not selected
+                    self.components[i]["src_path_disp"].setStyleSheet('color: red')
+                    arguments_incomplete = True
+                    self.statusBar.showMessage("path " + str(i+1) + " not selected")
+                # check if length of label is <= 16 chars
+                elif len(str(self.components[i]["edit_label"].text())) > 16:
+                    self.components[i]["edit_label"].setStyleSheet('color: red')
+                    arguments_incomplete = True
+                    self.statusBar.showMessage("Warning: Label is longer than 16 characters!")
+                else:
+                    audio_paths[i] = self.components[i]["src_path"]
+                # write service labels appended in one string
+                    merged_service_string = merged_service_string + str(self.components[i]["edit_label"].text()).ljust(16)
+                    self.components[i]["edit_label"].setStyleSheet('color: black')
+                # write dabplus types
+                    dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() is 0 else 0)
 
-        if arguments_incomplete is False:
-            # init transmitter
-            self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spin_dab_mode.value(),
-                                                                  self.t_spinbox_frequency.value(),
-                                                                  self.t_spin_num_subch.value(),
-                                                                  str(self.t_edit_ensemble_label.text()),
-                                                                  merged_service_string,
-                                                                  self.t_combo_language.currentIndex(), self.t_combo_country.currentIndex(),
-                                                                  protection_array, data_rate_n_array, stereo_flags, audio_sampling_rate_array,
-                                                                  audio_paths,
-                                                                  self.t_spin_listen_to_component.value(),
-                                                                  self.t_rbtn_USRP.isChecked(),
-                                                                  dabplus_types,
-                                                                  str(self.t_label_sink.text()) + "/" + str(
-                                                                      self.t_edit_file_name.text()))
+            # check if length of ensemble label is <= 16 chars
+            if len(str(self.t_edit_ensemble_label.text())) > 16:
+                self.t_edit_ensemble_label.setStyleSheet('color: red')
+                arguments_incomplete = True
+            else:
+                self.t_edit_ensemble_label.setStyleSheet('color: black')
+            # check if File path for sink is chosen if option enabled
+            if self.t_rbtn_File.isChecked() and (str(self.t_label_sink.text()) == "select path"):
+                self.t_label_sink.setStyleSheet('color: red')
+                arguments_incomplete = True
 
-            # enable play button
-            self.t_btn_play.setEnabled(True)
-            self.t_label_status.setText("ready to transmit")
-            self.statusBar.showMessage("ready to transmit")
+            if arguments_incomplete is False:
+                # init transmitter
+                self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spin_dab_mode.value(),
+                                                                      self.t_spinbox_frequency.value(),
+                                                                      self.t_spin_num_subch.value(),
+                                                                      str(self.t_edit_ensemble_label.text()),
+                                                                      merged_service_string,
+                                                                      self.t_combo_language.currentIndex(), self.t_combo_country.currentIndex(),
+                                                                      protection_array, data_rate_n_array, stereo_flags, audio_sampling_rate_array,
+                                                                      audio_paths,
+                                                                      self.t_spin_listen_to_component.value(),
+                                                                      self.t_rbtn_USRP.isChecked(),
+                                                                      dabplus_types,
+                                                                      str(self.t_label_sink.text()) + "/" + str(
+                                                                          self.t_edit_file_name.text()))
+
+                # enable play button
+                self.t_btn_play.setEnabled(True)
+                self.t_label_status.setText("ready to transmit")
+                self.statusBar.showMessage("ready to transmit")
 
     def t_run_transmitter(self):
         self.t_btn_stop.setEnabled(True)
