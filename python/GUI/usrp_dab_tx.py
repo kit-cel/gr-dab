@@ -112,7 +112,7 @@ class usrp_dab_tx(gr.top_block):
             self.sink.set_clock_source("gpsdo", 0)
             self.sink.set_time_source("gpsdo", 0)
             self.sink.set_antenna("TX/RX")
-            self.sink.set_gain(30, 0)
+            self.sink.set_gain(50, 0)
             self.sink.set_center_freq(uhd.tune_request(self.frequency, 2*self.sample_rate))
             self.multiply = blocks.multiply_const_cc_make(0.3)
         else:
