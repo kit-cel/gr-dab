@@ -135,6 +135,8 @@ class usrp_dab_rx(gr.top_block):
         ########################
         self.valve_left = dab.valve_ff_make(True)
         self.valve_right= dab.valve_ff_make(True)
+        self.delay_left = blocks.delay_make(gr.sizeof_float, int(audio_bit_rate))
+        self.delay_right = blocks.delay_make(gr.sizeof_float, int(audio_bit_rate))
         self.audio = audio.sink_make(audio_bit_rate)
         self.wav_sink = blocks.wavfile_sink_make("dab_audio.wav", 2, audio_bit_rate)
 
@@ -154,13 +156,13 @@ class usrp_dab_rx(gr.top_block):
         self.connect((self.demod, 0), self.v2s_snr, self.constellation_plot)
         # connect audio to sound card and file sink
         if self.dabplus:
-            self.connect((self.dabplus, 0), (self.audio, 0))
-            self.connect((self.dabplus, 1), (self.audio, 1))
+            self.connect((self.dabplus, 0), self.delay_left, (self.audio, 0))
+            self.connect((self.dabplus, 1), self.delay_right, (self.audio, 1))
             self.connect((self.dabplus, 0), self.valve_left, (self.wav_sink, 0))
             self.connect((self.dabplus, 1), self.valve_right, (self.wav_sink, 1))
         else:
-            self.connect(self.gain_left, (self.audio, 0))
-            self.connect(self.gain_right, (self.audio, 1))
+            self.connect(self.gain_left, self.delay_left, (self.audio, 0))
+            self.connect(self.gain_right, self.delay_right, (self.audio, 1))
             self.connect(self.gain_left, self.valve_left, (self.wav_sink, 0))
             self.connect(self.gain_right, self.valve_right, (self.wav_sink, 1))
 
