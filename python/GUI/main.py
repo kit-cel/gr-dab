@@ -428,7 +428,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
         else:
             self.bar_snr.setValue(0)
-            self.label_snr.setText("SNR: no reception")
+            #self.label_snr.setText("SNR: no reception")
         self.snr_timer.start(1000)
 
     def play_audio(self):
