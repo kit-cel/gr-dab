@@ -97,7 +97,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(670, 12)</value>
+      <value>(928, 17)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -160,7 +160,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(934, 11)</value>
+      <value>(1184, 30)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -199,7 +199,7 @@
     </param>
     <param>
       <key>_coordinate</key>
-      <value>(807, 11)</value>
+      <value>(1064, 17)</value>
     </param>
     <param>
       <key>gui_hint</key>
@@ -922,7 +922,7 @@
 3. Add more sub channels (optional)
 4. Write Service Info and Multiplex Info in FIB source
 
-5. Execute "DABstep" out of your terminal for a user-friendly graphical application</value>
+Execute "DABstep" out of your terminal for a more user-friendly graphical application</value>
     </param>
     <param>
       <key>_enabled</key>

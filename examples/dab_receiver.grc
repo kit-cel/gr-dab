@@ -277,7 +277,7 @@
     </param>
     <param>
       <key>file</key>
-      <value>/home/luca/Desktop/loopback/171130_rec.dat</value>
+      <value></value>
     </param>
     <param>
       <key>_coordinate</key>
@@ -529,7 +529,7 @@
 3. Read fib_sink info in the console to get the DAB Decoder info
 4. Set the DAB+ Decoder info and restart flowgraph
 
-5. Execute "DABstep" out of your terminal for a user-friendly graphical application</value>
+Execute "DABstep" out of your terminal for a more user-friendly graphical application</value>
     </param>
     <param>
       <key>_enabled</key>
