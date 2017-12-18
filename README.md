@@ -105,6 +105,7 @@ Features
 * Receiving and Transmitting DAB/DAB+ broadcasts with the graphical application "DABstep"
 * Receiving or Transmitting DAB/DAB+ with prepaired GNU Radio Companion flowgraph in examples/
 * Receiving or Transmitting DAB/DAB+ by building your own GNU Radio flowgraph with provided gr-dab blocks
+* USRP and RTl-SDR for reception supported
 
 Usage
 -------
@@ -129,10 +130,12 @@ Ideas
 
 * FM simulation, calculating the audio noise out of the SNR and adding it to the audio
 * parallel FM receiver that fills in the audio in case a superframe is broken 
+* include reception and transmission of data channels with packed data, e.g. pictures
 
 Known Bugs
 ----------
 
+* Audio underruns disturb played audio signal without having actual errors. Additional buffer through delay block is a temporary fix that only works until reception errors occur.
 
 Documentation
 --------------
