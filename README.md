@@ -105,7 +105,7 @@ Features
 * Receiving and Transmitting DAB/DAB+ broadcasts with the graphical application "DABstep"
 * Receiving or Transmitting DAB/DAB+ with prepaired GNU Radio Companion flowgraph in examples/
 * Receiving or Transmitting DAB/DAB+ by building your own GNU Radio flowgraph with provided gr-dab blocks
-* USRP and RTl-SDR for reception supported
+* USRP and RTL-SDR for reception supported
 
 Usage
 -------

@@ -21,10 +21,14 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-#import dab_swig as dab
 import dab_swig as dab
 
-class qa_conv_encoder_bb (gr_unittest.TestCase):
+class qa_prune (gr_unittest.TestCase):
+    """
+        @brief QA for the prune block
+
+        This class implements a test bench to verify the corresponding C++ class.
+        """
 
     def setUp (self):
         self.tb = gr.top_block ()
@@ -32,20 +36,17 @@ class qa_conv_encoder_bb (gr_unittest.TestCase):
     def tearDown (self):
         self.tb = None
 
-# test of a 2 byte frame with reference data (calculated by hand)
-    def test_001_t(self):
-        data = (0x05, 0x00)
-        expected_result = (0x00, 0x00, 0x0f, 0x62, 0xBF, 0x4D, 0x9F, 0x00, 0x00, 0x00, 0x00)
-        src = blocks.vector_source_b(data)
-        encoder = dab.conv_encoder_bb_make(2)
-        sink = blocks.vector_sink_b()
-        self.tb.connect(src, encoder, sink)
+    def test_001_prune(self):
+        src_data = [1, 2, 3, 4, 5, 6, 7, 6, 5, 4, 3, 2, 1, 2, 3]
+        expected_result = [3, 4, 6, 5, 1, 2]
+        src = blocks.vector_source_b(src_data)
+        prune = dab.prune(gr.sizeof_char, 5, 2, 1)
+        dst = blocks.vector_sink_b()
+        self.tb.connect(src, prune, dst)
         self.tb.run()
-        result = sink.data()
-        #print result
-        #print expected_result
-        self.assertEqual(expected_result, result)
+        result_data = dst.data()
+        self.assertFloatTuplesAlmostEqual(expected_result, result_data, 6)
 
 
 if __name__ == '__main__':
-    gr_unittest.run(qa_conv_encoder_bb, "qa_conv_encoder_bb.xml")
+    gr_unittest.run(qa_prune, "qa_prune.xml")

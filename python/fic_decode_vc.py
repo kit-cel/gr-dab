@@ -20,7 +20,7 @@
 # 
 
 from gnuradio import gr, trellis, blocks
-import dab
+import dab_swig as dab
 from math import sqrt
 
 class fic_decode_vc(gr.hier_block2):

@@ -21,11 +21,10 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-from gnuradio import fec
 import dab_swig as dab
 from parameters import dab_parameters
 from fic_encode import fic_encode
-from fic import fic_decode
+from fic_decode_vc import fic_decode_vc as fic_decode
 
 class qa_fic_encode (gr_unittest.TestCase):
 
@@ -59,9 +58,6 @@ class qa_fic_encode (gr_unittest.TestCase):
         # decode
         self.fic_decoder = fic_decode(self.dab_params)
 
-        # control stream
-        self.trigger_src = blocks.vector_source_b([1] + [0]*74, True)
-
         self.tb.connect(self.fib_src,
                         blocks.head_make(gr.sizeof_char, 100000),
                         self.fib_enc,
@@ -71,7 +67,6 @@ class qa_fic_encode (gr_unittest.TestCase):
                         self.soft_interleaver,
                         self.fic_decoder
                         )
-        self.tb.connect(self.trigger_src, (self.fic_decoder, 1))
 
 
         self.tb.run ()

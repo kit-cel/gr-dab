@@ -17,20 +17,16 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    dab_ofdm_sync_dab.xml
-    dab_ofdm_sync_dab2.xml
     dab_detect_null.xml
     dab_diff_phasor_vcc.xml
-    #   dab_frequency_interleaver_vcc.xml
-    dab_qpsk_demapper_vcb.xml
+    dab_frequency_interleaver_vcc.xml
     dab_complex_to_interleaved_float_vcf.xml
-    #   dab_fic_decode.xml
+    dab_fic_decode.xml
     dab_ofdm_demod.xml
     dab_ofdm_mod.xml
-    dab_select_vectors.xml
-    #    dab_unpuncture_vff.xml
+    dab_unpuncture_vff.xml
     dab_fib_sink_vb.xml
-    #   dab_ofdm_insert_pilot_vcc.xml
+    dab_ofdm_insert_pilot_vcc.xml
     dab_sum_phasor_trig_vcc.xml
     dab_ofdm_move_and_insert_zero.xml
     dab_insert_null_symbol.xml

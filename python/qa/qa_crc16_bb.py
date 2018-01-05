@@ -25,6 +25,12 @@ import dab_swig as dab
 
 
 class qa_crc16_bb(gr_unittest.TestCase):
+    """
+    @brief QA for the crc16 block
+
+    This class implements a test bench to verify the corresponding C++ class.
+    """
+
     def setUp(self):
         self.tb = gr.top_block()
 
