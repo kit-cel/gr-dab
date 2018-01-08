@@ -18,15 +18,15 @@
  * Boston, MA 02110-1301, USA.
  */
 
-#ifndef INCLUDED_DAB_SELECT_CUS_VCVC_IMPL_H
-#define INCLUDED_DAB_SELECT_CUS_VCVC_IMPL_H
+#ifndef INCLUDED_DAB_SELECT_CUS_VFVF_IMPL_H
+#define INCLUDED_DAB_SELECT_CUS_VFVF_IMPL_H
 
-#include <dab/select_cus_vcvc.h>
+#include <dab/select_cus_vfvf.h>
 
 namespace gr {
   namespace dab {
 
-    class select_cus_vcvc_impl : public select_cus_vcvc
+    class select_cus_vfvf_impl : public select_cus_vfvf
     {
      private:
       unsigned int d_vlen;
@@ -35,8 +35,8 @@ namespace gr {
       unsigned int d_size;
 
      public:
-      select_cus_vcvc_impl(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size);
-      ~select_cus_vcvc_impl();
+      select_cus_vfvf_impl(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size);
+      ~select_cus_vfvf_impl();
 
       // Where all the action really happens
       void forecast (int noutput_items, gr_vector_int &ninput_items_required);
@@ -50,5 +50,5 @@ namespace gr {
   } // namespace dab
 } // namespace gr
 
-#endif /* INCLUDED_DAB_SELECT_CUS_VCVC_IMPL_H */
+#endif /* INCLUDED_DAB_SELECT_CUS_VFVF_IMPL_H */
 

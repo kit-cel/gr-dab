@@ -83,7 +83,7 @@ class msc_decode(gr.hier_block2):
         # repartition vectors in capacity units (CUs) and select a sub-channel
         self.v2s_repart_to_cus = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.num_carriers*2)
         self.s2v_repart_to_cus = blocks.stream_to_vector_make(gr.sizeof_float, self.dp.msc_cu_size)
-        self.select_subch = dab.select_cus_vcvc_make(self.dp.msc_cu_size, self.dp.num_cus, self.address, self.size)
+        self.select_subch = dab.select_cus_vfvf_make(self.dp.msc_cu_size, self.dp.num_cus, self.address, self.size)
 
         # time deinterleaving
         self.time_v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.msc_cu_size)

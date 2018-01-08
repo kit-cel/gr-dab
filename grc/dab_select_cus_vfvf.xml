@@ -1,9 +1,9 @@
 <block>
-  <name>Select cus vcvc</name>
-  <key>dab_select_cus_vcvc</key>
+  <name>Select CUs</name>
+  <key>dab_select_cus_vfvf</key>
   <category>DAB</category>
   <import>import dab</import>
-  <make>dab.select_cus_vcvc($vlen, $frame_len, $address, $size)</make>
+  <make>dab.select_cus_vfvf($vlen, $frame_len, $address, $size)</make>
   <param>
     <name>Vlen</name>
     <key>vlen</key>

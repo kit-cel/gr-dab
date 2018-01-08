@@ -47,7 +47,6 @@ class qa_time_interleave_bb (gr_unittest.TestCase):
         self.tb.connect(src, s2v, time_interleaver, blocks.head_make(gr.sizeof_char*6, 3), v2s, dst)
         self.tb.run()
         result = dst.data()
-        print result
         self.assertEqual(expected_result, result)
 
     def test_002_t(self):
@@ -61,7 +60,6 @@ class qa_time_interleave_bb (gr_unittest.TestCase):
         self.tb.connect(src, s2v, time_interleaver, blocks.head_make(gr.sizeof_char*4, 4), v2s, dst)
         self.tb.run()
         result = dst.data()
-        #print result
         self.assertEqual(expected_result, result)
 
 if __name__ == '__main__':

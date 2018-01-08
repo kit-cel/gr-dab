@@ -19,8 +19,8 @@
  */
 
 
-#ifndef INCLUDED_DAB_SELECT_CUS_VCVC_H
-#define INCLUDED_DAB_SELECT_CUS_VCVC_H
+#ifndef INCLUDED_DAB_SELECT_CUS_VFVF_H
+#define INCLUDED_DAB_SELECT_CUS_VFVF_H
 
 #include <dab/api.h>
 #include <gnuradio/block.h>
@@ -33,17 +33,17 @@ namespace gr {
      * \ingroup dab
      *
      */
-    class DAB_API select_cus_vcvc : virtual public gr::block
+    class DAB_API select_cus_vfvf : virtual public gr::block
     {
      public:
-      typedef boost::shared_ptr<select_cus_vcvc> sptr;
+      typedef boost::shared_ptr<select_cus_vfvf> sptr;
 
       /*!
-       * \brief Return a shared_ptr to a new instance of dab::select_cus_vcvc.
+       * \brief Return a shared_ptr to a new instance of dab::select_cus_vfvf.
        *
-       * To avoid accidental use of raw pointers, dab::select_cus_vcvc's
+       * To avoid accidental use of raw pointers, dab::select_cus_vfvf's
        * constructor is in a private implementation
-       * class. dab::select_cus_vcvc::make is the public interface for
+       * class. dab::select_cus_vfvf::make is the public interface for
        * creating new instances.
        */
       static sptr make(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size);
@@ -52,5 +52,5 @@ namespace gr {
   } // namespace dab
 } // namespace gr
 
-#endif /* INCLUDED_DAB_SELECT_CUS_VCVC_H */
+#endif /* INCLUDED_DAB_SELECT_CUS_VFVF_H */
 

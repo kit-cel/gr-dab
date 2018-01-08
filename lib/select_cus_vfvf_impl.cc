@@ -23,23 +23,23 @@
 #endif
 
 #include <gnuradio/io_signature.h>
-#include "select_cus_vcvc_impl.h"
+#include "select_cus_vfvf_impl.h"
 
 namespace gr {
   namespace dab {
 
-    select_cus_vcvc::sptr
-    select_cus_vcvc::make(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size)
+    select_cus_vfvf::sptr
+    select_cus_vfvf::make(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size)
     {
       return gnuradio::get_initial_sptr
-        (new select_cus_vcvc_impl(vlen, frame_len, address, size));
+        (new select_cus_vfvf_impl(vlen, frame_len, address, size));
     }
 
     /*
      * The private constructor
      */
-    select_cus_vcvc_impl::select_cus_vcvc_impl(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size)
-      : gr::block("select_cus_vcvc",
+    select_cus_vfvf_impl::select_cus_vfvf_impl(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size)
+      : gr::block("select_cus_vfvf",
               gr::io_signature::make(1, 1, vlen * sizeof(float)),
               gr::io_signature::make(1, 1, vlen * sizeof(float))),
         d_vlen(vlen),
@@ -51,18 +51,18 @@ namespace gr {
     /*
      * Our virtual destructor.
      */
-    select_cus_vcvc_impl::~select_cus_vcvc_impl()
+    select_cus_vfvf_impl::~select_cus_vfvf_impl()
     {
     }
 
     void
-    select_cus_vcvc_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
+    select_cus_vfvf_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
     {
       ninput_items_required[0] = noutput_items;
     }
 
     int
-    select_cus_vcvc_impl::general_work (int noutput_items,
+    select_cus_vfvf_impl::general_work (int noutput_items,
                        gr_vector_int &ninput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items)

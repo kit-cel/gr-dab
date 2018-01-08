@@ -21,7 +21,6 @@
 #include "dab/time_deinterleave_ff.h"
 #include "dab/crc16_bb.h"
 #include "dab/fib_source_b.h"
-#include "dab/select_subch_vfvf.h"
 #include "dab/unpuncture_ff.h"
 #include "dab/prune.h"
 #include "dab/firecode_check_bb.h"
@@ -41,7 +40,7 @@
 #include "dab/ofdm_coarse_frequency_correction_vcvc.h"
 #include "dab/frequency_deinterleave_cc.h"
 #include "dab/demux_cc.h"
-#include "dab/select_cus_vcvc.h"
+#include "dab/select_cus_vfvf.h"
 #include "dab/qpsk_mapper_vbvc.h"
 %}
 
@@ -78,8 +77,6 @@ GR_SWIG_BLOCK_MAGIC2(dab, time_deinterleave_ff);
 GR_SWIG_BLOCK_MAGIC2(dab, crc16_bb);
 %include "dab/fib_source_b.h"
 GR_SWIG_BLOCK_MAGIC2(dab, fib_source_b);
-%include "dab/select_subch_vfvf.h"
-GR_SWIG_BLOCK_MAGIC2(dab, select_subch_vfvf);
 %include "dab/unpuncture_ff.h"
 GR_SWIG_BLOCK_MAGIC2(dab, unpuncture_ff);
 %include "dab/prune.h"
@@ -126,7 +123,7 @@ GR_SWIG_BLOCK_MAGIC2(dab, frequency_deinterleave_cc);
 %include "dab/demux_cc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, demux_cc);
 
-%include "dab/select_cus_vcvc.h"
-GR_SWIG_BLOCK_MAGIC2(dab, select_cus_vcvc);
+%include "dab/select_cus_vfvf.h"
+GR_SWIG_BLOCK_MAGIC2(dab, select_cus_vfvf);
 %include "dab/qpsk_mapper_vbvc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, qpsk_mapper_vbvc);

@@ -82,6 +82,7 @@ GR_ADD_TEST(qa_dab_transmission_frame_mux_bb.py ${PYTHON_EXECUTABLE} ${CMAKE_CUR
 
 GR_ADD_TEST(qa_diff_phasor_vcc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_diff_phasor_vcc.py)
 GR_ADD_TEST(qa_complex_to_interleaved_float_vcf.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_complex_to_interleaved_float_vcf.py)
+GR_ADD_TEST(qa_select_cus_vfvf ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_select_cus_vfvf.py)
 GR_ADD_TEST(qa_unpuncture_vff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_unpuncture_vff.py)
 GR_ADD_TEST(qa_prune.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_prune.py)
 GR_ADD_TEST(qa_fib_sink_vb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_fib_sink_vb.py)
@@ -89,7 +90,6 @@ GR_ADD_TEST(qa_time_deinterleave_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_
 GR_ADD_TEST(qa_reed_solomon_decode_bb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_reed_solomon_decode_bb.py)
 GR_ADD_TEST(qa_mp4_decode_bs ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_mp4_decode_bs.py)
 
-#GR_ADD_TEST(qa_select_subch_vfvf ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_select_subch_vfvf.py)
 #GR_ADD_TEST(qa_prune ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_prune.py)
 #GR_ADD_TEST(qa_mp2_decode_bs ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_mp2_decode_bs.py)
 #GR_ADD_TEST(qa_dabplus_audio_decoder_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_dabplus_audio_decoder_ff.py)

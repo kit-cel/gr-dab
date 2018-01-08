@@ -35,7 +35,6 @@ install(FILES
     time_deinterleave_ff.h
     crc16_bb.h
     fib_source_b.h
-    select_subch_vfvf.h
     unpuncture_ff.h
     prune.h
     firecode_check_bb.h
@@ -55,6 +54,6 @@ install(FILES
     ofdm_coarse_frequency_correction_vcvc.h
     frequency_deinterleave_cc.h
     demux_cc.h
-    select_cus_vcvc.h
+    select_cus_vfvf.h
     qpsk_mapper_vbvc.h DESTINATION include/dab
 )

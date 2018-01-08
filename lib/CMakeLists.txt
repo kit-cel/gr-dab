@@ -39,7 +39,7 @@ list(APPEND dab_sources
     time_deinterleave_ff_impl.cc
     crc16_bb_impl.cc
     fib_source_b_impl.cc
-    select_subch_vfvf_impl.cc
+    select_cus_vfvf_impl.cc
     unpuncture_ff_impl.cc
     prune_impl.cc
     firecode-checker.cpp
@@ -84,7 +84,6 @@ list(APPEND dab_sources
     ofdm_coarse_frequency_correction_vcvc_impl.cc
     frequency_deinterleave_cc_impl.cc
     demux_cc_impl.cc
-    select_cus_vcvc_impl.cc
     qpsk_mapper_vbvc_impl.cc )
 
 
