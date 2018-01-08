@@ -63,6 +63,7 @@ include(GrTest)
 set(GR_TEST_TARGET_DEPS gnuradio-dab)
 set(GR_TEST_PYTHON_DIRS ${CMAKE_BINARY_DIR}/swig)
 
+GR_ADD_TEST(qa_qpsk_mapper_vbvc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_qpsk_mapper_vbvc.py)
 GR_ADD_TEST(qa_ofdm_insert_pilot.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_ofdm_insert_pilot.py)
 GR_ADD_TEST(qa_sum_phasor_trig_vcc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_sum_phasor_trig_vcc.py)
 GR_ADD_TEST(qa_frequency_interleaver_vcc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_frequency_interleaver_vcc.py)
