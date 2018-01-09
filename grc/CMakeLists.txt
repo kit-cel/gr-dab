@@ -17,11 +17,9 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 install(FILES
-    dab_detect_null.xml
     dab_diff_phasor_vcc.xml
     dab_frequency_interleaver_vcc.xml
     dab_complex_to_interleaved_float_vcf.xml
-    dab_ofdm_demod.xml
     dab_ofdm_mod.xml
     dab_unpuncture_vff.xml
     dab_fib_sink_vb.xml
@@ -43,7 +41,6 @@ install(FILES
     dab_dab_transmission_frame_mux_bb.xml
     dab_transmitter_c.xml
     dab_conv_encoder_bb.xml
-    dab_mapper_bc.xml
     dab_mp2_decode_bs.xml
     dab_mp4_decode_bs.xml
     dab_reed_solomon_decode_bb.xml
@@ -52,10 +49,8 @@ install(FILES
     dab_mp4_encode_sb.xml
     dab_mp2_encode_sb.xml
     dab_valve_ff.xml
-    dab_synchronization_ff.xml
     dab_ofdm_synchronization_cvf.xml
     dab_ofdm_coarse_frequency_correction_vcvc.xml
-    dab_frequency_deinterleave_cc.xml
     dab_demux_cc.xml
     dab_ofdm_demod_cc.xml
     dab_fic_decode_vc.xml

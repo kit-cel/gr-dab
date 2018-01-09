@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * GNU Radio block written for gr-dab including the following third party elements:
  * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class
@@ -214,15 +214,9 @@ namespace gr {
         baudRate = sample_rate;
       }
       d_sample_rate = sample_rate;
-      //GR_LOG_DEBUG(d_logger, format("bytes consumed %d") % (int) (hInfo.bytesconsumed));
-      /*GR_LOG_DEBUG(d_logger,
-                   format("sample_rate = %d, samples = %d, channels = %d, error = %d, sbr = %d") % sample_rate %
-                   samples %
-                   (int) (hInfo.channels) % (int) (hInfo.error) % (int) (hInfo.sbr));*/
       channels = hInfo.channels;
       if (hInfo.error != 0) {
-        fprintf(stderr, "Warning: %s\n",
-                faacDecGetErrorMessage(hInfo.error));
+        GR_LOG_ERROR(d_logger, format("Warning:  %s") % faacDecGetErrorMessage(hInfo.error));
         return 0;
       }
 
@@ -244,7 +238,6 @@ namespace gr {
       } else
         GR_LOG_ERROR(d_logger, "Cannot handle these channels -> dump samples");
 
-      //GR_LOG_DEBUG(d_logger, format("Produced %d PCM samples (for each channel)") % (samples / 2));
       d_nsamples_produced += samples / 2;
       return samples / 2;
     }
@@ -307,10 +300,10 @@ namespace gr {
         d_ps_flag = (in[n * d_superframe_size + 2] >> 3) & 01; // bit 20
         d_mpeg_surround = (in[n * d_superframe_size + 2] & 07); // bits 21 .. 23
         // log header information
-        /*GR_LOG_DEBUG(d_logger,
+        GR_LOG_DEBUG(d_logger,
                      format("superframe header: dac_rate %d, sbr_flag %d, aac_mode %d, ps_flag %d, surround %d") %
                      (int) d_dac_rate % (int) d_sbr_flag % (int) d_aac_channel_mode % (int) d_ps_flag %
-                     (int) d_mpeg_surround);*/
+                     (int) d_mpeg_surround);
 
         switch (2 * d_dac_rate + d_sbr_flag) {
           default:    // cannot happen

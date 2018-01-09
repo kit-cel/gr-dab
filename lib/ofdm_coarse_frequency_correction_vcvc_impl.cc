@@ -45,11 +45,10 @@ namespace gr {
               gr::io_signature::make(1, 1, num_carriers*sizeof(gr_complex))),
         d_fft_length(fft_length),
         d_num_carriers(num_carriers),
-        d_cyclic_prefix_length(cyclic_prefix_length)
-    {
-      d_freq_offset = 0;
-      d_snr = 0;
-    }
+        d_cyclic_prefix_length(cyclic_prefix_length),
+        d_freq_offset (0),
+        d_snr (0)
+    {}
 
     /*
      * Our virtual destructor.
@@ -68,10 +67,12 @@ namespace gr {
       unsigned int i, index;
       float energy = 0, max = 0;
       // first energy measurement is processed completely
-      for (i=0; i<d_num_carriers+1; i++) {
-        if (i != d_num_carriers/2)
-          energy+=std::real(symbol[i]*conj(symbol[i]));
-      }
+       for (int i = 0; i < d_num_carriers/2; ++i) {
+           energy+=std::real(symbol[i])*std::real(symbol[i]) + std::imag(symbol[i])*std::imag(symbol[i]);
+       }
+       for (int i = d_num_carriers/2+1; i <= d_num_carriers; ++i) {
+           energy+=std::real(symbol[i])*std::real(symbol[i]) + std::imag(symbol[i])*std::imag(symbol[i]);
+       }
       max = energy;
       index = 0;
       /* the energy measurements with all possible carrier offsets are calculated over a moving sum,
@@ -79,12 +80,12 @@ namespace gr {
        */
       for (i=1; i<d_fft_length-d_num_carriers; i++) {
         /* diff on left side */
-        energy -= std::real(symbol[i-1]*conj(symbol[i-1]));
+        energy -= std::real(symbol[i-1])*std::real(symbol[i-1]) + std::imag(symbol[i-1])*std::imag(symbol[i-1]);
         /* diff for zero carrier */
-        energy += std::real(symbol[i+d_num_carriers/2-1]*conj(symbol[i+d_num_carriers/2-1]));
-        energy -= std::real(symbol[i+d_num_carriers/2]*conj(symbol[i+d_num_carriers/2]));
+        energy += std::real(symbol[i+d_num_carriers/2-1])*std::real(symbol[i+d_num_carriers/2-1]) + std::imag(symbol[i+d_num_carriers/2-1])*std::imag(symbol[i+d_num_carriers/2-1]);
+        energy -= std::real(symbol[i+d_num_carriers/2])*std::real(symbol[i+d_num_carriers/2]) + std::imag(symbol[i+d_num_carriers/2])*std::imag(symbol[i+d_num_carriers/2]);
         /* diff on rigth side */
-        energy += std::real(symbol[i+d_num_carriers]*conj(symbol[i+d_num_carriers]));
+        energy += std::real(symbol[i+d_num_carriers])*std::real(symbol[i+d_num_carriers]) + std::imag(symbol[i+d_num_carriers])*std::imag(symbol[i+d_num_carriers]);
         /* new max found? */
         if (energy > max) {
           max = energy;
@@ -103,18 +104,20 @@ namespace gr {
     {
       // measure normalized energy of occupied sub-carriers
       float energy = 0;
-      for (int i=0; i<d_num_carriers+1; i++) {
-        if (i != d_num_carriers/2)
-          energy+=std::real(symbol[i+d_freq_offset]*conj(symbol[i+d_freq_offset]));
+      for (int i=0; i<d_num_carriers/2; i++) {
+          energy+=std::real(symbol[i+d_freq_offset])*std::real(symbol[i+d_freq_offset]) + std::imag(symbol[i+d_freq_offset])*std::imag(symbol[i+d_freq_offset]);
+      }
+      for (int i = d_num_carriers/2+1; i <= d_num_carriers; ++i) {
+          energy+=std::real(symbol[i+d_freq_offset])*std::real(symbol[i+d_freq_offset]) + std::imag(symbol[i+d_freq_offset])*std::imag(symbol[i+d_freq_offset]);
       }
       // measure normalized energy of empty sub-carriers
       float noise = 0;
       for (int i=0; i<d_freq_offset; i++) {
-        noise+=std::real(symbol[i]*conj(symbol[i]));
+        noise+=std::real(symbol[i])*std::real(symbol[i]) + std::imag(symbol[i])*std::imag(symbol[i]);
       }
-      noise += std::real(symbol[d_freq_offset+d_num_carriers/2]*conj(symbol[d_freq_offset+d_num_carriers/2]));
+      noise += std::real(symbol[d_freq_offset+d_num_carriers/2])*std::real(symbol[d_freq_offset+d_num_carriers/2]) + std::imag(symbol[d_freq_offset+d_num_carriers/2])*std::imag(symbol[d_freq_offset+d_num_carriers/2]);
       for (int i=0; i<d_fft_length-d_num_carriers-d_freq_offset-1; i++) {
-        noise+=std::real(symbol[i+d_freq_offset+d_num_carriers+1]*conj(symbol[i+d_freq_offset+d_num_carriers+1]));
+        noise+=std::real(symbol[i+d_freq_offset+d_num_carriers+1])*std::real(symbol[i+d_freq_offset+d_num_carriers+1]) + std::imag(symbol[i+d_freq_offset+d_num_carriers+1])*std::imag(symbol[i+d_freq_offset+d_num_carriers+1]);
       }
       // normalize
       energy = energy/d_num_carriers;

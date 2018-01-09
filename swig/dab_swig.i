@@ -27,7 +27,6 @@
 #include "dab/puncture_bb.h"
 #include "dab/dab_transmission_frame_mux_bb.h"
 #include "dab/conv_encoder_bb.h"
-#include "dab/mapper_bc.h"
 #include "dab/mp2_decode_bs.h"
 #include "dab/mp4_decode_bs.h"
 #include "dab/reed_solomon_decode_bb.h"
@@ -35,10 +34,8 @@
 #include "dab/mp4_encode_sb.h"
 #include "dab/mp2_encode_sb.h"
 #include "dab/valve_ff.h"
-#include "dab/synchronization_ff.h"
 #include "dab/ofdm_synchronization_cvf.h"
 #include "dab/ofdm_coarse_frequency_correction_vcvc.h"
-#include "dab/frequency_deinterleave_cc.h"
 #include "dab/demux_cc.h"
 #include "dab/select_cus_vfvf.h"
 #include "dab/qpsk_mapper_vbvc.h"
@@ -89,8 +86,7 @@ GR_SWIG_BLOCK_MAGIC2(dab, puncture_bb);
 GR_SWIG_BLOCK_MAGIC2(dab, dab_transmission_frame_mux_bb);
 %include "dab/conv_encoder_bb.h"
 GR_SWIG_BLOCK_MAGIC2(dab, conv_encoder_bb);
-%include "dab/mapper_bc.h"
-GR_SWIG_BLOCK_MAGIC2(dab, mapper_bc);
+
 
 %include "dab/mp2_decode_bs.h"
 GR_SWIG_BLOCK_MAGIC2(dab, mp2_decode_bs);
@@ -109,16 +105,11 @@ GR_SWIG_BLOCK_MAGIC2(dab, mp2_encode_sb);
 %include "dab/valve_ff.h"
 GR_SWIG_BLOCK_MAGIC2(dab, valve_ff);
 
-
-%include "dab/synchronization_ff.h"
-GR_SWIG_BLOCK_MAGIC2(dab, synchronization_ff);
 %include "dab/ofdm_synchronization_cvf.h"
 GR_SWIG_BLOCK_MAGIC2(dab, ofdm_synchronization_cvf);
 %include "dab/ofdm_coarse_frequency_correction_vcvc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, ofdm_coarse_frequency_correction_vcvc);
 
-%include "dab/frequency_deinterleave_cc.h"
-GR_SWIG_BLOCK_MAGIC2(dab, frequency_deinterleave_cc);
 
 %include "dab/demux_cc.h"
 GR_SWIG_BLOCK_MAGIC2(dab, demux_cc);

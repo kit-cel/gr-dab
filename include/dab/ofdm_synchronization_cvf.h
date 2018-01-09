@@ -1,6 +1,11 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017 <+YOU OR YOUR COMPANY+>.
+ * 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * The content of this class is adopted from ODR-DabMod and written into a GNU Radio OutOfTree block.
+ *
+   Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010, 2011 Her Majesty
+   the Queen in Right of Canada (Communications Research Center Canada)
+   See https://github.com/Opendigitalradio/ODR-DabMod for licensing information of ODR-DabMod.
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +34,7 @@ namespace gr {
   namespace dab {
 
     /*!
-     * \brief <+description of block+>
+     * \brief fine time and frequency offset measurement and correction
      * \ingroup dab
      *
      */

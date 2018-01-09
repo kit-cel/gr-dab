@@ -50,29 +50,27 @@ namespace gr {
                                                                  int fft_length, int symbols_per_frame)
             : gr::block("ofdm_synchronization_cvf",
                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
-            //gr::io_signature::make(1, 1, sizeof(gr_complex))),
                         gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_symbol_length(symbol_length),
               d_cyclic_prefix_length(cyclic_prefix_length),
               d_symbols_per_frame(symbols_per_frame),
-              d_fft_length(fft_length)
-    {
-      d_correlation = 0;
-      d_energy_prefix = 1;
-      d_energy_repetition = 1;
-      d_NULL_symbol_energy = 1;
-      d_frequency_offset_per_sample = 0;
-      d_NULL_detected = false;
-      d_moving_average_counter = 0;
-      d_symbol_count = 0;
-      d_symbol_element_count = 0;
-      d_wait_for_NULL = true;
-      d_on_triangle = false;
-      d_control_counter = 0;
-      d_phase = 0;
-      d_correlation_maximum = 0;
-      d_peak_set = false;
-    }
+              d_fft_length(fft_length),
+              d_correlation (0),
+              d_energy_prefix (1),
+              d_energy_repetition (1),
+              d_NULL_symbol_energy (1),
+              d_frequency_offset_per_sample (0),
+              d_NULL_detected (false),
+              d_moving_average_counter (0),
+              d_symbol_count (0),
+              d_symbol_element_count (0),
+              d_wait_for_NULL (true),
+              d_on_triangle (false),
+              d_control_counter (0),
+              d_phase (0),
+              d_correlation_maximum (0),
+              d_peak_set (false)
+    {}
 
     /*
      * Our virtual destructor.
@@ -211,7 +209,6 @@ namespace gr {
               // NULL symbol detection, if energy is < 0.1 * energy a symbol time later
               d_NULL_symbol_energy = d_energy_prefix;
               d_NULL_detected = true;
-              //GR_LOG_DEBUG(d_logger, format("NULL detected"));
             }
           }
         } else { // tracking mode
@@ -223,7 +220,6 @@ namespace gr {
             d_symbol_element_count = 0;
             // check if we arrived at the next NULL symbol
             if (d_symbol_count >= d_symbols_per_frame) {
-              //GR_LOG_DEBUG(d_logger, format("Sucessfully finished!!!"));
               d_symbol_count = 0;
               //TODO: skip forward more to safe computing many computing steps
               // switch to acquisition mode again to get the start of the next frame exactly
@@ -232,19 +228,14 @@ namespace gr {
               // we expect the start of a new symbol here
               // correlation has to be calculated completely new, because of skipping samples before
               delayed_correlation(&in[i], true);
-              //GR_LOG_DEBUG(d_logger, format("  New possible peak %d (i=%d)") % d_correlation_normalized_magnitude % i);
               // check if there is really a peak
               if (d_correlation_normalized_magnitude > 0.3) { //TODO: check if we are on right edge
                 d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
-                //add_item_tag(0, nitems_written(0) + i, pmt::mp("on track"), pmt::from_float(d_frequency_offset_per_sample));
-                //GR_LOG_DEBUG(d_logger, format("in track symbol %d") % (d_symbol_count));
               } else {
                 // no peak found -> out of track; search for next NULL symbol
                 d_wait_for_NULL = true;
                 GR_LOG_DEBUG(d_logger, format("Lost track at %d, switching ot acquisition mode (%d)") %d_symbol_count %
                                        d_correlation_normalized_magnitude);
-                /*add_item_tag(0, nitems_written(0) + i, pmt::mp("Lost"),
-                             pmt::from_float(d_correlation_normalized_magnitude));*/
               }
             }
           } else if (d_cyclic_prefix_length*0.75 <= d_symbol_element_count && d_symbol_element_count < d_cyclic_prefix_length*0.75 + d_symbol_length) {
@@ -256,10 +247,8 @@ namespace gr {
             gr_complex fine_frequency_correction = gr_complex(oi, oq);
             // set tag at next item if it is the first element of the first symbol
             if (d_symbol_count == 0 && d_symbol_element_count == d_cyclic_prefix_length) {
-              //GR_LOG_DEBUG(d_logger, format("Set Tag %d")%(nitems_read(0)+i));
               add_item_tag(0, nitems_written(0) + d_nwritten, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
-
             }
             // now we start copying one symbol length to the output
             out[d_nwritten++] = in[i] * fine_frequency_correction;
@@ -273,8 +262,7 @@ namespace gr {
          */
         d_phase += d_frequency_offset_per_sample;
         //place phase in [-pi, +pi[
-#define F_PI ((float)(M_PI))
-        d_phase = std::fmod(d_phase + F_PI, 2.0f * F_PI) - F_PI;
+        d_phase = std::fmod(d_phase + M_PI, 2.0f * M_PI) - M_PI;
       }
 
       consume_each(noutput_items);

@@ -63,7 +63,7 @@ namespace gr {
       for (int i = 0; i < noutput_items; ++i) {
         // iterate over each symbol vector
         for (int j = 0; j < d_symbol_length/8; ++j) {
-          // iterate over the symbo vector, but each byte has 8 bit, which are accessed manually
+          // iterate over the symbol vector, but each byte has 8 bit, which are accessed manually
           out[i*d_symbol_length + j*8 + 0] = gr_complex((in[i*(d_symbol_length/4) + j]&128)>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&128)>0?-I_SQRT2:I_SQRT2);
           out[i*d_symbol_length + j*8 + 1] = gr_complex((in[i*(d_symbol_length/4) + j]&64 )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&64 )>0?-I_SQRT2:I_SQRT2);
           out[i*d_symbol_length + j*8 + 2] = gr_complex((in[i*(d_symbol_length/4) + j]&32 )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&32 )>0?-I_SQRT2:I_SQRT2);
@@ -74,7 +74,6 @@ namespace gr {
           out[i*d_symbol_length + j*8 + 7] = gr_complex((in[i*(d_symbol_length/4) + j]&1  )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&1  )>0?-I_SQRT2:I_SQRT2);
         }
       }
-
       // Tell runtime system how many output items we produced.
       return noutput_items;
     }

@@ -47,7 +47,6 @@ list(APPEND dab_sources
     puncture_bb_impl.cc
     dab_transmission_frame_mux_bb_impl.cc
     conv_encoder_bb_impl.cc
-    mapper_bc_impl.cc
     mp2_decode_bs_impl.cc
     mp4_decode_bs_impl.cc
     reed_solomon_decode_bb_impl.cc
@@ -79,10 +78,8 @@ list(APPEND dab_sources
     ${LIBTOOLAME-DAB_SOURCE_DIR}/encode_new.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/portableio.c
     valve_ff_impl.cc
-    synchronization_ff_impl.cc
     ofdm_synchronization_cvf_impl.cc
     ofdm_coarse_frequency_correction_vcvc_impl.cc
-    frequency_deinterleave_cc_impl.cc
     demux_cc_impl.cc
     qpsk_mapper_vbvc_impl.cc )
 

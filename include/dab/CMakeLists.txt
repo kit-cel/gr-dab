@@ -41,7 +41,6 @@ install(FILES
     puncture_bb.h
     dab_transmission_frame_mux_bb.h
     conv_encoder_bb.h
-    mapper_bc.h
     mp2_decode_bs.h
     mp4_decode_bs.h
     reed_solomon_decode_bb.h
@@ -49,10 +48,8 @@ install(FILES
     mp4_encode_sb.h
     mp2_encode_sb.h
     valve_ff.h
-    synchronization_ff.h
     ofdm_synchronization_cvf.h
     ofdm_coarse_frequency_correction_vcvc.h
-    frequency_deinterleave_cc.h
     demux_cc.h
     select_cus_vfvf.h
     qpsk_mapper_vbvc.h DESTINATION include/dab

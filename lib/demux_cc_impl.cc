@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,19 +92,10 @@ namespace gr {
       unsigned int tag_count = 0;
       get_tags_in_window(tags, 0, 0, noutput_items, d_key);
 
-      /*fprintf(stderr, "Work call ####################################\n");
-      fprintf(stderr, "nitems_read %d\n", nitems_read(0));
-      fprintf(stderr, "noutput_items %d\n", noutput_items);
-      fprintf(stderr, "Tags: %d\n", tags.size());
-      for(int i = 0; i < tags.size(); i++){
-        fprintf(stderr, "Tag offset %d\n", tags[i].offset);
-      }*/
       for (int i = 0; i < noutput_items; ++i) {
         if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0) - nconsumed == 0) {
-          //fprintf(stderr, "Tag detected\n");
           // this input symbol is tagged: a new frame begins here
           if(d_fic_counter%d_symbols_fic == 0 && d_msc_counter%d_symbols_msc == 0){
-            //fprintf(stderr, "Tag is at beginning of frame\n");
             // we are at the beginning of a frame and also finished writing the last frame
             // we can remove this first symbol of the frame (phase reference symbol) and copy the other symbols
             tag_count++;
@@ -143,9 +134,6 @@ namespace gr {
       // Tell runtime system how many output items we produced on each output stream separately.
       produce(0, fic_syms_written);
       produce(1, msc_syms_written);
-      /*fprintf(stderr, "fic_syms_written %d\n", fic_syms_written);
-      fprintf(stderr, "msc_syms_written %d\n", msc_syms_written);
-      fprintf(stderr, "nconsumed %d\n", nconsumed);*/
       return WORK_CALLED_PRODUCE;
     }
 
