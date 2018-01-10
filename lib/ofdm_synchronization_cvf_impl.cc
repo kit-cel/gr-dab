@@ -28,6 +28,7 @@
 #include <boost/format.hpp>
 #include <gnuradio/io_signature.h>
 #include "ofdm_synchronization_cvf_impl.h"
+#include <volk/volk.h>
 #include <gnuradio/fxpt.h>
 #include <cmath>
 
@@ -70,7 +71,10 @@ namespace gr {
               d_phase (0),
               d_correlation_maximum (0),
               d_peak_set (false)
-    {}
+    {
+        unsigned int alignment = volk_get_alignment();
+        float* d_magnitude_squared = (float*)volk_malloc(sizeof(float)*d_cyclic_prefix_length, alignment);
+    }
 
     /*
      * Our virtual destructor.
@@ -102,14 +106,16 @@ namespace gr {
           d_correlation += sample[j] * conj(sample[d_symbol_length + j]);
         }
         // calculate energy of cyclic prefix for this sample completely
+        volk_32fc_magnitude_squared_32f(d_magnitude_squared, sample, d_cyclic_prefix_length);
         d_energy_prefix = 0;
         for (int j = 0; j < d_cyclic_prefix_length; j++) {
-          d_energy_prefix += std::real(sample[j] * conj(sample[j]));
+          d_energy_prefix += d_magnitude_squared[j];
         }
         // calculate energy of its repetition for this sample completely
+        volk_32fc_magnitude_squared_32f(d_magnitude_squared, &sample[d_symbol_length], d_cyclic_prefix_length);
         d_energy_repetition = 0;
         for (int j = 0; j < d_cyclic_prefix_length; j++) {
-          d_energy_repetition += std::real(sample[j + d_symbol_length] * conj(sample[j + d_symbol_length]));
+          d_energy_repetition += d_magnitude_squared[j];
         }
       } else {
         // calculate next step for moving average

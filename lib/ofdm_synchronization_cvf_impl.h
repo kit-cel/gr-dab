@@ -43,6 +43,7 @@ namespace gr {
       gr_complex d_correlation_normalized;
       float d_correlation_normalized_magnitude;
       float d_correlation_normalized_phase;
+      float *d_magnitude_squared;
       float d_energy_prefix;
       float d_energy_repetition;
       float d_NULL_symbol_energy;
