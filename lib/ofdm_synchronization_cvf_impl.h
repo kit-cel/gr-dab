@@ -41,9 +41,10 @@ namespace gr {
       int d_moving_average_counter;
       gr_complex d_correlation;
       gr_complex d_correlation_normalized;
+      float *d_mag_squared;
+      gr_complex *d_fixed_lag_corr;
       float d_correlation_normalized_magnitude;
       float d_correlation_normalized_phase;
-      float *d_magnitude_squared;
       float d_energy_prefix;
       float d_energy_repetition;
       float d_NULL_symbol_energy;

@@ -72,8 +72,10 @@ namespace gr {
               d_correlation_maximum (0),
               d_peak_set (false)
     {
-        unsigned int alignment = volk_get_alignment();
-        float* d_magnitude_squared = (float*)volk_malloc(sizeof(float)*d_cyclic_prefix_length, alignment);
+      //allocation for repeating energy measurements
+      unsigned int alignment = volk_get_alignment();
+      d_mag_squared = (float*)volk_malloc(sizeof(float)*d_cyclic_prefix_length, alignment);
+      d_fixed_lag_corr = (gr_complex*)volk_malloc(sizeof(gr_complex)*d_cyclic_prefix_length, alignment);
     }
 
     /*
@@ -101,22 +103,17 @@ namespace gr {
           d_moving_average_counter = 0;
         }
         // calculate delayed correlation for this sample completely
+        volk_32fc_x2_conjugate_dot_prod_32fc(d_fixed_lag_corr, sample, &sample[d_symbol_length], d_cyclic_prefix_length);
         d_correlation = 0;
-        for (int j = 0; j < d_cyclic_prefix_length; j++) {
-          d_correlation += sample[j] * conj(sample[d_symbol_length + j]);
+        for (int i = 0; i < d_cyclic_prefix_length; ++i) {
+          d_correlation += d_fixed_lag_corr[i];
         }
         // calculate energy of cyclic prefix for this sample completely
-        volk_32fc_magnitude_squared_32f(d_magnitude_squared, sample, d_cyclic_prefix_length);
-        d_energy_prefix = 0;
-        for (int j = 0; j < d_cyclic_prefix_length; j++) {
-          d_energy_prefix += d_magnitude_squared[j];
-        }
+        volk_32fc_magnitude_squared_32f(d_mag_squared, sample, d_cyclic_prefix_length);
+        volk_32f_accumulator_s32f(&d_energy_prefix, d_mag_squared, d_cyclic_prefix_length);
         // calculate energy of its repetition for this sample completely
-        volk_32fc_magnitude_squared_32f(d_magnitude_squared, &sample[d_symbol_length], d_cyclic_prefix_length);
-        d_energy_repetition = 0;
-        for (int j = 0; j < d_cyclic_prefix_length; j++) {
-          d_energy_repetition += d_magnitude_squared[j];
-        }
+        volk_32fc_magnitude_squared_32f(d_mag_squared, &sample[d_symbol_length], d_cyclic_prefix_length);
+        volk_32f_accumulator_s32f(&d_energy_repetition, d_mag_squared, d_cyclic_prefix_length);
       } else {
         // calculate next step for moving average
         d_correlation +=
