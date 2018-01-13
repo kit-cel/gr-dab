@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@
 
 #include <gnuradio/io_signature.h>
 #include "ofdm_coarse_frequency_correction_vcvc_impl.h"
+#include <volk/volk.h>
 #include <math.h>
 
 namespace gr {
@@ -48,7 +49,10 @@ namespace gr {
         d_cyclic_prefix_length(cyclic_prefix_length),
         d_freq_offset (0),
         d_snr (0)
-    {}
+    {
+      unsigned int alignment = volk_get_alignment();
+      d_mag_squared = (float*)volk_malloc(sizeof(float)*num_carriers+1, alignment);
+    }
 
     /*
      * Our virtual destructor.
@@ -67,12 +71,10 @@ namespace gr {
       unsigned int i, index;
       float energy = 0, max = 0;
       // first energy measurement is processed completely
-       for (int i = 0; i < d_num_carriers/2; ++i) {
-           energy+=std::real(symbol[i])*std::real(symbol[i]) + std::imag(symbol[i])*std::imag(symbol[i]);
-       }
-       for (int i = d_num_carriers/2+1; i <= d_num_carriers; ++i) {
-           energy+=std::real(symbol[i])*std::real(symbol[i]) + std::imag(symbol[i])*std::imag(symbol[i]);
-       }
+      volk_32fc_magnitude_squared_32f(d_mag_squared, symbol, d_num_carriers+1);
+      volk_32f_accumulator_s32f(&energy, d_mag_squared, d_num_carriers+1);
+      // subtract the central (DC) carrier which is not occupied
+      energy -= std::real(symbol[d_num_carriers])*std::real(symbol[d_num_carriers]) + std::imag(symbol[d_num_carriers])*std::imag(symbol[d_num_carriers]);
       max = energy;
       index = 0;
       /* the energy measurements with all possible carrier offsets are calculated over a moving sum,
@@ -104,28 +106,30 @@ namespace gr {
     {
       // measure normalized energy of occupied sub-carriers
       float energy = 0;
-      for (int i=0; i<d_num_carriers/2; i++) {
-          energy+=std::real(symbol[i+d_freq_offset])*std::real(symbol[i+d_freq_offset]) + std::imag(symbol[i+d_freq_offset])*std::imag(symbol[i+d_freq_offset]);
-      }
-      for (int i = d_num_carriers/2+1; i <= d_num_carriers; ++i) {
-          energy+=std::real(symbol[i+d_freq_offset])*std::real(symbol[i+d_freq_offset]) + std::imag(symbol[i+d_freq_offset])*std::imag(symbol[i+d_freq_offset]);
-      }
+      volk_32fc_magnitude_squared_32f(d_mag_squared, &symbol[d_freq_offset], d_num_carriers+1);
+      volk_32f_accumulator_s32f(&energy, d_mag_squared, d_num_carriers+1);
+      // subtract the central (DC) carrier which is not assigned
+      energy -= std::real(symbol[d_num_carriers+d_freq_offset])*std::real(symbol[d_num_carriers+d_freq_offset]) + std::imag(symbol[d_num_carriers+d_freq_offset])*std::imag(symbol[d_num_carriers+d_freq_offset]);
+
       // measure normalized energy of empty sub-carriers
-      float noise = 0;
-      for (int i=0; i<d_freq_offset; i++) {
-        noise+=std::real(symbol[i])*std::real(symbol[i]) + std::imag(symbol[i])*std::imag(symbol[i]);
-      }
-      noise += std::real(symbol[d_freq_offset+d_num_carriers/2])*std::real(symbol[d_freq_offset+d_num_carriers/2]) + std::imag(symbol[d_freq_offset+d_num_carriers/2])*std::imag(symbol[d_freq_offset+d_num_carriers/2]);
-      for (int i=0; i<d_fft_length-d_num_carriers-d_freq_offset-1; i++) {
-        noise+=std::real(symbol[i+d_freq_offset+d_num_carriers+1])*std::real(symbol[i+d_freq_offset+d_num_carriers+1]) + std::imag(symbol[i+d_freq_offset+d_num_carriers+1])*std::imag(symbol[i+d_freq_offset+d_num_carriers+1]);
-      }
+      float noise_left = 0, noise_right, noise_total;
+      // empty sub-carriers on left side
+      volk_32fc_magnitude_squared_32f(d_mag_squared, symbol, d_freq_offset);
+      volk_32f_accumulator_s32f(&noise_left, d_mag_squared, d_freq_offset);
+      // empty sub-carriers on right side
+      volk_32fc_magnitude_squared_32f(d_mag_squared, &symbol[d_freq_offset + d_num_carriers + 1], d_fft_length-d_num_carriers-d_freq_offset-1);
+      volk_32f_accumulator_s32f(&noise_right, d_mag_squared, d_fft_length-d_num_carriers-d_freq_offset-1);
+      // add noise energies from both sides to total noise
+      noise_total = noise_left + noise_right;
+      noise_total += std::real(symbol[d_freq_offset+d_num_carriers/2])*std::real(symbol[d_freq_offset+d_num_carriers/2]) + std::imag(symbol[d_freq_offset+d_num_carriers/2])*std::imag(symbol[d_freq_offset+d_num_carriers/2]);
+
       // normalize
       energy = energy/d_num_carriers;
-      noise = noise/(d_fft_length-d_num_carriers);
+      noise_total = noise_total /(d_fft_length-d_num_carriers);
       // check if ratio is in the definition range of the log
-      if(energy > noise){
+      if(energy > noise_total){
         // now we can calculate the SNR in dB
-        d_snr = 10*log10((energy-noise)/noise);
+        d_snr = 10*log10((energy-noise_total)/noise_total);
       }
     }
 
