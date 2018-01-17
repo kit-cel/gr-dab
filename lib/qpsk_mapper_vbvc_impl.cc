@@ -64,14 +64,9 @@ namespace gr {
         // iterate over each symbol vector
         for (int j = 0; j < d_symbol_length/8; ++j) {
           // iterate over the symbol vector, but each byte has 8 bit, which are accessed manually
-          out[i*d_symbol_length + j*8 + 0] = gr_complex((in[i*(d_symbol_length/4) + j]&128)>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&128)>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 1] = gr_complex((in[i*(d_symbol_length/4) + j]&64 )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&64 )>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 2] = gr_complex((in[i*(d_symbol_length/4) + j]&32 )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&32 )>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 3] = gr_complex((in[i*(d_symbol_length/4) + j]&16 )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&16 )>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 4] = gr_complex((in[i*(d_symbol_length/4) + j]&8  )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&8  )>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 5] = gr_complex((in[i*(d_symbol_length/4) + j]&4  )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&4  )>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 6] = gr_complex((in[i*(d_symbol_length/4) + j]&2  )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&2  )>0?-I_SQRT2:I_SQRT2);
-          out[i*d_symbol_length + j*8 + 7] = gr_complex((in[i*(d_symbol_length/4) + j]&1  )>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&1  )>0?-I_SQRT2:I_SQRT2);
+          for (int k = 0; k < 8; k++) {
+            out[i*d_symbol_length + j*8 + k] = gr_complex((in[i*(d_symbol_length/4) + j]&(0x80>>k))>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&(0x80>>k))>0?-I_SQRT2:I_SQRT2);
+          }
         }
       }
       // Tell runtime system how many output items we produced.
