@@ -55,7 +55,8 @@ namespace gr {
 
       uint16_t BinToDec(const uint8_t *data, size_t offset, size_t length);
 
-      int get_aac_channel_configuration(int16_t m_mpeg_surround_config, uint8_t aacChannelMode);
+      int get_aac_channel_configuration(int16_t m_mpeg_surround_config,
+                                        uint8_t aacChannelMode);
 
       bool initialize(uint8_t dacRate,
                       uint8_t sbrFlag,
@@ -85,8 +86,7 @@ namespace gr {
 
       ~mp4_decode_bs_impl();
 
-      virtual int get_sample_rate()
-      { return d_sample_rate; }
+      virtual int get_sample_rate() { return d_sample_rate; }
 
       // Where all the action really happens
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);

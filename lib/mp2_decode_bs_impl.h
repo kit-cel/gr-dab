@@ -33,9 +33,9 @@
 #define INCLUDED_DAB_MP2_DECODE_BS_IMPL_H
 
 #include <dab/mp2_decode_bs.h>
-#include	<stdio.h>
-#include	<stdint.h>
-#include	<math.h>
+#include  <stdio.h>
+#include  <stdint.h>
+#include  <math.h>
 //#include	"pad-handler.h"
 
 namespace gr {
@@ -106,8 +106,7 @@ namespace gr {
 
       ~mp2_decode_bs_impl();
 
-      virtual int32_t get_sample_rate()
-      {return d_sample_rate;}
+      virtual int32_t get_sample_rate() { return d_sample_rate; }
 
       // Where all the action really happens
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);

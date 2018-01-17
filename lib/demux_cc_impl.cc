@@ -34,50 +34,50 @@ namespace gr {
   namespace dab {
 
     demux_cc::sptr
-    demux_cc::make(unsigned int symbol_length, unsigned int symbols_fic, unsigned int symbol_msc, gr_complex fillval)
-    {
+    demux_cc::make(unsigned int symbol_length, unsigned int symbols_fic,
+                   unsigned int symbol_msc, gr_complex fillval) {
       return gnuradio::get_initial_sptr
-        (new demux_cc_impl(symbol_length, symbols_fic, symbol_msc, fillval));
+              (new demux_cc_impl(symbol_length, symbols_fic, symbol_msc,
+                                 fillval));
     }
 
     /*
      * The private constructor
      */
-    demux_cc_impl::demux_cc_impl(unsigned int symbol_length, unsigned int symbols_fic, unsigned int symbol_msc, gr_complex fillval)
-      : gr::block("demux_cc",
-              gr::io_signature::make(1, 1, sizeof(gr_complex)*symbol_length),
-              gr::io_signature::make(2, 2, sizeof(gr_complex)*symbol_length)),
-        d_symbol_lenght(symbol_length),
-        d_symbols_fic(symbols_fic),
-        d_symbols_msc(symbol_msc),
-        d_fillval(fillval)
-    {
+    demux_cc_impl::demux_cc_impl(unsigned int symbol_length,
+                                 unsigned int symbols_fic,
+                                 unsigned int symbol_msc, gr_complex fillval)
+            : gr::block("demux_cc",
+                        gr::io_signature::make(1, 1, sizeof(gr_complex) *
+                                                     symbol_length),
+                        gr::io_signature::make(2, 2, sizeof(gr_complex) *
+                                                     symbol_length)),
+              d_symbol_lenght(symbol_length),
+              d_symbols_fic(symbols_fic),
+              d_symbols_msc(symbol_msc),
+              d_fillval(fillval) {
       set_tag_propagation_policy(TPP_DONT);
-      d_symbol_count = 0;
       d_fic_counter = 0;
       d_msc_counter = 0;
-      d_on_fic = true;
     }
 
     /*
      * Our virtual destructor.
      */
-    demux_cc_impl::~demux_cc_impl()
-    {
+    demux_cc_impl::~demux_cc_impl() {
     }
 
     void
-    demux_cc_impl::forecast (int noutput_items, gr_vector_int &ninput_items_required)
-    {
+    demux_cc_impl::forecast(int noutput_items,
+                            gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items;
     }
 
     int
-    demux_cc_impl::general_work (int noutput_items,
-                       gr_vector_int &ninput_items,
-                       gr_vector_const_void_star &input_items,
-                       gr_vector_void_star &output_items)
-    {
+    demux_cc_impl::general_work(int noutput_items,
+                                gr_vector_int &ninput_items,
+                                gr_vector_const_void_star &input_items,
+                                gr_vector_void_star &output_items) {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *fic_out = (gr_complex *) output_items[0];
       gr_complex *msc_out = (gr_complex *) output_items[1];
@@ -86,50 +86,54 @@ namespace gr {
       unsigned int msc_syms_written = 0;
 
       // get tags for the beginning of a frame
-      std::vector<gr::tag_t> tags;
+      std::vector <gr::tag_t> tags;
       const std::string s = "Start";
       pmt::pmt_t d_key = pmt::string_to_symbol(s);
       unsigned int tag_count = 0;
       get_tags_in_window(tags, 0, 0, noutput_items, d_key);
 
       for (int i = 0; i < noutput_items; ++i) {
-        if(tag_count < tags.size() && tags[tag_count].offset-nitems_read(0) - nconsumed == 0) {
+        if (tag_count < tags.size() &&
+            tags[tag_count].offset - nitems_read(0) - nconsumed == 0) {
           // this input symbol is tagged: a new frame begins here
-          if(d_fic_counter%d_symbols_fic == 0 && d_msc_counter%d_symbols_msc == 0){
+          if (d_fic_counter % d_symbols_fic == 0 &&
+              d_msc_counter % d_symbols_msc == 0) {
             // we are at the beginning of a frame and also finished writing the last frame
             // we can remove this first symbol of the frame (phase reference symbol) and copy the other symbols
             tag_count++;
             nconsumed++;
             d_fic_counter = 0;
             d_msc_counter = 0;
-          }
-          else{
+          } else {
             // we did not finish the last frame, maybe we lost track in sync
             // lets fill the remaining symbols with fillval before continuing with the new input frame
-            if(d_fic_counter%d_symbols_fic != 0){
-              memset(&fic_out[fic_syms_written++*d_symbol_lenght], 0, d_symbol_lenght * sizeof(gr_complex));
+            if (d_fic_counter % d_symbols_fic != 0) {
+              memset(&fic_out[fic_syms_written++ * d_symbol_lenght], 0,
+                     d_symbol_lenght * sizeof(gr_complex));
               d_fic_counter++;
-            }
-            else{
-              memset(&msc_out[msc_syms_written++*d_symbol_lenght], 0, d_symbol_lenght * sizeof(gr_complex));
+            } else {
+              memset(&msc_out[msc_syms_written++ * d_symbol_lenght], 0,
+                     d_symbol_lenght * sizeof(gr_complex));
               d_msc_counter++;
             }
           }
-        }
-        else if (d_fic_counter < d_symbols_fic){
+        } else if (d_fic_counter < d_symbols_fic) {
           // copy this symbol to fic output
-          memcpy(&fic_out[fic_syms_written++*d_symbol_lenght], &in[nconsumed++*d_symbol_lenght], d_symbol_lenght * sizeof(gr_complex));
+          memcpy(&fic_out[fic_syms_written++ * d_symbol_lenght],
+                 &in[nconsumed++ * d_symbol_lenght],
+                 d_symbol_lenght * sizeof(gr_complex));
           d_fic_counter++;
-        }
-        else if (d_msc_counter < d_symbols_msc){
+        } else if (d_msc_counter < d_symbols_msc) {
           // copy this output to msc output
-          memcpy(&msc_out[msc_syms_written++*d_symbol_lenght], &in[nconsumed++*d_symbol_lenght], d_symbol_lenght * sizeof(gr_complex));
+          memcpy(&msc_out[msc_syms_written++ * d_symbol_lenght],
+                 &in[nconsumed++ * d_symbol_lenght],
+                 d_symbol_lenght * sizeof(gr_complex));
           d_msc_counter++;
         }
       }
       // Tell runtime system how many input items we consumed on
       // each input stream.
-      consume_each (nconsumed);
+      consume_each(nconsumed);
 
       // Tell runtime system how many output items we produced on each output stream separately.
       produce(0, fic_syms_written);

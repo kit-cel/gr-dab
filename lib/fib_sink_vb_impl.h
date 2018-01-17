@@ -1,7 +1,7 @@
 /* -*- c++ -*- */
 /*
- * Copyright belongs to Andreas Mueller
- * Modified 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2008 by Andreas Mueller
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,10 @@
 
 namespace gr {
   namespace dab {
-/*! \brief sink for DAB FIBs, interprets MSC and SI
+/*! \brief sink for DAB/DAB+ FIBs, interprets MSC and SI
+ * crc16 check of incoming fibs
+ * reads correct fibs
+ * generates json objects with service and multiplex information
  *
  */
     class fib_sink_vb_impl : public fib_sink_vb {
@@ -55,28 +58,20 @@ namespace gr {
       std::string d_programme_type_current;
       int d_programme_type_written_trigger;
 
-
-
     public:
       fib_sink_vb_impl();
 
-      virtual std::string get_ensemble_info()
-      { return d_json_ensemble_info; }
+      virtual std::string get_ensemble_info() { return d_json_ensemble_info; }
 
-      virtual std::string get_service_info()
-      { return d_json_service_info;}
+      virtual std::string get_service_info() { return d_json_service_info; }
 
-      virtual std::string get_service_labels()
-      { return d_json_service_labels;}
+      virtual std::string get_service_labels() { return d_json_service_labels; }
 
-      virtual std::string get_subch_info()
-      { return d_json_subch_info;}
+      virtual std::string get_subch_info() { return d_json_subch_info; }
 
-      virtual std::string get_programme_type()
-      { return d_json_programme_type;}
+      virtual std::string get_programme_type() { return d_json_programme_type; }
 
-      virtual bool get_crc_passed()
-      { return d_crc_passed;}
+      virtual bool get_crc_passed() { return d_crc_passed; }
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,

@@ -3,4 +3,4 @@ The GNU Radio Out-Of-Tree module gr-dab contains the necessary signal processing
 
 Copyright (C) Andreas Müller, 2011
 
-Additions made by Moritz Luca Schmid, 2017 (Google Summer of Code Project 2017, details see https://dabtransceiver.wordpress.com/about/)
+Copyright (C) Moritz Luca Schmid, 2017 (Google Summer of Code Project 2017, details see https://dabtransceiver.wordpress.com/about/)

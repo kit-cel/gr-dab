@@ -35,42 +35,44 @@
 namespace gr {
   namespace dab {
 
-frequency_interleaver_vcc::sptr
-frequency_interleaver_vcc::make(const std::vector<short> &interleaving_sequence)
-{
-  return gnuradio::get_initial_sptr
-    (new frequency_interleaver_vcc_impl(interleaving_sequence));
-}
+    frequency_interleaver_vcc::sptr
+    frequency_interleaver_vcc::make(
+            const std::vector<short> &interleaving_sequence) {
+      return gnuradio::get_initial_sptr
+              (new frequency_interleaver_vcc_impl(interleaving_sequence));
+    }
 
-frequency_interleaver_vcc_impl::frequency_interleaver_vcc_impl(const std::vector<short> &interleaving_sequence)
-  : gr::sync_block("frequency_interleaver_vcc",
-             gr::io_signature::make (1, 1, sizeof(gr_complex)*interleaving_sequence.size()),
-             gr::io_signature::make (1, 1, sizeof(gr_complex)*interleaving_sequence.size())),
-  d_interleaving_sequence(interleaving_sequence), d_length(interleaving_sequence.size())
-{
-  for (unsigned int i=0; i<d_length; i++) 
-    assert(d_interleaving_sequence[i]<(short)d_length);
-}
+    frequency_interleaver_vcc_impl::frequency_interleaver_vcc_impl(
+            const std::vector<short> &interleaving_sequence)
+            : gr::sync_block("frequency_interleaver_vcc",
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
+                                                          interleaving_sequence.size()),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
+                                                          interleaving_sequence.size())),
+              d_interleaving_sequence(interleaving_sequence),
+              d_length(interleaving_sequence.size()) {
+      for (unsigned int i = 0; i < d_length; i++)
+        assert(d_interleaving_sequence[i] < (short) d_length);
+    }
 
 
-int 
-frequency_interleaver_vcc_impl::work(int noutput_items,
-                        gr_vector_const_void_star &input_items,
-                        gr_vector_void_star &output_items)
-{
-  gr_complex const *in = (const gr_complex *) input_items[0];
-  gr_complex *out = (gr_complex *) output_items[0];
+    int
+    frequency_interleaver_vcc_impl::work(int noutput_items,
+                                         gr_vector_const_void_star &input_items,
+                                         gr_vector_void_star &output_items) {
+      gr_complex const *in = (const gr_complex *) input_items[0];
+      gr_complex *out = (gr_complex *) output_items[0];
 
-  for (int i = 0; i < noutput_items; i++) {
-    for (unsigned int j = 0; j < d_length; j++) 
-      out[d_interleaving_sequence[j]] = in[j];
-    out += d_length;
-    in  += d_length;
+      for (int i = 0; i < noutput_items; i++) {
+        for (unsigned int j = 0; j < d_length; j++)
+          out[d_interleaving_sequence[j]] = in[j];
+        out += d_length;
+        in += d_length;
+      }
+
+      return noutput_items;
+    }
+
   }
-    
-  return noutput_items;
-}
-
-}
 }
 

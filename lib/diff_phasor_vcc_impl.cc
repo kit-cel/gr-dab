@@ -36,37 +36,36 @@
 namespace gr {
   namespace dab {
 
-diff_phasor_vcc::sptr
-diff_phasor_vcc::make(unsigned int length)
-{
-  return gnuradio::get_initial_sptr
-    (new diff_phasor_vcc_impl(length));
-}
+    diff_phasor_vcc::sptr
+    diff_phasor_vcc::make(unsigned int length) {
+      return gnuradio::get_initial_sptr
+              (new diff_phasor_vcc_impl(length));
+    }
 
-diff_phasor_vcc_impl::diff_phasor_vcc_impl(unsigned int length)
-  : gr::sync_block("diff_phasor_vcc",
-             gr::io_signature::make (1, 1, sizeof(gr_complex)*length),
-             gr::io_signature::make (1, 1, sizeof(gr_complex)*length)),
-  d_length(length)
-{
-  set_history(2);
-}
+    diff_phasor_vcc_impl::diff_phasor_vcc_impl(unsigned int length)
+            : gr::sync_block("diff_phasor_vcc",
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
+                                                          length),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
+                                                          length)),
+              d_length(length) {
+      set_history(2);
+    }
 
 
-int 
-diff_phasor_vcc_impl::work(int noutput_items,
-                        gr_vector_const_void_star &input_items,
-                        gr_vector_void_star &output_items)
-{
-  gr_complex const *in = (const gr_complex *) input_items[0];
-  gr_complex *out = (gr_complex *) output_items[0];
+    int
+    diff_phasor_vcc_impl::work(int noutput_items,
+                               gr_vector_const_void_star &input_items,
+                               gr_vector_void_star &output_items) {
+      gr_complex const *in = (const gr_complex *) input_items[0];
+      gr_complex *out = (gr_complex *) output_items[0];
 
-  for(unsigned int i = 0; i < noutput_items*d_length; i++){
-    out[i] = in[i+d_length] * conj(in[i]);
+      for (unsigned int i = 0; i < noutput_items * d_length; i++) {
+        out[i] = in[i + d_length] * conj(in[i]);
+      }
+
+      return noutput_items;
+    }
+
   }
-    
-  return noutput_items;
-}
-
-}
 }

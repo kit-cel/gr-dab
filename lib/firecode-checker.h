@@ -27,7 +27,7 @@
 #ifndef    FIRECODE_CHECKER
 #define    FIRECODE_CHECKER
 
-#include	<stdint.h>
+#include  <stdint.h>
 
 
 class firecode_checker {

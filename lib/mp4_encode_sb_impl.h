@@ -37,33 +37,36 @@ namespace gr {
  * @param bit_rate_n data rate in multiples of 8kbit/s
  * @param channels number of input audio channels
  */
-    class mp4_encode_sb_impl : public mp4_encode_sb
-    {
-     private:
+    class mp4_encode_sb_impl : public mp4_encode_sb {
+    private:
       int d_bit_rate_n, d_channels, d_samp_rate, d_afterburner, d_aot;
       int nconsumed, nproduced;
       int d_input_size, d_output_size;
       HANDLE_AACENCODER d_aac_encoder;
-      AACENC_InfoStruct info = { 0 };
+      AACENC_InfoStruct info = {0};
 
       bool init_aac_encoder(HANDLE_AACENCODER *encoder,
                             int channels,
                             int sample_rate,
                             int afterburner,
                             int *aot);
-      bool encode(int16_t *input_buffer, int size_input_buffer, unsigned char *output_buffer, int size_output_buffer);
 
-     public:
-      mp4_encode_sb_impl(int bit_rate_n, int channels, int samp_rate, int afterburner);
+      bool encode(int16_t *input_buffer, int size_input_buffer,
+                  unsigned char *output_buffer, int size_output_buffer);
+
+    public:
+      mp4_encode_sb_impl(int bit_rate_n, int channels, int samp_rate,
+                         int afterburner);
+
       ~mp4_encode_sb_impl();
 
       // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       int general_work(int noutput_items,
-           gr_vector_int &ninput_items,
-           gr_vector_const_void_star &input_items,
-           gr_vector_void_star &output_items);
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items);
     };
 
   } // namespace dab

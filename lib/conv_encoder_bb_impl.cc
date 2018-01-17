@@ -35,8 +35,7 @@ namespace gr {
   namespace dab {
 
     conv_encoder_bb::sptr
-    conv_encoder_bb::make(int framesize)
-    {
+    conv_encoder_bb::make(int framesize) {
       return gnuradio::get_initial_sptr
               (new conv_encoder_bb_impl(framesize));
     }
@@ -66,9 +65,9 @@ namespace gr {
     conv_encoder_bb_impl::conv_encoder_bb_impl(int framesize)
             : gr::block("conv_encoder_bb",
                         gr::io_signature::make(1, 1, sizeof(unsigned char)),
-                        gr::io_signature::make(1, 1, sizeof(unsigned char))),
-              d_framesize(framesize)
-    {
+                        gr::io_signature::make(1, 1,
+                                               sizeof(unsigned char))),
+              d_framesize(framesize) {
       d_outsize = (d_framesize * 4) + 3;
       set_output_multiple(framesize * 4 + 3);
     }
@@ -76,22 +75,21 @@ namespace gr {
     /*
      * Our virtual destructor.
      */
-    conv_encoder_bb_impl::~conv_encoder_bb_impl()
-    {
+    conv_encoder_bb_impl::~conv_encoder_bb_impl() {
     }
 
     void
-    conv_encoder_bb_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
-    {
-      ninput_items_required[0] = (noutput_items / (d_framesize * 4 + 3)) * d_framesize;
+    conv_encoder_bb_impl::forecast(int noutput_items,
+                                   gr_vector_int &ninput_items_required) {
+      ninput_items_required[0] =
+              (noutput_items / (d_framesize * 4 + 3)) * d_framesize;
     }
 
     int
     conv_encoder_bb_impl::general_work(int noutput_items,
                                        gr_vector_int &ninput_items,
                                        gr_vector_const_void_star &input_items,
-                                       gr_vector_void_star &output_items)
-    {
+                                       gr_vector_void_star &output_items) {
       const unsigned char *in = (const unsigned char *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
       d_memory = 0;

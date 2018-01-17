@@ -40,26 +40,26 @@ namespace gr {
  * @param sample_rate sample rate of the PCM audio stream
  *
  */
-    class mp2_encode_sb_impl : public mp2_encode_sb
-    {
-     private:
+    class mp2_encode_sb_impl : public mp2_encode_sb {
+    private:
       int d_bit_rate_n, d_channels, d_samp_rate;
       int d_output_size, d_input_size;
       int d_nproduced, d_nconsumed;
 
       bool init_encoder();
 
-     public:
+    public:
       mp2_encode_sb_impl(int bit_rate_n, int channels, int sample_rate);
+
       ~mp2_encode_sb_impl();
 
       // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       int general_work(int noutput_items,
-           gr_vector_int &ninput_items,
-           gr_vector_const_void_star &input_items,
-           gr_vector_void_star &output_items);
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items);
     };
 
   } // namespace dab

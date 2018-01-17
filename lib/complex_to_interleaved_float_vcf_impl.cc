@@ -35,41 +35,43 @@
 namespace gr {
   namespace dab {
 
-complex_to_interleaved_float_vcf::sptr
-complex_to_interleaved_float_vcf::make(unsigned int length)
-{
-  return gnuradio::get_initial_sptr
-    (new complex_to_interleaved_float_vcf_impl(length));
-}
-
-complex_to_interleaved_float_vcf_impl::complex_to_interleaved_float_vcf_impl(unsigned int length)
-  : gr::sync_block("complex_to_interleaved_float_vcf",
-             gr::io_signature::make (1, 1, sizeof(gr_complex)*length),
-             gr::io_signature::make (1, 1, sizeof(float)*length*2)),
-  d_length(length)
-{
-}
-
-
-int 
-complex_to_interleaved_float_vcf_impl::work(int noutput_items,
-                        gr_vector_const_void_star &input_items,
-                        gr_vector_void_star &output_items)
-{
-  gr_complex const *in = (const gr_complex *) input_items[0];
-  float *out = (float *) output_items[0];
-
-  for (int i=0; i<noutput_items; i++) {
-    for (unsigned int j=0;j<d_length;j++) {
-      out[j] = in[j].real();
-      out[j+d_length] = in[j].imag();
+    complex_to_interleaved_float_vcf::sptr
+    complex_to_interleaved_float_vcf::make(unsigned int length) {
+      return gnuradio::get_initial_sptr
+              (new complex_to_interleaved_float_vcf_impl(length));
     }
-    in += d_length;
-    out+= 2*d_length;
-  }
-    
-  return noutput_items;
-}
 
-}
+    complex_to_interleaved_float_vcf_impl::complex_to_interleaved_float_vcf_impl(
+            unsigned int length)
+            : gr::sync_block("complex_to_interleaved_float_vcf",
+                             gr::io_signature::make(1, 1,
+                                                    sizeof(gr_complex) *
+                                                    length),
+                             gr::io_signature::make(1, 1,
+                                                    sizeof(float) * length *
+                                                    2)),
+              d_length(length) {
+    }
+
+
+    int
+    complex_to_interleaved_float_vcf_impl::work(int noutput_items,
+                                                gr_vector_const_void_star &input_items,
+                                                gr_vector_void_star &output_items) {
+      gr_complex const *in = (const gr_complex *) input_items[0];
+      float *out = (float *) output_items[0];
+
+      for (int i = 0; i < noutput_items; i++) {
+        for (unsigned int j = 0; j < d_length; j++) {
+          out[j] = in[j].real();
+          out[j + d_length] = in[j].imag();
+        }
+        in += d_length;
+        out += 2 * d_length;
+      }
+
+      return noutput_items;
+    }
+
+  }
 }
