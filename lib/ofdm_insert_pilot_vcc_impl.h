@@ -26,24 +26,23 @@
 
 namespace gr {
   namespace dab {
+    class ofdm_insert_pilot_vcc_impl : public ofdm_insert_pilot_vcc {
+    private:
 
-class ofdm_insert_pilot_vcc_impl : public ofdm_insert_pilot_vcc
-{
-  private:
+      std::vector <gr_complex> d_pilot;
+      char d_start;
 
-    std::vector<gr_complex> d_pilot;
-    char d_start;
+    public:
+      ofdm_insert_pilot_vcc_impl(const std::vector <gr_complex> &pilot);
 
-  public:
-    ofdm_insert_pilot_vcc_impl(const std::vector<gr_complex> &pilot);
-    void forecast (int noutput_items, gr_vector_int &ninput_items_required);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
-    int general_work (int noutput_items,
-                      gr_vector_int &ninput_items,
-                      gr_vector_const_void_star &input_items,
-                      gr_vector_void_star &output_items);
-};
-}
+      int general_work(int noutput_items,
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items);
+    };
+  }
 }
 
 #endif /* INCLUDED_DAB_OFDM_INSERT_PILOT_VCC_H */

@@ -32,8 +32,7 @@ namespace gr {
  * \param num_ofdm_symbols number of OFDM symbols without the NULL symbol
  *
  */
-    class ofdm_synchronization_cvf_impl : public ofdm_synchronization_cvf
-    {
+    class ofdm_synchronization_cvf_impl : public ofdm_synchronization_cvf {
     private:
       int d_symbol_length;
       int d_cyclic_prefix_length;
@@ -62,11 +61,15 @@ namespace gr {
       int d_nwritten;
 
     public:
-      ofdm_synchronization_cvf_impl(int symbol_length, int cyclic_prefix_length, int fft_length, int symbols_per_frame);
+      ofdm_synchronization_cvf_impl(int symbol_length, int cyclic_prefix_length,
+                                    int fft_length, int symbols_per_frame);
+
       ~ofdm_synchronization_cvf_impl();
 
       void delayed_correlation(const gr_complex *sample, bool new_calculation);
+
       bool detect_peak();
+
       bool detect_start_of_symbol();
 
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);

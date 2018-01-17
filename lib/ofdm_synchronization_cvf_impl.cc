@@ -38,17 +38,21 @@ namespace gr {
   namespace dab {
 
     ofdm_synchronization_cvf::sptr
-    ofdm_synchronization_cvf::make(int symbol_length, int cyclic_prefix_length, int fft_length, int symbols_per_frame)
-    {
+    ofdm_synchronization_cvf::make(int symbol_length, int cyclic_prefix_length,
+                                   int fft_length, int symbols_per_frame) {
       return gnuradio::get_initial_sptr
-              (new ofdm_synchronization_cvf_impl(symbol_length, cyclic_prefix_length, fft_length, symbols_per_frame));
+              (new ofdm_synchronization_cvf_impl(symbol_length,
+                                                 cyclic_prefix_length,
+                                                 fft_length,
+                                                 symbols_per_frame));
     }
 
     /*
      * The private constructor
      */
-    ofdm_synchronization_cvf_impl::ofdm_synchronization_cvf_impl(int symbol_length, int cyclic_prefix_length,
-                                                                 int fft_length, int symbols_per_frame)
+    ofdm_synchronization_cvf_impl::ofdm_synchronization_cvf_impl(
+            int symbol_length, int cyclic_prefix_length,
+            int fft_length, int symbols_per_frame)
             : gr::block("ofdm_synchronization_cvf",
                         gr::io_signature::make(1, 1, sizeof(gr_complex)),
                         gr::io_signature::make(1, 1, sizeof(gr_complex))),
@@ -56,45 +60,47 @@ namespace gr {
               d_cyclic_prefix_length(cyclic_prefix_length),
               d_symbols_per_frame(symbols_per_frame),
               d_fft_length(fft_length),
-              d_correlation (0),
-              d_energy_prefix (1),
-              d_energy_repetition (1),
-              d_NULL_symbol_energy (1),
-              d_frequency_offset_per_sample (0),
-              d_NULL_detected (false),
-              d_moving_average_counter (0),
-              d_symbol_count (0),
-              d_symbol_element_count (0),
-              d_wait_for_NULL (true),
-              d_on_triangle (false),
-              d_control_counter (0),
-              d_phase (0),
-              d_correlation_maximum (0),
-              d_peak_set (false)
-    {
+              d_correlation(0),
+              d_energy_prefix(1),
+              d_energy_repetition(1),
+              d_NULL_symbol_energy(1),
+              d_frequency_offset_per_sample(0),
+              d_NULL_detected(false),
+              d_moving_average_counter(0),
+              d_symbol_count(0),
+              d_symbol_element_count(0),
+              d_wait_for_NULL(true),
+              d_on_triangle(false),
+              d_control_counter(0),
+              d_phase(0),
+              d_correlation_maximum(0),
+              d_peak_set(false) {
       //allocation for repeating energy measurements
       unsigned int alignment = volk_get_alignment();
-      d_mag_squared = (float*)volk_malloc(sizeof(float)*d_cyclic_prefix_length, alignment);
-      d_fixed_lag_corr = (gr_complex*)volk_malloc(sizeof(gr_complex)*d_cyclic_prefix_length, alignment);
+      d_mag_squared = (float *) volk_malloc(
+              sizeof(float) * d_cyclic_prefix_length, alignment);
+      d_fixed_lag_corr = (gr_complex *) volk_malloc(
+              sizeof(gr_complex) * d_cyclic_prefix_length, alignment);
     }
 
     /*
      * Our virtual destructor.
      */
-    ofdm_synchronization_cvf_impl::~ofdm_synchronization_cvf_impl()
-    {
+    ofdm_synchronization_cvf_impl::~ofdm_synchronization_cvf_impl() {
     }
 
     void
-    ofdm_synchronization_cvf_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
-    {
-      ninput_items_required[0] = noutput_items + d_symbol_length + d_cyclic_prefix_length + 1;
+    ofdm_synchronization_cvf_impl::forecast(int noutput_items,
+                                            gr_vector_int &ninput_items_required) {
+      ninput_items_required[0] =
+              noutput_items + d_symbol_length + d_cyclic_prefix_length + 1;
     }
 
     void
-    ofdm_synchronization_cvf_impl::delayed_correlation(const gr_complex *sample, bool new_calculation)
-    {
-      if (d_moving_average_counter > 100000 || d_moving_average_counter == 0 || new_calculation) {
+    ofdm_synchronization_cvf_impl::delayed_correlation(const gr_complex *sample,
+                                                       bool new_calculation) {
+      if (d_moving_average_counter > 100000 || d_moving_average_counter == 0 ||
+          new_calculation) {
         if (d_moving_average_counter == 0 && (!new_calculation)) {
           // first value is calculated completely, next values are calculated with moving average
           d_moving_average_counter++;
@@ -103,70 +109,80 @@ namespace gr {
           d_moving_average_counter = 0;
         }
         // calculate delayed correlation for this sample completely
-        volk_32fc_x2_conjugate_dot_prod_32fc(d_fixed_lag_corr, sample, &sample[d_symbol_length], d_cyclic_prefix_length);
+        volk_32fc_x2_conjugate_dot_prod_32fc(d_fixed_lag_corr, sample,
+                                             &sample[d_symbol_length],
+                                             d_cyclic_prefix_length);
         d_correlation = 0;
         for (int i = 0; i < d_cyclic_prefix_length; ++i) {
           d_correlation += d_fixed_lag_corr[i];
         }
         // calculate energy of cyclic prefix for this sample completely
-        volk_32fc_magnitude_squared_32f(d_mag_squared, sample, d_cyclic_prefix_length);
-        volk_32f_accumulator_s32f(&d_energy_prefix, d_mag_squared, d_cyclic_prefix_length);
+        volk_32fc_magnitude_squared_32f(d_mag_squared, sample,
+                                        d_cyclic_prefix_length);
+        volk_32f_accumulator_s32f(&d_energy_prefix, d_mag_squared,
+                                  d_cyclic_prefix_length);
         // calculate energy of its repetition for this sample completely
-        volk_32fc_magnitude_squared_32f(d_mag_squared, &sample[d_symbol_length], d_cyclic_prefix_length);
-        volk_32f_accumulator_s32f(&d_energy_repetition, d_mag_squared, d_cyclic_prefix_length);
+        volk_32fc_magnitude_squared_32f(d_mag_squared, &sample[d_symbol_length],
+                                        d_cyclic_prefix_length);
+        volk_32f_accumulator_s32f(&d_energy_repetition, d_mag_squared,
+                                  d_cyclic_prefix_length);
       } else {
         // calculate next step for moving average
         d_correlation +=
-                sample[d_cyclic_prefix_length - 1] * conj(sample[d_symbol_length + d_cyclic_prefix_length - 1]);
-        d_energy_prefix += std::real(sample[d_cyclic_prefix_length - 1] * conj(sample[d_cyclic_prefix_length - 1]));
-        d_energy_repetition += std::real(sample[d_symbol_length + d_cyclic_prefix_length - 1] *
-                                         conj(sample[d_symbol_length + d_cyclic_prefix_length - 1]));
+                sample[d_cyclic_prefix_length - 1] *
+                conj(sample[d_symbol_length + d_cyclic_prefix_length - 1]);
+        d_energy_prefix += std::real(sample[d_cyclic_prefix_length - 1] *
+                                     conj(sample[d_cyclic_prefix_length - 1]));
+        d_energy_repetition += std::real(
+                sample[d_symbol_length + d_cyclic_prefix_length - 1] *
+                conj(sample[d_symbol_length + d_cyclic_prefix_length - 1]));
         d_correlation -= sample[0] * conj(sample[d_symbol_length]);
         d_energy_prefix -= std::real(sample[0] * conj(sample[0]));
-        d_energy_repetition -= std::real(sample[d_symbol_length] * conj(sample[d_symbol_length]));
+        d_energy_repetition -= std::real(
+                sample[d_symbol_length] * conj(sample[d_symbol_length]));
         d_moving_average_counter++;
       }
       // normalize
-      d_correlation_normalized = d_correlation / std::sqrt(d_energy_prefix * d_energy_repetition);
+      d_correlation_normalized =
+              d_correlation / std::sqrt(d_energy_prefix * d_energy_repetition);
       // calculate magnitude
-      d_correlation_normalized_magnitude = d_correlation_normalized.real() * d_correlation_normalized.real() +
-                                           d_correlation_normalized.imag() * d_correlation_normalized.imag();
+      d_correlation_normalized_magnitude = d_correlation_normalized.real() *
+                                           d_correlation_normalized.real() +
+                                           d_correlation_normalized.imag() *
+                                           d_correlation_normalized.imag();
     }
 
     /*! \brief returns true at a point with a little space before the peak of a correlation triangular
      *
      */
     bool
-    ofdm_synchronization_cvf_impl::detect_start_of_symbol()
-    {
-      if(d_on_triangle){
-        if(d_correlation_normalized_magnitude > d_correlation_maximum){
+    ofdm_synchronization_cvf_impl::detect_start_of_symbol() {
+      if (d_on_triangle) {
+        if (d_correlation_normalized_magnitude > d_correlation_maximum) {
           d_correlation_maximum = d_correlation_normalized_magnitude;
 
         }
-        if(d_correlation_normalized_magnitude < d_correlation_maximum-0.05 && !d_peak_set){
+        if (d_correlation_normalized_magnitude < d_correlation_maximum - 0.05 &&
+            !d_peak_set) {
           // we are right behind the peak
           d_peak_set = true;
           return true;
         }
-        if(d_correlation_normalized_magnitude < 0.25){
+        if (d_correlation_normalized_magnitude < 0.25) {
           d_peak_set = false;
           d_on_triangle = false;
           d_correlation_maximum = 0;
-        }
-        else{
+        } else {
           // we are still on the triangle but have not reached the end
           return false;
         }
-      }
-      else{
+      } else {
         // not on a correlation triangle yet
-        if(d_correlation_normalized_magnitude > 0.35){
+        if (d_correlation_normalized_magnitude > 0.35) {
           // no we are on the triangle
           d_on_triangle = true;
           return false;
-        }
-        else{
+        } else {
           // no triangle here
           return false;
         }
@@ -177,8 +193,7 @@ namespace gr {
     ofdm_synchronization_cvf_impl::general_work(int noutput_items,
                                                 gr_vector_int &ninput_items,
                                                 gr_vector_const_void_star &input_items,
-                                                gr_vector_void_star &output_items)
-    {
+                                                gr_vector_void_star &output_items) {
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
       d_nwritten = 0;
@@ -191,7 +206,8 @@ namespace gr {
           if (detect_start_of_symbol()) {
             if (d_NULL_detected /*&& (d_energy_prefix > d_NULL_symbol_energy * 2)*/) {
               // calculate new frequency offset
-              d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/sample
+              d_frequency_offset_per_sample =
+                      std::arg(d_correlation) / d_fft_length; // in rad/sample
               //GR_LOG_DEBUG(d_logger, format("Start of frame, abs offset %d")%(nitems_read(0)+i));
               /* The start of the first symbol after the NULL symbol has been detected. The ideal start to copy
                * the symbol is &in[i+d_cyclic_prefix_length] to minimize ISI.
@@ -208,14 +224,16 @@ namespace gr {
               d_NULL_detected = false;
             }
           } else {
-            if (((!d_NULL_detected) && (d_energy_prefix / d_energy_repetition < 0.4))) {
+            if (((!d_NULL_detected) &&
+                 (d_energy_prefix / d_energy_repetition < 0.4))) {
               // NULL symbol detection, if energy is < 0.1 * energy a symbol time later
               d_NULL_symbol_energy = d_energy_prefix;
               d_NULL_detected = true;
             }
           }
         } else { // tracking mode
-          if (d_symbol_element_count >= (d_symbol_length + d_cyclic_prefix_length)) {
+          if (d_symbol_element_count >=
+              (d_symbol_length + d_cyclic_prefix_length)) {
             // we expect the start of a new symbol here or the a NULL symbol if we arrived at the end of the frame
             d_symbol_count++;
             // next symbol expecting
@@ -232,16 +250,22 @@ namespace gr {
               // correlation has to be calculated completely new, because of skipping samples before
               delayed_correlation(&in[i], true);
               // check if there is really a peak
-              if (d_correlation_normalized_magnitude > 0.3) { //TODO: check if we are on right edge
-                d_frequency_offset_per_sample = std::arg(d_correlation) / d_fft_length; // in rad/s
+              if (d_correlation_normalized_magnitude >
+                  0.3) { //TODO: check if we are on right edge
+                d_frequency_offset_per_sample =
+                        std::arg(d_correlation) / d_fft_length; // in rad/s
               } else {
                 // no peak found -> out of track; search for next NULL symbol
                 d_wait_for_NULL = true;
-                GR_LOG_DEBUG(d_logger, format("Lost track at %d, switching ot acquisition mode (%d)") %d_symbol_count %
-                                       d_correlation_normalized_magnitude);
+                GR_LOG_DEBUG(d_logger,
+                             format("Lost track at %d, switching ot acquisition mode (%d)") %
+                             d_symbol_count %
+                             d_correlation_normalized_magnitude);
               }
             }
-          } else if (d_cyclic_prefix_length*0.75 <= d_symbol_element_count && d_symbol_element_count < d_cyclic_prefix_length*0.75 + d_symbol_length) {
+          } else if (d_cyclic_prefix_length * 0.75 <= d_symbol_element_count &&
+                     d_symbol_element_count <
+                     d_cyclic_prefix_length * 0.75 + d_symbol_length) {
             // calculate the complex frequency correction value
             float oi, oq;
             // fixed point sine and cosine
@@ -249,7 +273,8 @@ namespace gr {
             gr::fxpt::sincos(angle, &oq, &oi);
             gr_complex fine_frequency_correction = gr_complex(oi, oq);
             // set tag at next item if it is the first element of the first symbol
-            if (d_symbol_count == 0 && d_symbol_element_count == d_cyclic_prefix_length) {
+            if (d_symbol_count == 0 &&
+                d_symbol_element_count == d_cyclic_prefix_length) {
               add_item_tag(0, nitems_written(0) + d_nwritten, pmt::mp("Start"),
                            pmt::from_float(std::arg(d_correlation)));
             }

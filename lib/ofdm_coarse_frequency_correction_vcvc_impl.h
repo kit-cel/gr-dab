@@ -25,31 +25,40 @@
 
 namespace gr {
   namespace dab {
-
-    class ofdm_coarse_frequency_correction_vcvc_impl : public ofdm_coarse_frequency_correction_vcvc
-    {
-     private:
+/*! \brief coarse frequency correction on multiples of the sub-carrier spacing
+ * synchronization on sub-carriers for DAB/DAB+ by energy measurements of the sub-carriers
+ *
+ * @param fft_length length of the applied FFT; corresponding to the input vector length
+ * @param num_carriers number of occupied carriers; corresponding to the output vector length
+ * @param cyclic_prefix_length length of the cyclic prefix; corresponding to the length of the energy measurement
+ */
+    class ofdm_coarse_frequency_correction_vcvc_impl
+            : public ofdm_coarse_frequency_correction_vcvc {
+    private:
       int d_fft_length;
       int d_num_carriers;
       int d_cyclic_prefix_length;
       float *d_mag_squared;
-      unsigned int d_freq_offset;
-      float d_snr;
+      unsigned int d_freq_offset; /*!< measured position of the first occupied sub-carrier*/
+      float d_snr; /*!< measured snr*/
 
-     public:
-      ofdm_coarse_frequency_correction_vcvc_impl(int fft_length, int num_carriers, int cyclic_prefix_length);
+    public:
+      ofdm_coarse_frequency_correction_vcvc_impl(int fft_length,
+                                                 int num_carriers,
+                                                 int cyclic_prefix_length);
+
       ~ofdm_coarse_frequency_correction_vcvc_impl();
 
-      void measure_energy(const gr_complex*);
-      void measure_snr(const gr_complex*);
+      void measure_energy(const gr_complex *);
 
-      virtual float get_snr()
-      { return d_snr;}
+      void measure_snr(const gr_complex *);
+
+      virtual float get_snr() { return d_snr; }
 
       // Where all the action really happens
       int work(int noutput_items,
-         gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
     };
 
   } // namespace dab

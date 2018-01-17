@@ -28,8 +28,7 @@
 #include "qa_dab.h"
 
 CppUnit::TestSuite *
-qa_dab::suite()
-{
+qa_dab::suite() {
   CppUnit::TestSuite *s = new CppUnit::TestSuite("dab");
 
   return s;

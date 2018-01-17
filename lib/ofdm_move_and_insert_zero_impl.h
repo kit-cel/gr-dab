@@ -27,22 +27,23 @@
 namespace gr {
   namespace dab {
 
-class ofdm_move_and_insert_zero_impl : public ofdm_move_and_insert_zero
-{
-  private:
+    class ofdm_move_and_insert_zero_impl : public ofdm_move_and_insert_zero {
 
-    unsigned int d_fft_length;
-    unsigned int d_num_carriers;
-    unsigned int d_zeros_on_left;
+    private:
+      unsigned int d_fft_length;
+      unsigned int d_num_carriers;
+      unsigned int d_zeros_on_left;
 
-  public:
-    ofdm_move_and_insert_zero_impl(unsigned int fft_length,unsigned int num_carriers);
-    int work (int noutput_items,
-              gr_vector_const_void_star &input_items,
-              gr_vector_void_star &output_items);
-};
+    public:
+      ofdm_move_and_insert_zero_impl(unsigned int fft_length,
+                                     unsigned int num_carriers);
 
-}
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+    };
+
+  }
 }
 
 #endif /* INCLUDED_DAB_OFDM_MOVE_AND_INSERT_ZERO_H */
