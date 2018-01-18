@@ -29,26 +29,28 @@ namespace gr {
  * @param feed_with_zeros if valve is closed feed_with_zeros decides if zeros are sent or nothing
  * @param closed decides if valve is closed or opened
  */
-    class valve_ff_impl : public valve_ff
-    {
-     private:
+    class valve_ff_impl : public valve_ff {
+    private:
       bool d_feed_with_zeros;
       bool d_closed;
 
-     public:
+    public:
       valve_ff_impl(bool closed, bool feed_with_zeros);
+
       ~valve_ff_impl();
 
       // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       void set_closed(bool closed) { d_closed = closed; }
-      void set_feed_with_zeros(bool feed_with_zeros) { d_feed_with_zeros = feed_with_zeros; }
+
+      void set_feed_with_zeros(
+              bool feed_with_zeros) { d_feed_with_zeros = feed_with_zeros; }
 
       int general_work(int noutput_items,
-           gr_vector_int &ninput_items,
-           gr_vector_const_void_star &input_items,
-           gr_vector_void_star &output_items);
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items);
     };
 
   } // namespace dab

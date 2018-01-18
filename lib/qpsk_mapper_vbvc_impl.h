@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017, 2018 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,20 +27,25 @@
 
 namespace gr {
   namespace dab {
-
-    class qpsk_mapper_vbvc_impl : public qpsk_mapper_vbvc
-    {
-     private:
+/*! \brief vector wise working qpsk mapper
+ * QPSK mapper according to the DAB/DAB+ standard ETSI EN 300 401
+ *
+ * @ingroup packed byte vectors of length symbol_length/4
+ * @param symbol_length size of the complex output vectors
+ */
+    class qpsk_mapper_vbvc_impl : public qpsk_mapper_vbvc {
+    private:
       unsigned int d_symbol_length;
 
-     public:
+    public:
       qpsk_mapper_vbvc_impl(unsigned int symbol_length);
+
       ~qpsk_mapper_vbvc_impl();
 
       // Where all the action really happens
       int work(int noutput_items,
-         gr_vector_const_void_star &input_items,
-         gr_vector_void_star &output_items);
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
     };
 
   } // namespace dab

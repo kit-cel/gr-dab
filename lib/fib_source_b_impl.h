@@ -25,7 +25,7 @@
 
 namespace gr {
   namespace dab {
-/*! \brief source that produces Fast Information Blocks (FIBs) according to the DAB standard
+/*! \brief source that produces Fast Information Blocks (FIBs) according to the DAB standard ETSI EN 300 401
  *
  * output: unpacked byte stream with FIBs (each 256 bit) and zeros at last 16 bits for following CRC16
  *

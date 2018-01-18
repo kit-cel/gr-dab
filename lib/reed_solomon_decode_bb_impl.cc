@@ -41,8 +41,7 @@ namespace gr {
   namespace dab {
 
     reed_solomon_decode_bb::sptr
-    reed_solomon_decode_bb::make(int bit_rate_n)
-    {
+    reed_solomon_decode_bb::make(int bit_rate_n) {
       return gnuradio::get_initial_sptr
               (new reed_solomon_decode_bb_impl(bit_rate_n));
     }
@@ -54,8 +53,7 @@ namespace gr {
             : gr::block("reed_solomon_decode_bb",
                         gr::io_signature::make(1, 1, sizeof(unsigned char)),
                         gr::io_signature::make(1, 1, sizeof(unsigned char))),
-              d_bit_rate_n(bit_rate_n)
-    {
+              d_bit_rate_n(bit_rate_n) {
       rs_handle = init_rs_char(8, 0x11D, 0, 1, 10, 135);
       if (!rs_handle) {
         GR_LOG_DEBUG(d_logger, "RS init failed");
@@ -71,13 +69,12 @@ namespace gr {
     /*
      * Our virtual destructor.
      */
-    reed_solomon_decode_bb_impl::~reed_solomon_decode_bb_impl()
-    {
+    reed_solomon_decode_bb_impl::~reed_solomon_decode_bb_impl() {
       free_rs_char(rs_handle);
     }
 
-    void reed_solomon_decode_bb_impl::DecodeSuperframe(uint8_t *sf, size_t sf_len)
-    {
+    void
+    reed_solomon_decode_bb_impl::DecodeSuperframe(uint8_t *sf, size_t sf_len) {
 //	// insert errors for test
 //	sf[0] ^= 0xFF;
 //	sf[10] ^= 0xFF;
@@ -114,17 +111,16 @@ namespace gr {
 
 
     void
-    reed_solomon_decode_bb_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required)
-    {
-      ninput_items_required[0] = noutput_items*120/110;
+    reed_solomon_decode_bb_impl::forecast(int noutput_items,
+                                          gr_vector_int &ninput_items_required) {
+      ninput_items_required[0] = noutput_items * 120 / 110;
     }
 
     int
     reed_solomon_decode_bb_impl::general_work(int noutput_items,
                                               gr_vector_int &ninput_items,
                                               gr_vector_const_void_star &input_items,
-                                              gr_vector_void_star &output_items)
-    {
+                                              gr_vector_void_star &output_items) {
       const unsigned char *in = (const unsigned char *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
 
@@ -132,7 +128,8 @@ namespace gr {
         uint8_t superframe[d_superframe_size];
         memcpy(superframe, &in[n * d_superframe_size], d_superframe_size);
         DecodeSuperframe(superframe, d_superframe_size);
-        memcpy(&out[n * d_superframe_size_rs], superframe, d_superframe_size_rs);
+        memcpy(&out[n * d_superframe_size_rs], superframe,
+               d_superframe_size_rs);
       }
       // Tell runtime system how many input items we consumed on
       // each input stream.

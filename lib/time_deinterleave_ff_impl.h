@@ -24,35 +24,37 @@
 #include <dab/time_deinterleave_ff.h>
 
 namespace gr {
-    namespace dab {
+  namespace dab {
 /*! \brief applies time deinterleaving to a vector (convolutional deinterleaving -> descrambling and delay)
  *
- * applies convolutional deinterleaving to a vector with its max[vector_length] followers, the scrambling_vector describes which vector element comes from which follower
- * delays the elements of a max delay of d_scrambling_length-1
- * more information to the interleaving rules on ETSI EN 300 401 chapter 12
- * this deinterleaver restores a bitstream interleaved by the block time_interleave_bb
+ * Applies convolutional deinterleaving to a vector with its max[vector_length] followers,
+ * the scrambling_vector describes which vector element comes from which follower.
+ * Delays the elements of a max delay of d_scrambling_length-1.
+ * More information to the interleaving rules on ETSI EN 300 401 chapter 12.
+ * This deinterleaver restores a bitstream interleaved by the block time_interleave_bb.
  *
  * @param vector_length length of input vectors
  * @param scrambling_vector vector with scrambling parameters (see DAB standard p.138)
  *
  */
-        class time_deinterleave_ff_impl : public time_deinterleave_ff
-        {
-        private:
-            int d_scrambling_length, d_vector_length;
-            std::vector<unsigned char> d_scrambling_vector;
+    class time_deinterleave_ff_impl : public time_deinterleave_ff {
+    private:
+      int d_scrambling_length, d_vector_length;
+      std::vector<unsigned char> d_scrambling_vector;
 
-        public:
-            time_deinterleave_ff_impl(int vector_length, const std::vector<unsigned char> &scrambling_vector);
-            ~time_deinterleave_ff_impl();
+    public:
+      time_deinterleave_ff_impl(int vector_length,
+                                const std::vector<unsigned char> &scrambling_vector);
 
-            // Where all the action really happens
-            int work(int noutput_items,
-                     gr_vector_const_void_star &input_items,
-                     gr_vector_void_star &output_items);
-        };
+      ~time_deinterleave_ff_impl();
 
-    } // namespace dab
+      // Where all the action really happens
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+    };
+
+  } // namespace dab
 } // namespace gr
 
 #endif /* INCLUDED_DAB_TIME_DEINTERLEAVE_FF_IMPL_H */

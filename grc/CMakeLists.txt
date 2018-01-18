@@ -32,7 +32,6 @@ install(FILES
     dab_crc16_bb.xml
     dab_msc_decode.xml
     dab_fib_source_b.xml
-    dab_unpuncture_ff.xml
     dab_prune.xml
     dab_firecode_check_bb.xml
     dab_fic_encode.xml

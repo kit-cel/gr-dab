@@ -24,35 +24,37 @@
 #include <dab/time_interleave_bb.h>
 
 namespace gr {
-    namespace dab {
+  namespace dab {
 /*! \brief applies time interleaving to a vector (convolutional interleaving -> scrambling and delay)
  *
- * applies convolutional interleaving to a vector with its max[vector_length] followers, the scrambling_vector describes which vector element comes from which follower
- * delays the elements of a max delay of d_scrambling_length-1
- * more information to the interleaving rules on ETSI EN 300 401 chapter 12
+ * Applies convolutional interleaving to a vector with its max[vector_length] followers,
+ * the scrambling_vector describes which vector element comes from which follower.
+ * Delays the elements of a max delay of d_scrambling_length-1.
+ * More information to the interleaving rules on ETSI EN 300 401 chapter 12.
  *
  * @param vector_length length of input vectors
  * @param scrambling_vector vector with scrambling parameters (see DAB standard p.138)
  *
  */
 
-        class time_interleave_bb_impl : public time_interleave_bb
-        {
-        private:
-            int d_scrambling_length, d_vector_length;
-            std::vector<unsigned char> d_scrambling_vector;
+    class time_interleave_bb_impl : public time_interleave_bb {
+    private:
+      int d_scrambling_length, d_vector_length;
+      std::vector<unsigned char> d_scrambling_vector;
 
-        public:
-            time_interleave_bb_impl(int vector_length, const std::vector<unsigned char> &scrambling_vector);
-            ~time_interleave_bb_impl();
+    public:
+      time_interleave_bb_impl(int vector_length,
+                              const std::vector<unsigned char> &scrambling_vector);
 
-            // Where all the action really happens
-            int work(int noutput_items,
-                     gr_vector_const_void_star &input_items,
-                     gr_vector_void_star &output_items);
-        };
+      ~time_interleave_bb_impl();
 
-    } // namespace dab
+      // Where all the action really happens
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+    };
+
+  } // namespace dab
 } // namespace gr
 
 #endif /* INCLUDED_DAB_TIME_interleave_BB_IMPL_H */

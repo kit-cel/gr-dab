@@ -27,22 +27,22 @@
 namespace gr {
   namespace dab {
 
-class sum_phasor_trig_vcc_impl : public sum_phasor_trig_vcc
-{
-  private:
+    class sum_phasor_trig_vcc_impl : public sum_phasor_trig_vcc {
+    private:
 
-    unsigned int d_length;
-    std::vector<gr_complex> d_last_symbol;
+      unsigned int d_length;
+      std::vector <gr_complex> d_last_symbol;
 
 
-  public:
-    sum_phasor_trig_vcc_impl(unsigned int length);
-    int work (int noutput_items,
-              gr_vector_const_void_star &input_items,
-              gr_vector_void_star &output_items);
-};
+    public:
+      sum_phasor_trig_vcc_impl(unsigned int length);
 
-}
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+    };
+
+  }
 }
 
 #endif /* INCLUDED_DAB_SUM_PHASOR_TRIG_VCC_H */

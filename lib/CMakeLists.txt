@@ -40,7 +40,6 @@ list(APPEND dab_sources
     crc16_bb_impl.cc
     fib_source_b_impl.cc
     select_cus_vfvf_impl.cc
-    unpuncture_ff_impl.cc
     prune_impl.cc
     firecode-checker.cpp
     firecode_check_bb_impl.cc

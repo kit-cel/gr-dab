@@ -25,26 +25,34 @@
 
 namespace gr {
   namespace dab {
-
-    class select_cus_vfvf_impl : public select_cus_vfvf
-    {
-     private:
+/*! \brief selects items out of a stream, defined by start address and size
+ * This block is used to select the data of one MSC sub-channel out of a transmission frame.
+ *
+ * @param vlen vector size of input and output vectors, defining the item size on witch the address and size variables base on
+ * @param frame_length length in items of a frame (each item is a vector with size vlen)
+ * @param address number of the first item in each frame to be copied
+ * @param size number of items to copy in each frame
+ */
+    class select_cus_vfvf_impl : public select_cus_vfvf {
+    private:
       unsigned int d_vlen;
       unsigned int d_frame_len;
       unsigned int d_address;
       unsigned int d_size;
 
-     public:
-      select_cus_vfvf_impl(unsigned int vlen, unsigned int frame_len, unsigned int address, unsigned int size);
+    public:
+      select_cus_vfvf_impl(unsigned int vlen, unsigned int frame_len,
+                           unsigned int address, unsigned int size);
+
       ~select_cus_vfvf_impl();
 
       // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       int general_work(int noutput_items,
-           gr_vector_int &ninput_items,
-           gr_vector_const_void_star &input_items,
-           gr_vector_void_star &output_items);
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items);
     };
 
   } // namespace dab

@@ -45,12 +45,12 @@ namespace gr {
     class reed_solomon_decode_bb_impl : public reed_solomon_decode_bb {
     private:
       int d_bit_rate_n;
-      int d_superframe_size;
-      int d_superframe_size_rs;
+      int d_superframe_size; /*!< size of a superframe in byte with rs code words*/
+      int d_superframe_size_rs; /*!< size of a superframe in byte without rs code words*/
       void *rs_handle;
-      uint8_t rs_packet[120];
-      int corr_pos[10];
-      int d_corrected_errors;
+      uint8_t rs_packet[120]; /*!< buffer for rs algorithm*/
+      int corr_pos[10]; /*!< positions of detected and correctable errors*/
+      int d_corrected_errors; /*!< number of corrected errors in the current superframe*/
 
       void DecodeSuperframe(uint8_t *sf, size_t sf_len);
 
@@ -59,8 +59,7 @@ namespace gr {
 
       ~reed_solomon_decode_bb_impl();
 
-      virtual int get_corrected_errors()
-      { return d_corrected_errors; }
+      virtual int get_corrected_errors() { return d_corrected_errors; }
 
       // Where all the action really happens
       void forecast(int noutput_items, gr_vector_int &ninput_items_required);

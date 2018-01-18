@@ -88,9 +88,11 @@ class msc_decode(gr.hier_block2):
         # time deinterleaving
         self.time_v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.msc_cu_size)
         self.time_deinterleaver = dab.time_deinterleave_ff_make(self.dp.msc_cu_size * self.size, self.dp.scrambling_vector)
+        
         # unpuncture
-        self.conv_v2s = blocks.vector_to_stream(gr.sizeof_float, self.msc_punctured_codeword_length)
-        self.unpuncture = dab.unpuncture_ff_make(self.assembled_msc_puncturing_sequence, 0)
+        self.unpuncture_s2v = blocks.stream_to_vector(gr.sizeof_float, self.msc_punctured_codeword_length)
+        self.unpuncture = dab.unpuncture_vff_make(self.assembled_msc_puncturing_sequence, 0)
+        self.unpuncture_v2s = blocks.vector_to_stream(gr.sizeof_float, self.msc_conv_codeword_length)
 
         # convolutional decoding
         self.fsm = trellis.fsm(1, 4, [0133, 0171, 0145, 0133])  # OK (dumped to text and verified partially)
@@ -136,7 +138,9 @@ class msc_decode(gr.hier_block2):
                      self.select_subch,
                      self.time_v2s,
                      self.time_deinterleaver,
+                     self.unpuncture_s2v,
                      self.unpuncture,
+                     self.unpuncture_v2s,
                      self.conv_decode,
                      self.conv_prune,
                      self.add_mod_2,
