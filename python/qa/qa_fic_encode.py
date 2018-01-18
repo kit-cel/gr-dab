@@ -49,10 +49,10 @@ class qa_fic_encode (gr_unittest.TestCase):
         self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
 
         # mapper
-        self.map = dab.mapper_bc_make(self.dp.num_carriers)
+        self.s2v = blocks.stream_to_vector_make(gr.sizeof_char, self.dp.num_carriers/4)
+        self.map = dab.qpsk_mapper_vbvc_make(self.dp.num_carriers)
 
         # demapper
-        self.s2v = blocks.stream_to_vector_make(gr.sizeof_gr_complex, self.dp.num_carriers)
         self.soft_interleaver = dab.complex_to_interleaved_float_vcf_make(self.dp.num_carriers)
 
         # decode
@@ -62,8 +62,8 @@ class qa_fic_encode (gr_unittest.TestCase):
                         blocks.head_make(gr.sizeof_char, 100000),
                         self.fib_enc,
                         self.unpack,
-                        self.map,
                         self.s2v,
+                        self.map,
                         self.soft_interleaver,
                         self.fic_decoder
                         )
