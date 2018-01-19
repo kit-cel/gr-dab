@@ -181,8 +181,9 @@ namespace gr {
                   uint8_t TMID = (uint8_t)((data[service_counter + 4 + i * 2] & 0xc0) >> 6);
                   uint8_t comp_type = (uint8_t)(data[service_counter + 4 + i * 2] & 0x3f);
                   uint8_t subchID = (uint8_t)((data[service_counter + 5 + i * 2] & 0xfc) >> 2);
-                  uint16_t SCId = (uint16_t)(((data[service_counter + 4 + i * 2] & 0x3f)<<6)|((data[service_counter + 5 + i * 2] & 0xfc) >> 2));
-                  uint8_t ps = (uint8_t)((data[service_counter + 5 + i * 2 + 1] & 0x02) >> 1);
+                  uint16_t SCId = (uint16_t)((data[service_counter + 4 + i * 2]&0x3f)<<6)|(uint8_t)((data[service_counter + 5 + i * 2] & 0xfc) >> 2);
+                  uint8_t ps = (uint8_t)((data[service_counter + 5 + i * 2] & 0x02) >> 1);
+                  uint8_t ca = (uint8_t)(data[service_counter + 5 + i * 2] & 0x01);
                   if (TMID == 0) {
                     GR_LOG_DEBUG(d_logger,
                                  format("(audio stream, type %d, subchID %d, primary %d)") % (int) comp_type %
@@ -214,7 +215,7 @@ namespace gr {
                                  format("(FIDC, type %d, subchID %d, primary %d)") % (int) comp_type % (int) subchID %
                                  (int) ps);
                   } else {
-                    GR_LOG_DEBUG(d_logger, format("(packet data, SCId %d, primary %d)") %(int) SCId %(int)ps);
+                    GR_LOG_DEBUG(d_logger, format("(packet data, SCId %d, primary %d, ca %d)") %(int) SCId %(int)ps %(int)ca);
                   }
                 }
                 service_counter += 3 + 2 * num_service_comps;
@@ -225,22 +226,22 @@ namespace gr {
               GR_LOG_DEBUG(d_logger, "service orga packet mode:");
               uint8_t service_comp_counter = 1;
               do {
-                uint16_t SCId = (uint16_t)((data[service_comp_counter] << 4) |
-                                           (data[service_comp_counter + 1] &
-                                            0xf0) >> 4);
+                uint16_t SCId = (uint16_t)(data[1+service_comp_counter] << 4) |
+                                           (data[1+service_comp_counter + 1] &
+                                            0xf0) >> 4;
                 uint8_t Rfa = (uint8_t)(
-                        (data[service_comp_counter + 1] & 0x0e) >> 1);
+                        (data[1+service_comp_counter + 1] & 0x0e) >> 1);
                 uint8_t CAorg_flag = (uint8_t)(
-                        data[service_comp_counter + 1] & 0x01);
+                        data[1+service_comp_counter + 1] & 0x01);
                 uint8_t DG_flag = (uint8_t)(
-                        (data[service_comp_counter + 2] & 0x80) >> 7);
+                        (data[1+service_comp_counter + 2] & 0x80) >> 7);
                 uint8_t DSCTy = (uint8_t)(
-                        data[service_comp_counter + 2] & 0x3f);
+                        data[1+service_comp_counter + 2] & 0x3f);
                 uint8_t subchID = (uint8_t)(
-                        (data[service_comp_counter + 3] & 0xfc) >> 2);
-                uint16_t packet_address = (uint16_t)(
-                        ((data[service_comp_counter + 3] & 0x03) << 8) |
-                        data[service_comp_counter + 4]);
+                        (data[1+service_comp_counter + 3] & 0xfc) >> 2);
+                uint16_t packet_address = (uint16_t)
+                        ((data[1+service_comp_counter + 3] & 0x03) << 8) |
+                        data[1+service_comp_counter + 4];
                 if (CAorg_flag) {
                   service_comp_counter += 7;
                 } else {
