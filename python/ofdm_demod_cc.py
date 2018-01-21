@@ -59,7 +59,6 @@ class ofdm_demod_cc(gr.hier_block2):
         self.coarse_freq_corr = dab.ofdm_coarse_frequency_correction_vcvc_make(self.dp.fft_length,
                                                                                self.dp.num_carriers,
                                                                                self.dp.cp_length)
-        self.v2s_fft = blocks.vector_to_stream_make(gr.sizeof_gr_complex, self.dp.num_carriers)
 
         # differential phasor
         self.differential_phasor = dab.diff_phasor_vcc_make(1536)
