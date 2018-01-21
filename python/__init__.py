@@ -19,32 +19,30 @@
 # The presence of this file turns this directory into a Python package
 
 '''
-This is the GNU Radio DAB module. Place your Python package
-description here (python/__init__.py).
+This is the GNU Radio DAB module.
 '''
+
+# The presence of this file turns this directory into a Python package
+import os
 
 # import swig generated symbols into the dab namespace
 try:
-	# this might fail if the module is python-only
-	from dab_swig import *
+    # this might fail if the module is python-only
+    from dab_swig import *
 except ImportError:
-	pass
+    dirname, filename = os.path.split(os.path.abspath(__file__))
+    __path__.append(os.path.join(dirname, "..", "..", "swig"))
+    from dab_swig import *
 
-# import any pure python here
+from parameters import *
+from ofdm_demod_cc import *
+from ofdm_mod_bc import *
+from fic_decode_vc import *
+from fic_encode import *
+from msc_decode import *
+from msc_encode import *
+from transmitter_c import *
+from dabplus_audio_decoder_ff import *
 
-
-from detect_null import detect_null
-from parameters import dab_parameters
-from parameters import receiver_parameters
-from ofdm import ofdm_mod
-from ofdm import ofdm_demod
-from fic import fic_decode
-from msc_decode import msc_decode
-from fic_encode import fic_encode
-from msc_encode import msc_encode
-from transmitter_c import transmitter_c
-from dabplus_audio_decoder_ff import dabplus_audio_decoder_ff
-from ofdm_demod_cc import ofdm_demod_cc
-from fic_decode_vc import fic_decode_vc
 import constants
-#
+
