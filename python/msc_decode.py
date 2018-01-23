@@ -123,7 +123,6 @@ class msc_decode(gr.hier_block2):
 
         #energy descramble
         self.prbs_src = blocks.vector_source_b(self.dp.prbs(self.msc_I), True)
-        self.energy_v2s = blocks.vector_to_stream(gr.sizeof_char, self.msc_I)
         self.add_mod_2 = blocks.xor_bb()
 
         #pack bits
