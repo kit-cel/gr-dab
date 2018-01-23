@@ -79,7 +79,6 @@ GR_ADD_TEST(qa_reed_solomon_encode_bb.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SO
 GR_ADD_TEST(qa_msc_encode.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_msc_encode.py)
 GR_ADD_TEST(qa_time_interleave_bb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_time_interleave_bb.py)
 GR_ADD_TEST(qa_dab_transmission_frame_mux_bb.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_dab_transmission_frame_mux_bb.py)
-
 GR_ADD_TEST(qa_diff_phasor_vcc.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_diff_phasor_vcc.py)
 GR_ADD_TEST(qa_complex_to_interleaved_float_vcf.py ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_complex_to_interleaved_float_vcf.py)
 GR_ADD_TEST(qa_select_cus_vfvf ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_select_cus_vfvf.py)
@@ -89,9 +88,5 @@ GR_ADD_TEST(qa_fib_sink_vb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/q
 GR_ADD_TEST(qa_time_deinterleave_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_time_deinterleave_ff.py)
 GR_ADD_TEST(qa_reed_solomon_decode_bb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_reed_solomon_decode_bb.py)
 GR_ADD_TEST(qa_mp4_decode_bs ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa/qa_mp4_decode_bs.py)
+GR_ADD_TEST(qa_valve_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_valve_ff.py)
 
-#GR_ADD_TEST(qa_mp2_decode_bs ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_mp2_decode_bs.py)
-#GR_ADD_TEST(qa_dabplus_audio_decoder_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_dabplus_audio_decoder_ff.py)
-#GR_ADD_TEST(qa_mp2_encode_sb ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_mp2_encode_sb.py)
-#GR_ADD_TEST(qa_valve_ff ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_valve_ff.py)
-#GR_ADD_TEST(qa_ofdm_synchronization_cvf ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/qa_ofdm_synchronization_cvf.py)
