@@ -156,13 +156,12 @@ namespace gr {
       memcpy(au, v, frame_length);
       memset(&au[frame_length], 0, 10);
 
+      // if AU contents PAD, process it
       if (((au[0] >> 5) & 07) == 4) {
         int16_t count = au[1];
         uint8_t buffer[count];
         memcpy(buffer, &au[2], count);
-        uint8_t L0 = buffer[count - 1];
-        uint8_t L1 = buffer[count - 2];
-        // TODO: handle PADs
+        process_pad(buffer, count);
       }
 
       int tmp = MP42PCM(dacRate,
@@ -173,6 +172,15 @@ namespace gr {
                         frame_length,
                         out_sample1,
                         out_sample2);
+    }
+
+    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t length) {
+      // read F-PAD field
+      uint8_t fpad_type = (uint8_t) (pad[length-2]&0xc0)>>6;
+      uint8_t xpad_indicator = (uint8_t) (pad[length-2]&0x30)>>4;
+      uint8_t byte_L_indicator = (uint8_t) (pad[length-2]&0x0f);
+      uint8_t content_indicator_flag = (uint8_t) (pad[length-1]&0x02)>>1;
+      GR_LOG_DEBUG(d_logger, format("F-PAD: length %d, type %d, xpad indicator %d, byte L indicator %d, content indicator flag %d") %(int)length %(int)fpad_type %(int)xpad_indicator %(int)byte_L_indicator %(int)content_indicator_flag);
     }
 
     int16_t mp4_decode_bs_impl::MP42PCM(uint8_t dacRate,

@@ -72,6 +72,8 @@ namespace gr {
                             int16_t *out_sample1,
                             int16_t *out_sample2);
 
+      void process_pad(uint8_t *pad, int16_t length);
+
       int16_t MP42PCM(uint8_t dacRate,
                       uint8_t sbrFlag,
                       int16_t mpegSurround,
