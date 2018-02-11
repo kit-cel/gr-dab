@@ -3,7 +3,7 @@
  * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * GNU Radio block written for gr-dab including the following third party elements:
- * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class
+ * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class and the PAD processing
  *  Copyright (C) 2013
  *  Jan van Katwijk (J.vanKatwijk@gmail.com)
  *  Lazy Chair Computing
@@ -43,8 +43,12 @@ using namespace boost;
 namespace gr {
   namespace dab {
 
+    // lookup table for length of X-PAD data subfield
+    const uint8_t mp4_decode_bs_impl::d_length_data_subfield[8] = {4, 6, 8, 12, 16, 24, 32, 48};
+
     mp4_decode_bs::sptr
-    mp4_decode_bs::make(int bit_rate_n) {
+    mp4_decode_bs::make(int bit_rate_n)
+    {
       return gnuradio::get_initial_sptr
               (new mp4_decode_bs_impl(bit_rate_n));
     }
@@ -56,7 +60,8 @@ namespace gr {
             : gr::block("mp4_decode_bs",
                         gr::io_signature::make(1, 1, sizeof(unsigned char)),
                         gr::io_signature::make(2, 2, sizeof(int16_t))),
-              d_bit_rate_n(bit_rate_n) {
+              d_bit_rate_n(bit_rate_n)
+    {
       d_superframe_size = bit_rate_n * 110;
       d_aacInitialized = false;
       baudRate = 48000;
@@ -65,23 +70,27 @@ namespace gr {
       aacHandle = NeAACDecOpen();
       //memset(d_aac_frame, 0, 960);
       d_sample_rate = -1;
+      d_dynamic_label_index = 0;
     }
 
     /*
      * Our virtual destructor.
      */
-    mp4_decode_bs_impl::~mp4_decode_bs_impl() {
+    mp4_decode_bs_impl::~mp4_decode_bs_impl()
+    {
     }
 
     void
     mp4_decode_bs_impl::forecast(int noutput_items,
-                                 gr_vector_int &ninput_items_required) {
+                                 gr_vector_int &ninput_items_required)
+    {
       ninput_items_required[0] = noutput_items; //TODO: how to calculate actual rate?
     }
 
     // returns aac channel configuration
     int mp4_decode_bs_impl::get_aac_channel_configuration(
-            int16_t m_mpeg_surround_config, uint8_t aacChannelMode) {
+            int16_t m_mpeg_surround_config, uint8_t aacChannelMode)
+    {
       switch (m_mpeg_surround_config) {
         case 0:     // no surround
           return aacChannelMode ? 2 : 1;
@@ -97,7 +106,8 @@ namespace gr {
     bool mp4_decode_bs_impl::initialize(uint8_t dacRate,
                                         uint8_t sbrFlag,
                                         int16_t mpegSurround,
-                                        uint8_t aacChannelMode) {
+                                        uint8_t aacChannelMode)
+    {
       long unsigned int sample_rate;
       uint8_t channels;
       /* AudioSpecificConfig structure (the only way to select 960 transform here!)
@@ -150,7 +160,8 @@ namespace gr {
                                               uint8_t mpegSurround,
                                               uint8_t aacChannelMode,
                                               int16_t *out_sample1,
-                                              int16_t *out_sample2) {
+                                              int16_t *out_sample2)
+    {
       // copy AU to process it
       uint8_t au[2 * 960 + 10]; // sure, large enough
       memcpy(au, v, frame_length);
@@ -174,13 +185,65 @@ namespace gr {
                         out_sample2);
     }
 
-    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t length) {
-      // read F-PAD field
-      uint8_t fpad_type = (uint8_t) (pad[length-2]&0xc0)>>6;
-      uint8_t xpad_indicator = (uint8_t) (pad[length-2]&0x30)>>4;
-      uint8_t byte_L_indicator = (uint8_t) (pad[length-2]&0x0f);
-      uint8_t content_indicator_flag = (uint8_t) (pad[length-1]&0x02)>>1;
-      GR_LOG_DEBUG(d_logger, format("F-PAD: length %d, type %d, xpad indicator %d, byte L indicator %d, content indicator flag %d") %(int)length %(int)fpad_type %(int)xpad_indicator %(int)byte_L_indicator %(int)content_indicator_flag);
+    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t length)
+    {
+      // read F-PAD field (header of X-PAD)
+      uint8_t fpad_type = (uint8_t)(pad[length - 2] & 0xc0) >> 6;
+      uint8_t xpad_indicator = (uint8_t)(pad[length - 2] & 0x30) >> 4;
+      uint8_t byte_L_indicator = (uint8_t)(pad[length - 2] & 0x0f);
+      uint8_t content_indicator_flag = (uint8_t)(pad[length - 1] & 0x02) >> 1;
+      GR_LOG_DEBUG(d_logger,
+                   format("F-PAD: length %d, type %d, xpad indicator %d, byte L indicator %d, content indicator flag %d") %
+                   (int) length % (int) fpad_type % (int) xpad_indicator % (int) byte_L_indicator %
+                   (int) content_indicator_flag);
+      // check if the X-PAD contains one or multiple content indicators
+      if(content_indicator_flag == 0){
+        // no content indicators: the X-PAD content is a continuation of a data group and the length is like in the previous data sub-field
+        GR_LOG_DEBUG(d_logger, format("no CI flag set"));
+      }else {
+        // switch to signalled X-PAD type (short, variable or no X-PAD)
+        if (xpad_indicator == 1) { // short X-PAD -> 4 bytes
+          uint8_t app_type = (uint8_t)(pad[length-3] & 0x1f);
+          GR_LOG_DEBUG(d_logger, format("short X-PAD: app type %d") %(int)app_type);
+          // TODO implement short X-PAD handler
+        } else if (xpad_indicator == 2) { // variable X-PAD size
+          // check the number of content indicators (CIs) and the length of the CI list (these can differ due to the end marker!)
+          uint8_t ci_list_length = 0;
+          uint8_t n_ci_elements = 0;
+          while(ci_list_length < 4){ // there are max 4 content indicators (CIs) in a X-PAD of var length
+            // check if the CI is an end marker
+            if((uint8_t)(pad[length-3-ci_list_length] & 0x1f) == 0){
+              // found end marker of CI list, this CI increases the ci_list_length but does not count as a valid CI element
+              ci_list_length++;
+              break;
+            }
+            ci_list_length++;
+            n_ci_elements++;
+          }
+          // iterate over CIs processing the associated X-PAD data sub-fields after now knowing the end of the CIs
+          uint8_t pad_subfield_index = 3 + ci_list_length;
+          for (int i = 0; i < n_ci_elements; ++i) {
+            uint8_t subfield_length = (uint8_t)(pad[length-3-i] & 0xe0) >> 6;
+            uint8_t app_type = (uint8_t)(pad[length-3-i] & 0x1f);
+            GR_LOG_DEBUG(d_logger, format("variable X-PAD: app type %d, length %d") %(int)app_type %(int)subfield_length);
+            // process the X-PAD data sub-field according to its application type
+            switch (app_type) {
+              case 2: { // Dynamic label segment, start of X-PAD data group
+                // start of a new label, we don't delete the old label but overwrite it by resetting the dynamic_label_index
+                d_dynamic_label_index = 0;
+                process_dynamic_label_segment(&pad[length-pad_subfield_index]);
+                break;
+              }
+              default:
+                GR_LOG_DEBUG(d_logger, format("unsupported application type (%d)") %
+                                       (int) app_type);
+                break;
+            }
+            // push index to the start of the next data subfield
+            pad_subfield_index += d_length_data_subfield[subfield_length];
+          }
+        }
+      }
     }
 
     int16_t mp4_decode_bs_impl::MP42PCM(uint8_t dacRate,
@@ -190,7 +253,8 @@ namespace gr {
                                         uint8_t buffer[],
                                         int16_t bufferLength,
                                         int16_t *out_sample1,
-                                        int16_t *out_sample2) {
+                                        int16_t *out_sample2)
+    {
       int16_t samples;
       long unsigned int sample_rate;
       int16_t *outBuffer;
@@ -253,7 +317,8 @@ namespace gr {
  * @param len length of dataword without the 2 bytes crc at the end
  * @return true if CRC passed
  */
-    bool mp4_decode_bs_impl::crc16(const uint8_t *msg, int16_t len) {
+    bool mp4_decode_bs_impl::crc16(const uint8_t *msg, int16_t len)
+    {
       int i, j;
       uint16_t accumulator = 0xFFFF;
       uint16_t crc;
@@ -275,7 +340,8 @@ namespace gr {
     }
 
     uint16_t mp4_decode_bs_impl::BinToDec(const uint8_t *data, size_t offset,
-                                          size_t length) {
+                                          size_t length)
+    {
       uint32_t output =
               (*(data + offset / 8) << 16) | ((*(data + offset / 8 + 1)) << 8) |
               (*(data + offset / 8 +
@@ -289,7 +355,8 @@ namespace gr {
     mp4_decode_bs_impl::general_work(int noutput_items,
                                      gr_vector_int &ninput_items,
                                      gr_vector_const_void_star &input_items,
-                                     gr_vector_void_star &output_items) {
+                                     gr_vector_void_star &output_items)
+    {
       const unsigned char *in =
               (const unsigned char *) input_items[0] + d_superframe_size;
       int16_t *out1 = (int16_t *) output_items[0];
