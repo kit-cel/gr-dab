@@ -51,9 +51,12 @@ namespace gr {
 
       NeAACDecHandle aacHandle;
 
-      const static uint8_t d_length_data_subfield[8]; /*!< Lookup table for length of X-PAD data subfield.*/
+      const static uint8_t d_length_xpad_data_subfield_table[8]; /*!< Lookup table for length of X-PAD data subfield.*/
       static char d_dynamic_label[128]; /*!< Character array with dynamic label. Size is maximum length of a dynamic label.*/
       uint8_t d_dynamic_label_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
+      uint8_t d_dynamic_label_message_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic message. */
+      uint8_t d_dynamic_label_command_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic command. */
+
 
       bool crc16(const uint8_t *msg, int16_t len);
 
@@ -80,11 +83,12 @@ namespace gr {
 
       //! Processes a dynamic label segment.
       /*!
-       * @param data Pointer to the first byte (the first logical byte corresponds to the last byte in the array caused
+       * @param segment Pointer to the last logical byte (the first logical byte
+       * corresponds to the last byte in the array caused
        * to inverted byte order) of the dynamic label segment.
        * @param length Length of the dynamic label segment in bytes.
        */
-      void process_dynamic_label_segment(uint8_t *data, uint8_t length);
+      void process_dynamic_label_segment(const uint8_t *segment, uint8_t length);
 
       int16_t MP42PCM(uint8_t dacRate,
                       uint8_t sbrFlag,

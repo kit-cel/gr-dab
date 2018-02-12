@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <stdio.h>
 #include <sstream>
+#include <string>
 #include <boost/format.hpp>
 #include "neaacdec.h"
 
@@ -44,7 +45,7 @@ namespace gr {
   namespace dab {
 
     // lookup table for length of X-PAD data subfield
-    const uint8_t mp4_decode_bs_impl::d_length_data_subfield[8] = {4, 6, 8, 12, 16, 24, 32, 48};
+    const uint8_t mp4_decode_bs_impl::d_length_xpad_data_subfield_table[8] = {4, 6, 8, 12, 16, 24, 32, 48};
 
     mp4_decode_bs::sptr
     mp4_decode_bs::make(int bit_rate_n)
@@ -223,15 +224,39 @@ namespace gr {
           // iterate over CIs processing the associated X-PAD data sub-fields after now knowing the end of the CIs
           uint8_t pad_subfield_index = 3 + ci_list_length;
           for (int i = 0; i < n_ci_elements; ++i) {
-            uint8_t subfield_length = (uint8_t)(pad[length-3-i] & 0xe0) >> 6;
+            uint8_t data_subfield_length_indicator = (uint8_t)(pad[length-3-i] & 0xe0) >> 6;
             uint8_t app_type = (uint8_t)(pad[length-3-i] & 0x1f);
-            GR_LOG_DEBUG(d_logger, format("variable X-PAD: app type %d, length %d") %(int)app_type %(int)subfield_length);
+            // Write the X-PAD data sub-field into a buffer and reverse the order of the bytes to the logical byte order.
+            uint8_t xpad_subfield[d_length_xpad_data_subfield_table[data_subfield_length_indicator]];
+            for (int j = 0; j < d_length_xpad_data_subfield_table[data_subfield_length_indicator]; ++j) {
+              xpad_subfield[j] = pad[length-pad_subfield_index-j];
+            }
             // process the X-PAD data sub-field according to its application type
             switch (app_type) {
               case 2: { // Dynamic label segment, start of X-PAD data group
                 // start of a new label, we don't delete the old label but overwrite it by resetting the dynamic_label_index
                 d_dynamic_label_index = 0;
-                process_dynamic_label_segment(&pad[length-pad_subfield_index]);
+                //process dynamic label segment if CRC succeeds
+                if(crc16(const_cast<const uint8_t*>(xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]-2))) {
+                  GR_LOG_DEBUG(d_logger, format("CRC ok, START of xpad data group"));
+                  process_dynamic_label_segment(const_cast<const uint8_t*>(xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
+                } else{
+                  GR_LOG_DEBUG(d_logger, format("CRC dynamic label segment failed, dumping whole dynamic label"));
+                  // the CRC failed, so we lost one dynamic label segment and have to dump the whole dynamic label
+                  d_dynamic_label_index = 0;
+                }
+                break;
+              }
+              case 3: { // Dynamic label segment, continuation of X-PAD data group
+                // we append the dynamic label segment to the existing segments
+                // TODO what if our first xpad apptype is a continuation, should we wait for the first start?
+                if(crc16(const_cast<const uint8_t*>(xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]-2))) {
+                  GR_LOG_DEBUG(d_logger, format("CRC ok, CONTINUATION of xpad data group"));
+                  process_dynamic_label_segment(const_cast<const uint8_t*>(xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
+                } else{
+                  // the CRC failed, so we lost one dynamic label segment and have to dump the whole dynamic label
+                  GR_LOG_DEBUG(d_logger, format("CRC dynamic label segment failed, dumping whole dynamic label"));
+                }
                 break;
               }
               default:
@@ -240,8 +265,54 @@ namespace gr {
                 break;
             }
             // push index to the start of the next data subfield
-            pad_subfield_index += d_length_data_subfield[subfield_length];
+            pad_subfield_index += d_length_xpad_data_subfield_table[data_subfield_length_indicator];
           }
+        }
+      }
+    }
+
+    void mp4_decode_bs_impl::process_dynamic_label_segment(const uint8_t *segment,
+                                                           uint8_t length) {
+      uint8_t toggle = (uint8_t)(segment[0]&0x80)>>7;
+      uint8_t first_segment_flag = (uint8_t)(segment[0]&0x40)>>6;
+      uint8_t last_segment_flag = (uint8_t)(segment[0]&0x20)>>5;
+      uint8_t c_flag = (uint8_t)(segment[0]&0x10)>>4;
+      uint8_t length_char_field = (uint8_t)(segment[0]&0x0f);
+
+      // process dynamic label message and dynamic label command separately
+      if(c_flag == 0){ // message segment (character data)
+        //GR_LOG_DEBUG(d_logger, format("Message segment, first/last %d %d") %(int)first_segment_flag %(int)last_segment_flag);
+        if(first_segment_flag){
+          uint8_t charset = (uint8_t)(segment[1]&0xf0)>>4;
+          //GR_LOG_DEBUG(d_logger, format("Charset: %d") %(int)charset );
+        }else{
+          uint8_t segnum = (uint8_t)(segment[1]&0x70)>>4;
+          //GR_LOG_DEBUG(d_logger, format("SegNum: %d") %(int)segnum );
+        }
+        char label[length_char_field+1];
+        label[length_char_field] = '\0';
+        memcpy(label, &segment[2], length_char_field);
+        for (int i = 0; i < length_char_field; ++i) {
+          //GR_LOG_DEBUG(d_logger, format("Text: %s") % label[i]);
+        }
+        // check toggle bit for change of dynamic message
+        if(toggle == d_dynamic_label_message_toggle){
+          // This segment belongs to the current dynamic label message or the message is repeated.
+          //memcpy(&d_dynamic_label[d_dynamic_label_index], &segment[2], length_char_field);
+
+        }
+        else{
+          // A different dynamic label message is sent.
+        }
+      }
+      else{ // command segment
+        // check toggle bit for change of dynamic label command
+        if(toggle == d_dynamic_label_command_toggle){
+          // This segment belongs to the current dynamic label command or the command is repeated.
+
+        }
+        else{
+          // A different dynamic label message is sent.
         }
       }
     }
