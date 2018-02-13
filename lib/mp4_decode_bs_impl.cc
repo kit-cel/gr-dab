@@ -45,7 +45,7 @@ namespace gr {
   namespace dab {
 
     // lookup table for length of X-PAD data subfield
-    const uint8_t mp4_decode_bs_impl::d_length_xpad_data_subfield_table[8] = {4, 6, 8, 12, 16, 24, 32, 48};
+    const uint8_t mp4_decode_bs_impl::d_length_xpad_subfield_table[8] = {4, 6, 8, 12, 16, 24, 32, 48};
 
     mp4_decode_bs::sptr
     mp4_decode_bs::make(int bit_rate_n)
@@ -186,80 +186,63 @@ namespace gr {
                         out_sample2);
     }
 
-    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t length)
+    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t xpad_length)
     {
       // read F-PAD field (header of X-PAD)
-      uint8_t fpad_type = (uint8_t)(pad[length - 2] & 0xc0) >> 6;
-      uint8_t xpad_indicator = (uint8_t)(pad[length - 2] & 0x30) >> 4;
-      uint8_t byte_L_indicator = (uint8_t)(pad[length - 2] & 0x0f);
-      uint8_t content_indicator_flag = (uint8_t)(pad[length - 1] & 0x02) >> 1;
-      GR_LOG_DEBUG(d_logger, "PAD START ########################################################################################");
+      fpad_tail *fpad = (fpad_tail*)&pad[xpad_length-2];
       GR_LOG_DEBUG(d_logger,
-                   format("F-PAD: length %d, type %d, xpad indicator %d, byte L indicator %d, content indicator flag %d") %
-                   (int) length % (int) fpad_type % (int) xpad_indicator % (int) byte_L_indicator %
-                   (int) content_indicator_flag);
-      for (int k = 0; k <length; ++k) {
-        GR_LOG_DEBUG(d_logger, format("%s") %pad[length-1-k]);
-      }
+                   format("F-PAD: length %d") %(int)xpad_length);
       // check if the X-PAD contains one or multiple content indicators
-      if(content_indicator_flag == 0){
+      if(fpad->content_ind == 0){
         // no content indicators: the X-PAD content is a continuation of a data group and the length is like in the previous data sub-field
         GR_LOG_DEBUG(d_logger, format("no CI flag set"));
       }else {
         // switch to signalled X-PAD type (short, variable or no X-PAD)
-        if (xpad_indicator == 1) { // short X-PAD -> 4 bytes
-          uint8_t app_type = (uint8_t)(pad[length-3] & 0x1f);
-          GR_LOG_DEBUG(d_logger, format("short X-PAD: app type %d") %(int)app_type);
+        if (fpad->xpad_ind == 1) { // short X-PAD -> 4 bytes
+          GR_LOG_DEBUG(d_logger, format("short X-PAD: app type not supported"));
           // TODO implement short X-PAD handler
-        } else if (xpad_indicator == 2) { // variable X-PAD size
-          // check the number of content indicators (CIs) and the length of the CI list (these can differ due to the end marker!)
-          uint8_t ci_list_length = 0;
+        } else if (fpad->xpad_ind == 2) { // variable X-PAD size
+          // check the number of content indicators (CIs) including the possible end marker
           uint8_t n_ci_elements = 0;
-          while(ci_list_length < 4){ // there are max 4 content indicators (CIs) in a X-PAD of var length
+          while(n_ci_elements < 4){ // there are max 4 content indicators (CIs) in a X-PAD of var length
             // check if the CI is an end marker
-            if((uint8_t)(pad[length-3-ci_list_length] & 0x1f) == 0){
+            if((uint8_t)(pad[xpad_length-3-n_ci_elements] & 0x1f) == 0){
               // found end marker of CI list, this CI increases the ci_list_length but does not count as a valid CI element
-              ci_list_length++;
+              n_ci_elements++;
               break;
             }
-            ci_list_length++;
             n_ci_elements++;
           }
-          GR_LOG_DEBUG(d_logger, format("variable X-PAD with %d CI elements (length %d)") %(int)n_ci_elements %(int)ci_list_length);
+          // TODO sanity check, that sum of ci sizes is equal to xpad_size
           // iterate over CIs processing the associated X-PAD data sub-fields after now knowing the end of the CIs
-          uint8_t pad_subfield_index = 3 + ci_list_length;
+          uint8_t pad_subfield_start = 3 + n_ci_elements;
           for (int i = 0; i < n_ci_elements; ++i) {
-            uint8_t data_subfield_length_indicator = (uint8_t)(pad[length-3-i] & 0xe0) >> 6;
-            uint8_t data_subfield_length = d_length_xpad_data_subfield_table[data_subfield_length_indicator];
-            uint8_t app_type = (uint8_t)(pad[length-3-i] & 0x1f);
-            // Write the X-PAD data sub-field into a buffer and reverse the order of the bytes to the logical byte order.
-            uint8_t xpad_subfield[data_subfield_length];
-            GR_LOG_DEBUG(d_logger, format("%d. subfield: subfield_index %d, size %d, pad_sufield_index %d, type %d") %(int)(i+1) %(int)pad_subfield_index %(int)data_subfield_length %(int)pad_subfield_index %(int)app_type);
+            uint8_t app_type = (uint8_t)(pad[xpad_length-3-i] & 0x1f);
+            // if we arrived at the end marker, we can leave before assigning any byte space
+            if(app_type == 0){
+              break;
+            }
+            content_ind *ci = (content_ind*)&pad[xpad_length-3-i];
 
-            for (int j = 0; j < data_subfield_length; ++j) {
-              xpad_subfield[j] = pad[length-pad_subfield_index-j];
-              //GR_LOG_DEBUG(d_logger, format("%s") %xpad_subfield[j]);
+            // Write the X-PAD data sub-field into a buffer and reverse the order of the bytes to the logical byte order.
+            GR_LOG_DEBUG(d_logger, format("%d. subfield: subfield_index %d, size %d, type %d") %(int)(i+1) %(int)pad_subfield_start %(int)d_length_xpad_subfield_table[ci->length] %(int)ci->app_type);
+            for (int j = 0; j < ci->length; ++j) {
+              d_xpad_subfield[j] = pad[xpad_length-pad_subfield_start-j];
             }
             // process the X-PAD data sub-field according to its application type
             switch (app_type) {
               case 1: { // Data group length indicator; this indicates the start of a new data group
-                uint16_t data_group_length = (uint16_t)(xpad_subfield[0]&0x3f)<<8 || xpad_subfield[1];
-                GR_LOG_DEBUG(d_logger, format("Data group length indicator: length %d") %(int)data_group_length);
-                if(crc16(xpad_subfield, data_subfield_length-2)){
-                  GR_LOG_DEBUG(d_logger, format("CRC succeeded") );
-                }
-                else{
-                  GR_LOG_DEBUG(d_logger, format("CRC failed"));
-                }
+                //uint16_t data_group_length = (uint16_t)(d_xpad_subfield[0]&0x3f)<<8 || d_xpad_subfield[1];
+                //GR_LOG_DEBUG(d_logger, format("Data group length indicator: length %d") %(int)data_group_length);
                 break;
               }
               /*case 2: { // Dynamic label segment, start of X-PAD data group
                 // start of a new label, we don't delete the old label but overwrite it by resetting the dynamic_label_index
                 d_dynamic_label_index = 0;
                 //process dynamic label
-                if(crc16(const_cast<const uint8_t*>(xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]))) {
+                if(crc16(const_cast<const uint8_t*>(d_xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]))) {
                   GR_LOG_DEBUG(d_logger, format("CRC ok, START of xpad data group"));
-                  process_dynamic_label_segment(const_cast<const uint8_t*>(xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
+                  process_dynamic_label_segment(const_cast<const uint8_t*>(d_xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
                 } else{
                   GR_LOG_DEBUG(d_logger, format("CRC failed"));
                   // the CRC failed, so we lost one dynamic label segment and have to dump the whole dynamic label
@@ -270,9 +253,9 @@ namespace gr {
               /*case 3: { // Dynamic label segment, continuation of X-PAD data group
                 // we append the dynamic label segment to the existing segments
                 // TODO what if our first xpad apptype is a continuation, should we wait for the first start?
-                if(crc16(const_cast<const uint8_t*>(xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]-2))) {
+                if(crc16(const_cast<const uint8_t*>(d_xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]-2))) {
                   GR_LOG_DEBUG(d_logger, format("CRC ok, CONTINUATION of xpad data group"));
-                  process_dynamic_label_segment(const_cast<const uint8_t*>(xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
+                  process_dynamic_label_segment(const_cast<const uint8_t*>(d_xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
                 } else{
                   // the CRC failed, so we lost one dynamic label segment and have to dump the whole dynamic label
                   GR_LOG_DEBUG(d_logger, format("CRC dynamic label segment failed, dumping whole dynamic label"));
@@ -280,12 +263,11 @@ namespace gr {
                 break;
               }*/
               default:
-                GR_LOG_DEBUG(d_logger, format("unsupported application type (%d)") %
-                                       (int) app_type);
+                //GR_LOG_DEBUG(d_logger, format("unsupported application type (%d)") %(int) app_type);
                 break;
             }
             // push index to the start of the next data subfield
-            pad_subfield_index += d_length_xpad_data_subfield_table[data_subfield_length_indicator];
+            pad_subfield_start += d_length_xpad_subfield_table[ci->length];
           }
         }
       }

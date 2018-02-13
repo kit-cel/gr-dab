@@ -51,11 +51,24 @@ namespace gr {
 
       NeAACDecHandle aacHandle;
 
-      const static uint8_t d_length_xpad_data_subfield_table[8]; /*!< Lookup table for length of X-PAD data subfield.*/
+      const static uint8_t d_length_xpad_subfield_table[8]; /*!< Lookup table for length of X-PAD data subfield.*/
       static char d_dynamic_label[128]; /*!< Character array with dynamic label. Size is maximum length of a dynamic label.*/
       uint8_t d_dynamic_label_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
       uint8_t d_dynamic_label_message_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic message. */
       uint8_t d_dynamic_label_command_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic command. */
+      struct fpad_tail {
+        uint8_t fpad_type : 2;
+        uint8_t xpad_ind : 2;
+        uint8_t byte_l_ind : 4;
+        uint8_t byte_l_data : 6;
+        uint8_t content_ind : 1;
+        uint8_t z : 1;
+      }; /*!< Structure with bit fields of the 2 F-PAD bytes at the end of the PAD field. */
+      struct content_ind {
+        uint8_t length : 3;
+        uint8_t app_type: 5;
+      }; /*!< Structure with bit fields of the content idicator. */
+      uint8_t d_xpad_subfield[48]; /*!< Buffer for a xpad subfield, 48 bytes is the max length of a subfield. */
 
 
       bool crc16(const uint8_t *msg, int16_t len);
@@ -79,7 +92,7 @@ namespace gr {
                             int16_t *out_sample1,
                             int16_t *out_sample2);
 
-      void process_pad(uint8_t *pad, int16_t length);
+      void process_pad(uint8_t *pad, int16_t xpad_length);
 
       //! Processes a dynamic label segment.
       /*!
