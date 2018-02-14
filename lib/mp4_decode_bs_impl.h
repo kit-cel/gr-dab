@@ -51,24 +51,42 @@ namespace gr {
 
       NeAACDecHandle aacHandle;
 
-      const static uint8_t d_length_xpad_subfield_table[8]; /*!< Lookup table for length of X-PAD data subfield.*/
-      static char d_dynamic_label[128]; /*!< Character array with dynamic label. Size is maximum length of a dynamic label.*/
-      uint8_t d_dynamic_label_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
-      uint8_t d_dynamic_label_message_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic message. */
-      uint8_t d_dynamic_label_command_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic command. */
+      const static uint8_t d_length_xpad_subfield_table[8];
+      /*!< Lookup table for length of X-PAD data subfield.*/
+      static char d_dynamic_label[128];
+      /*!< Character array with dynamic label. Size is maximum length of a dynamic label.*/
+      uint8_t d_dyn_lab_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
+      uint8_t d_dyn_lab_seg_index;
+      /*!< Signalizing how many bytes of the current segment are already written to the buffer. */
       struct fixed_pad {
-        uint8_t type : 2;
-        uint8_t xpad_ind : 2;
+        // first byte "L-1"
         uint8_t byte_l_ind : 4;
-        uint8_t byte_l_data : 6;
-        uint8_t content_ind : 1;
+        uint8_t xpad_ind : 2;
+        uint8_t type : 2;
+        // second byte "L"
         uint8_t z : 1;
+        uint8_t content_ind : 1;
+        uint8_t byte_l_data : 6;
       }; /*!< Structure with bit fields of the 2 F-PAD bytes at the end of the PAD field. */
       struct content_ind {
-        uint8_t length : 3;
         uint8_t app_type: 5;
+        uint8_t length : 3;
       }; /*!< Structure with bit fields of the content idicator. */
-      uint8_t d_xpad_subfield[48]; /*!< Buffer for a xpad subfield, 48 bytes is the max length of a subfield. */
+      struct dynamic_label_header {
+        uint8_t field3 : 4;
+        uint8_t field2 : 4;
+
+        uint8_t field1 : 4; // length if character field and command if command field
+        uint8_t c : 1;
+        uint8_t last : 1;
+        uint8_t first : 1;
+        uint8_t toggle : 1;
+      }; /*!< Structure with bit fields of the X-PAD data group for a dynamic label segment. */
+      uint8_t d_dyn_lab_curr_char_field_length;
+      /*!< Length of the character field of the current dynamic label segment. */
+      static char d_dyn_lab_seg[20];
+      /*!< Buffer for one dynamic label segment. Size is maximum length of a
+       * segment (16 bytes char field + 2 bytes header + 2 bytes CRC) */
 
 
       bool crc16(const uint8_t *msg, int16_t len);

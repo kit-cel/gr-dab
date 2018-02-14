@@ -71,7 +71,9 @@ namespace gr {
       aacHandle = NeAACDecOpen();
       //memset(d_aac_frame, 0, 960);
       d_sample_rate = -1;
-      d_dynamic_label_index = 0;
+      d_dyn_lab_index = 0;
+      d_dyn_lab_seg_index = 0;
+      d_dyn_lab_curr_char_field_length = 0;
     }
 
     /*
@@ -189,25 +191,17 @@ namespace gr {
     void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t xpad_length)
     {
       // read F-PAD field (header of X-PAD)
-      fixed_pad *fpad = (fixed_pad*)&pad[xpad_length-3];
+      fixed_pad *fpad = (fixed_pad*)&pad[xpad_length-2];
+      GR_LOG_DEBUG(d_logger, format("byte1: %d, byte2: %d")%(int)pad[xpad_length-2] %(int)pad[xpad_length-1]);
       GR_LOG_DEBUG(d_logger,
                    format("F-PAD(bit field): xpad_length %d, type %d, xpad indicator %d, byte L indicator %d, l_data %d, content indicator flag %d, z flag %d") %
                    (int) xpad_length % (int) fpad->type % (int) fpad->xpad_ind % (int) fpad->byte_l_ind %(int)fpad->byte_l_data %
                    (int) fpad->content_ind %(int)fpad->z);
-      uint8_t fpad_type = (uint8_t)(pad[xpad_length - 2] & 0xc0) >> 6;
-      uint8_t xpad_indicator = (uint8_t)(pad[xpad_length - 2] & 0x30) >> 4;
-      uint8_t byte_L_indicator = (uint8_t)(pad[xpad_length - 2] & 0x0f);
-      uint8_t byte_L_data = (uint8_t)(pad[xpad_length-1]&0xfc)>>2;
-      uint8_t content_indicator_flag = (uint8_t)(pad[xpad_length - 1] & 0x02) >> 1;
-      uint8_t z = (uint8_t)(pad[xpad_length-1]&0x01);
-      GR_LOG_DEBUG(d_logger,
-                   format("F-PAD(classic): xpad_length %d, type %d, xpad indicator %d, byte L indicator %d, l_data %d, content indicator flag %d, z flag %d") %
-                   (int) xpad_length % (int) fpad_type % (int) xpad_indicator % (int) byte_L_indicator %(int)byte_L_data %
-                   (int) content_indicator_flag %(int)z);
       // check if the X-PAD contains one or multiple content indicators
       if(fpad->content_ind == 0){
         // no content indicators: the X-PAD content is a continuation of a data group and the length is like in the previous data sub-field
         GR_LOG_DEBUG(d_logger, format("no CI flag set"));
+        // TODO implement this case
       }else {
         // switch to signalled X-PAD type (short, variable or no X-PAD)
         if (fpad->xpad_ind == 1) { // short X-PAD -> 4 bytes
@@ -235,44 +229,66 @@ namespace gr {
             if(ci->app_type == 0){
               break;
             }
-            // Write the X-PAD data sub-field into a buffer and reverse the order of the bytes to the logical byte order.
-            GR_LOG_DEBUG(d_logger, format("%d. subfield: subfield_index %d, size %d, type %d") %(int)(i+1) %(int)curr_subfield_start %(int)d_length_xpad_subfield_table[ci->length] %(int)ci->app_type);
-            for (int j = 0; j < ci->length; ++j) {
-              d_xpad_subfield[j] = pad[xpad_length-curr_subfield_start-j];
-            }
+            /* Define a ptr that points at the first byte in order of the subfield.
+             * This ist the last logical byte because the bytes are still reversed! */
+            uint8_t *xpad_subfield = &pad[xpad_length-curr_subfield_start-(ci->length-1)];
             // process the X-PAD data sub-field according to its application type
             switch (ci->app_type) {
               case 1: { // Data group length indicator; this indicates the start of a new data group
-                //uint16_t data_group_length = (uint16_t)(d_xpad_subfield[0]&0x3f)<<8 || d_xpad_subfield[1];
-                //GR_LOG_DEBUG(d_logger, format("Data group length indicator: length %d") %(int)data_group_length);
                 break;
               }
-              /*case 2: { // Dynamic label segment, start of X-PAD data group
-                // start of a new label, we don't delete the old label but overwrite it by resetting the dynamic_label_index
-                d_dynamic_label_index = 0;
-                //process dynamic label
-                if(crc16(const_cast<const uint8_t*>(d_xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]))) {
-                  GR_LOG_DEBUG(d_logger, format("CRC ok, START of xpad data group"));
-                  process_dynamic_label_segment(const_cast<const uint8_t*>(d_xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
-                } else{
-                  GR_LOG_DEBUG(d_logger, format("CRC failed"));
-                  // the CRC failed, so we lost one dynamic label segment and have to dump the whole dynamic label
-                  d_dynamic_label_index = 0;
+              case 2: { // Dynamic label segment, start of X-PAD data group
+                GR_LOG_DEBUG(d_logger, format("START DYN LABEL"));
+                // reset the index for the written bytes in this segment, because it is the start of a new segment
+                d_dyn_lab_seg_index = 0;
+                // read dynamic label segment header (first 2 bytes in logical order)
+                dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header*)&xpad_subfield[(ci->length)-2];
+                if(dyn_lab_seg_header->c == 0){
+                  GR_LOG_DEBUG(d_logger, format("MESSAGE SUBFIELD"));
+                  // write the length of the char field of the current segment to a variable
+                  d_dyn_lab_curr_char_field_length = dyn_lab_seg_header->field1;
+                  if(dyn_lab_seg_header->first) { // this is the start subfield of the first segment of a dynamic label
+                    // reset dynamic label index and overwrite the buffer
+                    d_dyn_lab_index = 0;
+                  }
+                  // Write the complete subfield (with header) to the buffer in logical order.
+                  for (int j = 0; j < (ci->length); ++j) {
+                    d_dyn_lab_seg[d_dyn_lab_seg_index] = xpad_subfield[(ci->length)-1-j];
+                  }
+                  for (int j = 2; j < (ci->length); ++j) {
+                    GR_LOG_DEBUG(d_logger, format("%s") %xpad_subfield[(ci->length)-1-j]);
+                  }
+                  d_dyn_lab_seg_index += (ci->length);
+                  /* Check if the segment is already finished.
+                   * In this case the segment was fully written in this one subfield. */
+                  if(d_dyn_lab_seg_index-4 >= d_dyn_lab_curr_char_field_length){
+                    /* We have completely written the segment to the buffer.
+                     * We don't have to check if we wrote too much, because the CRC
+                     * would fail in this case. */
+                    // do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer
+                    if(crc16(const_cast<const uint8_t*>(d_dyn_lab_seg), d_dyn_lab_seg_index-2)){
+                      // We received a correct label segment and can write it to the dynamic label buffer.
+                      memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2], d_dyn_lab_seg_index-4);
+                      d_dyn_lab_index += d_dyn_lab_seg_index-4;
+                      d_dyn_lab_seg_index = 0;
+                    } else{ // the CRC failed and we reset the whole dynamic label
+                      d_dyn_lab_seg_index = 0;
+                      d_dyn_lab_curr_char_field_length = 0;
+                      d_dyn_lab_index = 0;
+                      break;
+                    }
+                    if(dyn_lab_seg_header->last){ // This is the last segment of the dynamic label.
+                      /* We just completed the current (last) segment and are
+                       * therefore finished completely with this whole dynamic label. */
+                      // Export it (do command segments and wrap up for a message).
+                      // TODO dyn_label_export(d_dyn_label, length)
+                    }
+                  }
+                } else {
+                  // TODO insert command handling
                 }
                 break;
-              }*/
-              /*case 3: { // Dynamic label segment, continuation of X-PAD data group
-                // we append the dynamic label segment to the existing segments
-                // TODO what if our first xpad apptype is a continuation, should we wait for the first start?
-                if(crc16(const_cast<const uint8_t*>(d_xpad_subfield), (int16_t)(d_length_xpad_data_subfield_table[data_subfield_length_indicator]-2))) {
-                  GR_LOG_DEBUG(d_logger, format("CRC ok, CONTINUATION of xpad data group"));
-                  process_dynamic_label_segment(const_cast<const uint8_t*>(d_xpad_subfield), d_length_xpad_data_subfield_table[data_subfield_length_indicator]);
-                } else{
-                  // the CRC failed, so we lost one dynamic label segment and have to dump the whole dynamic label
-                  GR_LOG_DEBUG(d_logger, format("CRC dynamic label segment failed, dumping whole dynamic label"));
-                }
-                break;
-              }*/
+              }
               default:
                 //GR_LOG_DEBUG(d_logger, format("unsupported application type (%d)") %(int) app_type);
                 break;
@@ -286,51 +302,6 @@ namespace gr {
       }
     }
 
-    void mp4_decode_bs_impl::process_dynamic_label_segment(const uint8_t *segment,
-                                                           uint8_t length) {
-      uint8_t toggle = (uint8_t)(segment[0]&0x80)>>7;
-      uint8_t first_segment_flag = (uint8_t)(segment[0]&0x40)>>6;
-      uint8_t last_segment_flag = (uint8_t)(segment[0]&0x20)>>5;
-      uint8_t c_flag = (uint8_t)(segment[0]&0x10)>>4;
-      uint8_t length_char_field = (uint8_t)(segment[0]&0x0f);
-
-      // process dynamic label message and dynamic label command separately
-      if(c_flag == 0){ // message segment (character data)
-        //GR_LOG_DEBUG(d_logger, format("Message segment, first/last %d %d") %(int)first_segment_flag %(int)last_segment_flag);
-        if(first_segment_flag){
-          uint8_t charset = (uint8_t)(segment[1]&0xf0)>>4;
-          //GR_LOG_DEBUG(d_logger, format("Charset: %d") %(int)charset );
-        }else{
-          uint8_t segnum = (uint8_t)(segment[1]&0x70)>>4;
-          //GR_LOG_DEBUG(d_logger, format("SegNum: %d") %(int)segnum );
-        }
-        char label[length_char_field+1];
-        label[length_char_field] = '\0';
-        memcpy(label, &segment[2], length_char_field);
-        for (int i = 0; i < length_char_field; ++i) {
-          //GR_LOG_DEBUG(d_logger, format("Text: %s") % label[i]);
-        }
-        // check toggle bit for change of dynamic message
-        if(toggle == d_dynamic_label_message_toggle){
-          // This segment belongs to the current dynamic label message or the message is repeated.
-          //memcpy(&d_dynamic_label[d_dynamic_label_index], &segment[2], length_char_field);
-
-        }
-        else{
-          // A different dynamic label message is sent.
-        }
-      }
-      else{ // command segment
-        // check toggle bit for change of dynamic label command
-        if(toggle == d_dynamic_label_command_toggle){
-          // This segment belongs to the current dynamic label command or the command is repeated.
-
-        }
-        else{
-          // A different dynamic label message is sent.
-        }
-      }
-    }
 
     int16_t mp4_decode_bs_impl::MP42PCM(uint8_t dacRate,
                                         uint8_t sbrFlag,
