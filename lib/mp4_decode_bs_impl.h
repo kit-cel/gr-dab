@@ -56,8 +56,8 @@ namespace gr {
       uint8_t d_dynamic_label_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
       uint8_t d_dynamic_label_message_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic message. */
       uint8_t d_dynamic_label_command_toggle; /*!< Toggle bit which is signalling the repetition or change of a dynamic command. */
-      struct fpad_tail {
-        uint8_t fpad_type : 2;
+      struct fixed_pad {
+        uint8_t type : 2;
         uint8_t xpad_ind : 2;
         uint8_t byte_l_ind : 4;
         uint8_t byte_l_data : 6;

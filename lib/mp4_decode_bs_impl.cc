@@ -189,9 +189,21 @@ namespace gr {
     void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t xpad_length)
     {
       // read F-PAD field (header of X-PAD)
-      fpad_tail *fpad = (fpad_tail*)&pad[xpad_length-2];
+      fixed_pad *fpad = (fixed_pad*)&pad[xpad_length-3];
       GR_LOG_DEBUG(d_logger,
-                   format("F-PAD: length %d") %(int)xpad_length);
+                   format("F-PAD(bit field): xpad_length %d, type %d, xpad indicator %d, byte L indicator %d, l_data %d, content indicator flag %d, z flag %d") %
+                   (int) xpad_length % (int) fpad->type % (int) fpad->xpad_ind % (int) fpad->byte_l_ind %(int)fpad->byte_l_data %
+                   (int) fpad->content_ind %(int)fpad->z);
+      uint8_t fpad_type = (uint8_t)(pad[xpad_length - 2] & 0xc0) >> 6;
+      uint8_t xpad_indicator = (uint8_t)(pad[xpad_length - 2] & 0x30) >> 4;
+      uint8_t byte_L_indicator = (uint8_t)(pad[xpad_length - 2] & 0x0f);
+      uint8_t byte_L_data = (uint8_t)(pad[xpad_length-1]&0xfc)>>2;
+      uint8_t content_indicator_flag = (uint8_t)(pad[xpad_length - 1] & 0x02) >> 1;
+      uint8_t z = (uint8_t)(pad[xpad_length-1]&0x01);
+      GR_LOG_DEBUG(d_logger,
+                   format("F-PAD(classic): xpad_length %d, type %d, xpad indicator %d, byte L indicator %d, l_data %d, content indicator flag %d, z flag %d") %
+                   (int) xpad_length % (int) fpad_type % (int) xpad_indicator % (int) byte_L_indicator %(int)byte_L_data %
+                   (int) content_indicator_flag %(int)z);
       // check if the X-PAD contains one or multiple content indicators
       if(fpad->content_ind == 0){
         // no content indicators: the X-PAD content is a continuation of a data group and the length is like in the previous data sub-field
@@ -214,23 +226,22 @@ namespace gr {
             n_ci_elements++;
           }
           // TODO sanity check, that sum of ci sizes is equal to xpad_size
-          // iterate over CIs processing the associated X-PAD data sub-fields after now knowing the end of the CIs
-          uint8_t pad_subfield_start = 3 + n_ci_elements;
+          // iterate over CIs processing the associated X-PAD data sub-fields after now knowing the end of the CIs and the start of the sub-fields
+          uint8_t curr_subfield_start = 3 + n_ci_elements;
           for (int i = 0; i < n_ci_elements; ++i) {
-            uint8_t app_type = (uint8_t)(pad[xpad_length-3-i] & 0x1f);
+            // read content indicator (CI)
+            content_ind *ci = (content_ind*)&pad[xpad_length-3-i];
             // if we arrived at the end marker, we can leave before assigning any byte space
-            if(app_type == 0){
+            if(ci->app_type == 0){
               break;
             }
-            content_ind *ci = (content_ind*)&pad[xpad_length-3-i];
-
             // Write the X-PAD data sub-field into a buffer and reverse the order of the bytes to the logical byte order.
-            GR_LOG_DEBUG(d_logger, format("%d. subfield: subfield_index %d, size %d, type %d") %(int)(i+1) %(int)pad_subfield_start %(int)d_length_xpad_subfield_table[ci->length] %(int)ci->app_type);
+            GR_LOG_DEBUG(d_logger, format("%d. subfield: subfield_index %d, size %d, type %d") %(int)(i+1) %(int)curr_subfield_start %(int)d_length_xpad_subfield_table[ci->length] %(int)ci->app_type);
             for (int j = 0; j < ci->length; ++j) {
-              d_xpad_subfield[j] = pad[xpad_length-pad_subfield_start-j];
+              d_xpad_subfield[j] = pad[xpad_length-curr_subfield_start-j];
             }
             // process the X-PAD data sub-field according to its application type
-            switch (app_type) {
+            switch (ci->app_type) {
               case 1: { // Data group length indicator; this indicates the start of a new data group
                 //uint16_t data_group_length = (uint16_t)(d_xpad_subfield[0]&0x3f)<<8 || d_xpad_subfield[1];
                 //GR_LOG_DEBUG(d_logger, format("Data group length indicator: length %d") %(int)data_group_length);
@@ -267,8 +278,10 @@ namespace gr {
                 break;
             }
             // push index to the start of the next data subfield
-            pad_subfield_start += d_length_xpad_subfield_table[ci->length];
+            curr_subfield_start += d_length_xpad_subfield_table[ci->length];
           }
+        } else {
+          // no X-PAD; we are finished here
         }
       }
     }
