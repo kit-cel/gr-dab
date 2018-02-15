@@ -1,10 +1,10 @@
 /* -*- c++ -*- */
 /*
  *
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * GNU Radio block written for gr-dab including the following third party elements:
- * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class
+ * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class and the PAD processing
  *  Copyright (C) 2013
  *  Jan van Katwijk (J.vanKatwijk@gmail.com)
  *  Lazy Chair Computing

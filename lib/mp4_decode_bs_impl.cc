@@ -1,6 +1,6 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  *
  * GNU Radio block written for gr-dab including the following third party elements:
  * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class and the PAD processing
@@ -45,7 +45,11 @@ namespace gr {
   namespace dab {
 
     // lookup table for length of X-PAD data subfield
-    const uint8_t mp4_decode_bs_impl::d_length_xpad_subfield_table[8] = {4, 6, 8, 12, 16, 24, 32, 48};
+    const uint8_t mp4_decode_bs_impl::d_length_xpad_subfield_table[8] = {4, 6,
+                                                                         8, 12,
+                                                                         16, 24,
+                                                                         32,
+                                                                         48};
 
     mp4_decode_bs::sptr
     mp4_decode_bs::make(int bit_rate_n)
@@ -192,17 +196,14 @@ namespace gr {
     void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t xpad_length)
     {
       // read F-PAD field (header of X-PAD)
-      fixed_pad *fpad = (fixed_pad*)&pad[xpad_length-2];
-      GR_LOG_DEBUG(d_logger,
-                   format("F-PAD(bit field): xpad_length %d, type %d, xpad indicator %d, byte L indicator %d, l_data %d, content indicator flag %d, z flag %d") %
-                   (int) xpad_length % (int) fpad->type % (int) fpad->xpad_ind % (int) fpad->byte_l_ind %(int)fpad->byte_l_data %
-                   (int) fpad->content_ind %(int)fpad->z);
+      fixed_pad *fpad = (fixed_pad *) &pad[xpad_length - 2];
       // check if the X-PAD contains one or multiple content indicators
-      if(fpad->content_ind == 0){
-        // no content indicators: the X-PAD content is a continuation of a data group and the length is like in the previous data sub-field
+      if (fpad->content_ind == 0) {
+        /* no content indicators: the X-PAD content is a continuation of a data
+         * group and the length is like in the previous data sub-field */
         GR_LOG_DEBUG(d_logger, format("no CI flag set"));
         // TODO implement this case
-      }else {
+      } else {
         // switch to signalled X-PAD type (short, variable or no X-PAD)
         if (fpad->xpad_ind == 1) { // short X-PAD -> 4 bytes
           GR_LOG_DEBUG(d_logger, format("short X-PAD: app type not supported"));
@@ -210,69 +211,100 @@ namespace gr {
         } else if (fpad->xpad_ind == 2) { // variable X-PAD size
           // check the number of content indicators (CIs) including the possible end marker
           uint8_t n_ci_elements = 0;
-          while(n_ci_elements < 4){ // there are max 4 content indicators (CIs) in a X-PAD of var length
+          uint8_t subfield_length_sum = 0; // this only exists for the following sanity check
+          /* There are max 4 content indicators (CIs) in a X-PAD of var length.
+           * Search for content indicators until you reached the maximum number
+           * or you found the end marker. */
+          while (n_ci_elements < 4) {
             // check if the CI is an end marker
-            if((uint8_t)(pad[xpad_length-3-n_ci_elements] & 0x1f) == 0){
-              // found end marker of CI list, this CI increases the ci_list_length but does not count as a valid CI element
+            if ((uint8_t)(pad[xpad_length - 3 - n_ci_elements] & 0x1f) == 0) {
+              /* Found end marker of CI list, this CI increases the ci_list_length
+               * but does not count as a valid CI element. */
               n_ci_elements++;
               break;
             }
+            subfield_length_sum +=
+                    (uint8_t)(pad[xpad_length - 3 - n_ci_elements]) >> 5;
             n_ci_elements++;
           }
-          // TODO sanity check, that sum of ci sizes is equal to xpad_size
-          // iterate over CIs processing the associated X-PAD data sub-fields after now knowing the end of the CIs and the start of the sub-fields
-          uint8_t curr_subfield_start = 3 + n_ci_elements;
-          for (int i = 0; i < n_ci_elements; ++i) {
-            // read content indicator (CI)
-            content_ind *ci = (content_ind*)&pad[xpad_length-3-i];
-            // if we arrived at the end marker, we can leave before assigning any byte space
-            if(ci->app_type == 0){
-              break;
-            }
-            uint8_t curr_subfield_length = d_length_xpad_subfield_table[ci->length];
-             /* Define a ptr that points at the first byte in order of the subfield.
-              * This ist the last logical byte because the bytes are still reversed! */
-            uint8_t *xpad_subfield = &pad[xpad_length-curr_subfield_start-(curr_subfield_length-1)];
-            // process the X-PAD data sub-field according to its application type
-            switch (ci->app_type) {
-              case 1: { // Data group length indicator; this indicates the start of a new data group
+          // sanity check: sum of ci sizes must be equal to xpad_size
+          if (subfield_length_sum + n_ci_elements == xpad_length) {
+            /* Iterate over CIs processing the associated X-PAD data sub-fields
+             * after now knowing the end of the CIs and the start of the sub-fields. */
+            uint8_t curr_subfield_start = 3 + n_ci_elements;
+            for (int i = 0; i < n_ci_elements; ++i) {
+              // read content indicator (CI)
+              content_ind *ci = (content_ind *) &pad[xpad_length - 3 - i];
+              // if we arrived at the end marker, we can leave before assigning any byte space
+              if (ci->app_type == 0) {
                 break;
               }
-              case 2: { // Dynamic label segment, start of X-PAD data group
-                // reset the index for the written bytes in this segment, because it is the start of a new segment
-                d_dyn_lab_seg_index = 0;
-                // read dynamic label segment header (first 2 bytes in logical order)
-                dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header*)&xpad_subfield[curr_subfield_length-2];
-                if(dyn_lab_seg_header->c == 0){ // message segment
-                  // write the length of the char field of the current segment to a variable
-                  d_dyn_lab_curr_char_field_length = dyn_lab_seg_header->field1 + 1;
-                  // check if this segment is the first one of a dynamic label
-                  if(dyn_lab_seg_header->first) {
-                    // reset dynamic label index and overwrite the buffer
-                    d_dyn_lab_index = 0;
-                  }
-                  // process this subfield as a part of a dynamic label segment
-                  process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
-                  // check if this is the last segment of a dynamic label
-                  if(dyn_lab_seg_header->last){
-                    d_last_dyn_lab_seg = true;
-                  }
-                } else { // command segment
-                  // TODO insert command handling
+              uint8_t curr_subfield_length = d_length_xpad_subfield_table[ci->length];
+              /* Define a ptr that points at the first byte in order of the subfield.
+               * This ist the last logical byte because the bytes are still reversed! */
+              uint8_t *xpad_subfield = &pad[xpad_length - curr_subfield_start -
+                                            (curr_subfield_length - 1)];
+              // process the X-PAD data sub-field according to its application type
+              switch (ci->app_type) {
+                case 1: { // Data group length indicator; this indicates the start of a new data group
+                  break;
                 }
-                break;
+                case 2: { // Dynamic label segment, start of X-PAD data group
+                  /* Reset the index for the written bytes in this segment,
+                   * because it is the start of a new segment. */
+                  d_dyn_lab_seg_index = 0;
+                  // read dynamic label segment header (first 2 bytes in logical order)
+                  dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header *) &xpad_subfield[
+                          curr_subfield_length - 2];
+                  if (dyn_lab_seg_header->c == 0) { // message segment
+                    // write the length of the char field of the current segment to a variable
+                    d_dyn_lab_curr_char_field_length =
+                            dyn_lab_seg_header->field1 + 1;
+                    // check if this segment is the first one of a dynamic label
+                    if (dyn_lab_seg_header->first) {
+                      // reset dynamic label index and overwrite the buffer
+                      d_dyn_lab_index = 0;
+                    }
+                    // process this subfield as a part of a dynamic label segment
+                    process_dynamic_label_segment_subfield(xpad_subfield,
+                                                           curr_subfield_length);
+                    // check if this is the last segment of a dynamic label
+                    if (dyn_lab_seg_header->last) {
+                      d_last_dyn_lab_seg = true;
+                    }
+                  } else { // command segment
+                    if (dyn_lab_seg_header->field1 == 1) {
+                      // clear display command
+                      // TODO pass message to clear display
+                    }
+                  }
+                  break;
+                }
+                case 3: { // Dynamic label segment, continuation of X-PAD data group
+                  // process this subfield as a part of a dynamic label segment
+                  if (d_dyn_lab_seg_index != 0) {
+                    /* If we continue a subfield and already wrote bytes in the
+                     * subfield buffer, we are processing a message segment
+                     * and no command segment. */
+                    process_dynamic_label_segment_subfield(xpad_subfield,
+                                                           curr_subfield_length);
+                  } else {
+                    /* We process a command segment and have to do nothing. */
+                  }
+                  break;
+                }
+                default:
+                  break;
               }
-              case 3: { // Dynamic label segment, continuation of X-PAD data group
-                // process this subfield as a part of a dynamic label segment
-                process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
-                break;
-              }
-              default:
-                //GR_LOG_DEBUG(d_logger, format("unsupported application type (%d)") %(int) app_type);
-                break;
+              // push index to the start of the next data subfield
+              curr_subfield_start += d_length_xpad_subfield_table[ci->length];
             }
-            // push index to the start of the next data subfield
-            curr_subfield_start += d_length_xpad_subfield_table[ci->length];
+          } else {
+            GR_LOG_ERROR(d_logger,
+                         format("XPAD length (%d) does not match with the total "
+                                        "length of the content indicators (%d)") %
+                         (int) xpad_length %
+                         (int) (subfield_length_sum + n_ci_elements));
           }
         } else {
           // no X-PAD; we are finished here
@@ -280,36 +312,44 @@ namespace gr {
       }
     }
 
-    void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(uint8_t *subfield, uint8_t subfield_length) {
+    void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(
+            uint8_t *subfield, uint8_t subfield_length)
+    {
       // check if this sub-field contains padding bytes
       uint8_t num_valid_bytes;
-      if (subfield_length > d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index){
-        num_valid_bytes = d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index;
+      if (subfield_length >
+          d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index) {
+        num_valid_bytes =
+                d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index;
       } else {
         num_valid_bytes = subfield_length;
       }
 
       // Write the complete subfield (with header) to the buffer in logical order.
       for (int j = 0; j < num_valid_bytes; ++j) {
-        d_dyn_lab_seg[d_dyn_lab_seg_index+j] = subfield[subfield_length-1-j];
+        d_dyn_lab_seg[d_dyn_lab_seg_index + j] = subfield[subfield_length - 1 -
+                                                          j];
       }
       d_dyn_lab_seg_index += num_valid_bytes;
 
       // check if the segment is finished
-      if(d_dyn_lab_seg_index >= d_dyn_lab_curr_char_field_length + 4){
+      if (d_dyn_lab_seg_index >= d_dyn_lab_curr_char_field_length + 4) {
         // We have completely written the segment to the buffer.
-        // do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer
-        if(crc16(const_cast<const uint8_t*>(d_dyn_lab_seg), d_dyn_lab_seg_index-2)){
-          GR_LOG_DEBUG(d_logger, format("DYNAMIC LABEL SEGMENT: CRC OK, copying data in buffer"));
+        // Do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer.
+        if (crc16(const_cast<const uint8_t *>(d_dyn_lab_seg),
+                  d_dyn_lab_seg_index - 2)) {
+          GR_LOG_DEBUG(d_logger,
+                       format("DYNAMIC LABEL SEGMENT: CRC OK, copying data in buffer"));
           // We received a correct label segment and can write it to the dynamic label buffer.
-          memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2], d_dyn_lab_seg_index-4);
-          d_dyn_lab_index += d_dyn_lab_seg_index-4;
+          memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2],
+                 d_dyn_lab_seg_index - 4);
+          d_dyn_lab_index += d_dyn_lab_seg_index - 4;
           d_dyn_lab_seg_index = 0;
-          if(d_last_dyn_lab_seg){
+          if (d_last_dyn_lab_seg) {
             // we finished the complete dynamic label and can export it
             // TODO export/process dynamic label
           }
-        } else{ // the CRC failed and we reset the whole dynamic label
+        } else { // the CRC failed and we reset the whole dynamic label
           GR_LOG_DEBUG(d_logger, format("CRC FAILED"));
           // TODO wait for the start of the next dynamic label
           d_dyn_lab_seg_index = 0;
@@ -449,7 +489,8 @@ namespace gr {
         d_mpeg_surround = (in[n * d_superframe_size + 2] & 07); // bits 21 .. 23
         // log header information
         GR_LOG_DEBUG(d_logger,
-                     format("superframe header: dac_rate %d, sbr_flag %d, aac_mode %d, ps_flag %d, surround %d") %
+                     format("superframe header: dac_rate %d, sbr_flag %d, "
+                                    "aac_mode %d, ps_flag %d, surround %d") %
                      (int) d_dac_rate % (int) d_sbr_flag %
                      (int) d_aac_channel_mode % (int) d_ps_flag %
                      (int) d_mpeg_surround);
@@ -502,7 +543,8 @@ namespace gr {
             break;
         }
 
-        // each of the d_num_aus AUs of each superframe (110 * d_bit_rate_n packed bytes) is now processed separately
+        /* Each of the d_num_aus AUs of each superframe (110 * d_bit_rate_n packed bytes)
+         * is now processed separately. */
 
         for (int i = 0; i < d_num_aus; i++) {
           int16_t aac_frame_length;
