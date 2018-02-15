@@ -53,7 +53,7 @@ namespace gr {
 
       const static uint8_t d_length_xpad_subfield_table[8];
       /*!< Lookup table for length of X-PAD data subfield.*/
-      static char d_dynamic_label[128];
+      char d_dynamic_label[256];
       /*!< Character array with dynamic label. Size is maximum length of a dynamic label.*/
       uint8_t d_dyn_lab_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
       uint8_t d_dyn_lab_seg_index;
@@ -84,7 +84,7 @@ namespace gr {
       }; /*!< Structure with bit fields of the X-PAD data group for a dynamic label segment. */
       uint8_t d_dyn_lab_curr_char_field_length;
       /*!< Length of the character field of the current dynamic label segment. */
-      static char d_dyn_lab_seg[20];
+      uint8_t d_dyn_lab_seg[64];
       /*!< Buffer for one dynamic label segment. Size is maximum length of a
        * segment (16 bytes char field + 2 bytes header + 2 bytes CRC) */
 
