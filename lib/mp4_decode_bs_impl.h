@@ -35,8 +35,8 @@
 
 namespace gr {
   namespace dab {
-/*! \brief DAB+ Audio frame decoder
- * according to ETSI TS 102 563
+/*! \brief DAB+ Audio frame decoder with PAD processing.
+ * according to ETSI TS 102 563 and ETSI EN 300 401
  */
     class mp4_decode_bs_impl : public mp4_decode_bs {
     private:
@@ -58,6 +58,7 @@ namespace gr {
       uint8_t d_dyn_lab_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
       uint8_t d_dyn_lab_seg_index;
       /*!< Signalizing how many bytes of the current segment are already written to the buffer. */
+      bool d_last_dyn_lab_seg;
       struct fixed_pad {
         // first byte "L-1"
         uint8_t byte_l_ind : 4;
@@ -112,14 +113,14 @@ namespace gr {
 
       void process_pad(uint8_t *pad, int16_t xpad_length);
 
-      //! Processes a dynamic label segment.
+      //! Processes a subfield of a dynamic label segment.
       /*!
-       * @param segment Pointer to the last logical byte (the first logical byte
-       * corresponds to the last byte in the array caused
-       * to inverted byte order) of the dynamic label segment.
-       * @param length Length of the dynamic label segment in bytes.
+       * @param subfield Pointer to the last logical byte (the last logical byte
+       * corresponds to the first byte in the array order, caused
+       * to inverted byte order) of the subfield of a dynamic label segment.
+       * @param subfield_length Length of the subfield of a dynamic label segment in bytes.
        */
-      void process_dynamic_label_segment(const uint8_t *segment, uint8_t length);
+      void process_dynamic_label_segment_subfield(uint8_t *subfield, uint8_t subfield_length);
 
       int16_t MP42PCM(uint8_t dacRate,
                       uint8_t sbrFlag,

@@ -74,6 +74,7 @@ namespace gr {
       d_dyn_lab_index = 0;
       d_dyn_lab_seg_index = 0;
       d_dyn_lab_curr_char_field_length = 0;
+      d_last_dyn_lab_seg = false;
     }
 
     /*
@@ -229,7 +230,6 @@ namespace gr {
               break;
             }
             uint8_t curr_subfield_length = d_length_xpad_subfield_table[ci->length];
-            GR_LOG_DEBUG(d_logger, format("SUBFIELD, length %d") %(int)curr_subfield_length);
              /* Define a ptr that points at the first byte in order of the subfield.
               * This ist the last logical byte because the bytes are still reversed! */
             uint8_t *xpad_subfield = &pad[xpad_length-curr_subfield_start-(curr_subfield_length-1)];
@@ -239,66 +239,32 @@ namespace gr {
                 break;
               }
               case 2: { // Dynamic label segment, start of X-PAD data group
-                GR_LOG_DEBUG(d_logger, format("START DYN LABEL"));
                 // reset the index for the written bytes in this segment, because it is the start of a new segment
                 d_dyn_lab_seg_index = 0;
                 // read dynamic label segment header (first 2 bytes in logical order)
                 dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header*)&xpad_subfield[curr_subfield_length-2];
-                if(dyn_lab_seg_header->c == 0){
+                if(dyn_lab_seg_header->c == 0){ // message segment
                   // write the length of the char field of the current segment to a variable
                   d_dyn_lab_curr_char_field_length = dyn_lab_seg_header->field1 + 1;
-                  // check if this sub-field contains padding bytes
-                  if (curr_subfield_length > d_dyn_lab_curr_char_field_length + 4){
-                    curr_subfield_length = d_dyn_lab_curr_char_field_length + 4;
-                  }
-                  GR_LOG_DEBUG(d_logger, format("MESSAGE SUBFIELD, segment char length %d") %(int)d_dyn_lab_curr_char_field_length);
-                  if(dyn_lab_seg_header->first) { // this is the start subfield of the first segment of a dynamic label
+                  // check if this segment is the first one of a dynamic label
+                  if(dyn_lab_seg_header->first) {
                     // reset dynamic label index and overwrite the buffer
                     d_dyn_lab_index = 0;
                   }
-                  // Write the complete subfield (with header) to the buffer in logical order.
-                  for (int j = 0; j < curr_subfield_length; ++j) {
-                    d_dyn_lab_seg[d_dyn_lab_seg_index+j] = xpad_subfield[curr_subfield_length-1-j];
+                  // process this subfield as a part of a dynamic label segment
+                  process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
+                  // check if this is the last segment of a dynamic label
+                  if(dyn_lab_seg_header->last){
+                    d_last_dyn_lab_seg = true;
                   }
-                  d_dyn_lab_seg_index += curr_subfield_length;
-                  for (int j = 2; j < curr_subfield_length; ++j) {
-                    GR_LOG_DEBUG(d_logger, format("%s") %xpad_subfield[curr_subfield_length-1-j]);
-                  }
-                   /* Check if the segment is already finished.
-                    * In this case the segment was fully written in this one subfield. */
-                  if(d_dyn_lab_seg_index-4 >= d_dyn_lab_curr_char_field_length){
-                    GR_LOG_DEBUG(d_logger, format("FINISHED SEGMENT, doing CRC"));
-                     /* We have completely written the segment to the buffer.
-                      * We don't have to check if we wrote too much, because the CRC
-                     * would fail in this case. */
-                    // do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer
-                    if(crc16(const_cast<const uint8_t*>(d_dyn_lab_seg), d_dyn_lab_seg_index-2)){
-                      GR_LOG_DEBUG(d_logger, format("CRC OK, copying data in buffer"));
-                      // We received a correct label segment and can write it to the dynamic label buffer.
-                      memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2], d_dyn_lab_seg_index-4);
-                      d_dyn_lab_index += d_dyn_lab_seg_index-4;
-                      d_dyn_lab_seg_index = 0;
-                    } else{ // the CRC failed and we reset the whole dynamic label
-                      GR_LOG_DEBUG(d_logger, format("CRC FAILED"));
-                      d_dyn_lab_seg_index = 0;
-                      d_dyn_lab_curr_char_field_length = 0;
-                      d_dyn_lab_index = 0;
-                      break;
-                    }
-                    if(dyn_lab_seg_header->last){ // This is the last segment of the dynamic label.
-                       /* We just completed the current (last) segment and are
-                        * therefore finished completely with this whole dynamic label. */
-                      // Export it (do command segments and wrap up for a message).
-                      // TODO dyn_label_export(d_dyn_label, length)
-                    }
-                  }
-                } else {
+                } else { // command segment
                   // TODO insert command handling
                 }
                 break;
               }
-              case 3: {
-                GR_LOG_DEBUG(d_logger, format("CONTINUATION DYN LABEL"));
+              case 3: { // Dynamic label segment, continuation of X-PAD data group
+                // process this subfield as a part of a dynamic label segment
+                process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
                 break;
               }
               default:
@@ -314,6 +280,45 @@ namespace gr {
       }
     }
 
+    void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(uint8_t *subfield, uint8_t subfield_length) {
+      // check if this sub-field contains padding bytes
+      uint8_t num_valid_bytes;
+      if (subfield_length > d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index){
+        num_valid_bytes = d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index;
+      } else {
+        num_valid_bytes = subfield_length;
+      }
+
+      // Write the complete subfield (with header) to the buffer in logical order.
+      for (int j = 0; j < num_valid_bytes; ++j) {
+        d_dyn_lab_seg[d_dyn_lab_seg_index+j] = subfield[subfield_length-1-j];
+      }
+      d_dyn_lab_seg_index += num_valid_bytes;
+
+      // check if the segment is finished
+      if(d_dyn_lab_seg_index >= d_dyn_lab_curr_char_field_length + 4){
+        // We have completely written the segment to the buffer.
+        // do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer
+        if(crc16(const_cast<const uint8_t*>(d_dyn_lab_seg), d_dyn_lab_seg_index-2)){
+          GR_LOG_DEBUG(d_logger, format("DYNAMIC LABEL SEGMENT: CRC OK, copying data in buffer"));
+          // We received a correct label segment and can write it to the dynamic label buffer.
+          memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2], d_dyn_lab_seg_index-4);
+          d_dyn_lab_index += d_dyn_lab_seg_index-4;
+          d_dyn_lab_seg_index = 0;
+          if(d_last_dyn_lab_seg){
+            // we finished the complete dynamic label and can export it
+            // TODO export/process dynamic label
+          }
+        } else{ // the CRC failed and we reset the whole dynamic label
+          GR_LOG_DEBUG(d_logger, format("CRC FAILED"));
+          // TODO wait for the start of the next dynamic label
+          d_dyn_lab_seg_index = 0;
+          d_dyn_lab_curr_char_field_length = 0;
+          d_dyn_lab_index = 0;
+          d_last_dyn_lab_seg = false;
+        }
+      }
+    }
 
     int16_t mp4_decode_bs_impl::MP42PCM(uint8_t dacRate,
                                         uint8_t sbrFlag,
