@@ -38,6 +38,7 @@
 #include <string>
 #include <boost/format.hpp>
 #include "neaacdec.h"
+#include <pmt/pmt.h>
 
 using namespace boost;
 
@@ -52,8 +53,7 @@ namespace gr {
                                                                          48};
 
     mp4_decode_bs::sptr
-    mp4_decode_bs::make(int bit_rate_n)
-    {
+    mp4_decode_bs::make(int bit_rate_n) {
       return gnuradio::get_initial_sptr
               (new mp4_decode_bs_impl(bit_rate_n));
     }
@@ -65,8 +65,7 @@ namespace gr {
             : gr::block("mp4_decode_bs",
                         gr::io_signature::make(1, 1, sizeof(unsigned char)),
                         gr::io_signature::make(2, 2, sizeof(int16_t))),
-              d_bit_rate_n(bit_rate_n)
-    {
+              d_bit_rate_n(bit_rate_n) {
       d_superframe_size = bit_rate_n * 110;
       d_aacInitialized = false;
       baudRate = 48000;
@@ -79,26 +78,25 @@ namespace gr {
       d_dyn_lab_seg_index = 0;
       d_dyn_lab_curr_char_field_length = 0;
       d_last_dyn_lab_seg = false;
+      // declare output message port for dynamic_label messages
+      message_port_register_out(pmt::intern(std::string("dynamic_label")));
     }
 
     /*
      * Our virtual destructor.
      */
-    mp4_decode_bs_impl::~mp4_decode_bs_impl()
-    {
+    mp4_decode_bs_impl::~mp4_decode_bs_impl() {
     }
 
     void
     mp4_decode_bs_impl::forecast(int noutput_items,
-                                 gr_vector_int &ninput_items_required)
-    {
+                                 gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items; //TODO: how to calculate actual rate?
     }
 
     // returns aac channel configuration
     int mp4_decode_bs_impl::get_aac_channel_configuration(
-            int16_t m_mpeg_surround_config, uint8_t aacChannelMode)
-    {
+            int16_t m_mpeg_surround_config, uint8_t aacChannelMode) {
       switch (m_mpeg_surround_config) {
         case 0:     // no surround
           return aacChannelMode ? 2 : 1;
@@ -114,8 +112,7 @@ namespace gr {
     bool mp4_decode_bs_impl::initialize(uint8_t dacRate,
                                         uint8_t sbrFlag,
                                         int16_t mpegSurround,
-                                        uint8_t aacChannelMode)
-    {
+                                        uint8_t aacChannelMode) {
       long unsigned int sample_rate;
       uint8_t channels;
       /* AudioSpecificConfig structure (the only way to select 960 transform here!)
@@ -168,8 +165,7 @@ namespace gr {
                                               uint8_t mpegSurround,
                                               uint8_t aacChannelMode,
                                               int16_t *out_sample1,
-                                              int16_t *out_sample2)
-    {
+                                              int16_t *out_sample2) {
       // copy AU to process it
       uint8_t au[2 * 960 + 10]; // sure, large enough
       memcpy(au, v, frame_length);
@@ -193,10 +189,9 @@ namespace gr {
                         out_sample2);
     }
 
-    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t xpad_length)
-    {
+    void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t pad_length) {
       // read F-PAD field (header of X-PAD)
-      fixed_pad *fpad = (fixed_pad *) &pad[xpad_length - 2];
+      fixed_pad *fpad = (fixed_pad *) &pad[pad_length - 2];
       // check if the X-PAD contains one or multiple content indicators
       if (fpad->content_ind == 0) {
         /* no content indicators: the X-PAD content is a continuation of a data
@@ -217,24 +212,24 @@ namespace gr {
            * or you found the end marker. */
           while (n_ci_elements < 4) {
             // check if the CI is an end marker
-            if ((uint8_t)(pad[xpad_length - 3 - n_ci_elements] & 0x1f) == 0) {
+            if ((uint8_t)(pad[pad_length - 3 - n_ci_elements] & 0x1f) == 0) {
               /* Found end marker of CI list, this CI increases the ci_list_length
                * but does not count as a valid CI element. */
               n_ci_elements++;
               break;
             }
-            subfield_length_sum +=
-                    (uint8_t)(pad[xpad_length - 3 - n_ci_elements]) >> 5;
+            subfield_length_sum += d_length_xpad_subfield_table[
+                    (uint8_t)(pad[pad_length - 3 - n_ci_elements] & 0xe0) >> 5];
             n_ci_elements++;
           }
           // sanity check: sum of ci sizes must be equal to xpad_size
-          if (subfield_length_sum + n_ci_elements == xpad_length) {
+          if (subfield_length_sum + n_ci_elements == pad_length - 2) {
             /* Iterate over CIs processing the associated X-PAD data sub-fields
              * after now knowing the end of the CIs and the start of the sub-fields. */
             uint8_t curr_subfield_start = 3 + n_ci_elements;
             for (int i = 0; i < n_ci_elements; ++i) {
               // read content indicator (CI)
-              content_ind *ci = (content_ind *) &pad[xpad_length - 3 - i];
+              content_ind *ci = (content_ind *) &pad[pad_length - 3 - i];
               // if we arrived at the end marker, we can leave before assigning any byte space
               if (ci->app_type == 0) {
                 break;
@@ -242,7 +237,7 @@ namespace gr {
               uint8_t curr_subfield_length = d_length_xpad_subfield_table[ci->length];
               /* Define a ptr that points at the first byte in order of the subfield.
                * This ist the last logical byte because the bytes are still reversed! */
-              uint8_t *xpad_subfield = &pad[xpad_length - curr_subfield_start -
+              uint8_t *xpad_subfield = &pad[pad_length - curr_subfield_start -
                                             (curr_subfield_length - 1)];
               // process the X-PAD data sub-field according to its application type
               switch (ci->app_type) {
@@ -265,13 +260,15 @@ namespace gr {
                       // reset dynamic label index and overwrite the buffer
                       d_dyn_lab_index = 0;
                     }
-                    // process this subfield as a part of a dynamic label segment
-                    process_dynamic_label_segment_subfield(xpad_subfield,
-                                                           curr_subfield_length);
                     // check if this is the last segment of a dynamic label
                     if (dyn_lab_seg_header->last) {
                       d_last_dyn_lab_seg = true;
+                    } else {
+                      d_last_dyn_lab_seg = false;
                     }
+                    // process this subfield as a part of a dynamic label segment
+                    process_dynamic_label_segment_subfield(xpad_subfield,
+                                                           curr_subfield_length);
                   } else { // command segment
                     if (dyn_lab_seg_header->field1 == 1) {
                       // clear display command
@@ -303,8 +300,9 @@ namespace gr {
             GR_LOG_ERROR(d_logger,
                          format("XPAD length (%d) does not match with the total "
                                         "length of the content indicators (%d)") %
-                         (int) xpad_length %
-                         (int) (subfield_length_sum + n_ci_elements));
+                         (int) (pad_length - 2 %
+                                             (int) (subfield_length_sum +
+                                                    n_ci_elements)));
           }
         } else {
           // no X-PAD; we are finished here
@@ -313,8 +311,7 @@ namespace gr {
     }
 
     void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(
-            uint8_t *subfield, uint8_t subfield_length)
-    {
+            uint8_t *subfield, uint8_t subfield_length) {
       // check if this sub-field contains padding bytes
       uint8_t num_valid_bytes;
       if (subfield_length >
@@ -346,8 +343,13 @@ namespace gr {
           d_dyn_lab_index += d_dyn_lab_seg_index - 4;
           d_dyn_lab_seg_index = 0;
           if (d_last_dyn_lab_seg) {
-            // we finished the complete dynamic label and can export it
-            // TODO export/process dynamic label
+            // we finished the complete dynamic label and can publish it
+            message_port_pub(pmt::intern(std::string("dynamic_label")),
+                             pmt::init_u8vector((size_t) d_dyn_lab_index,
+                                                const_cast<const uint8_t *>(d_dynamic_label)));
+            // Reset dynamic label index. We are starting all over again.
+            d_dyn_lab_index = 0;
+            d_last_dyn_lab_seg = false;
           }
         } else { // the CRC failed and we reset the whole dynamic label
           GR_LOG_DEBUG(d_logger, format("CRC FAILED"));
@@ -367,8 +369,7 @@ namespace gr {
                                         uint8_t buffer[],
                                         int16_t bufferLength,
                                         int16_t *out_sample1,
-                                        int16_t *out_sample2)
-    {
+                                        int16_t *out_sample2) {
       int16_t samples;
       long unsigned int sample_rate;
       int16_t *outBuffer;
@@ -431,8 +432,7 @@ namespace gr {
  * @param len length of dataword without the 2 bytes crc at the end
  * @return true if CRC passed
  */
-    bool mp4_decode_bs_impl::crc16(const uint8_t *msg, int16_t len)
-    {
+    bool mp4_decode_bs_impl::crc16(const uint8_t *msg, int16_t len) {
       int i, j;
       uint16_t accumulator = 0xFFFF;
       uint16_t crc;
@@ -454,8 +454,7 @@ namespace gr {
     }
 
     uint16_t mp4_decode_bs_impl::BinToDec(const uint8_t *data, size_t offset,
-                                          size_t length)
-    {
+                                          size_t length) {
       uint32_t output =
               (*(data + offset / 8) << 16) | ((*(data + offset / 8 + 1)) << 8) |
               (*(data + offset / 8 +
@@ -469,8 +468,7 @@ namespace gr {
     mp4_decode_bs_impl::general_work(int noutput_items,
                                      gr_vector_int &ninput_items,
                                      gr_vector_const_void_star &input_items,
-                                     gr_vector_void_star &output_items)
-    {
+                                     gr_vector_void_star &output_items) {
       const unsigned char *in =
               (const unsigned char *) input_items[0] + d_superframe_size;
       int16_t *out1 = (int16_t *) output_items[0];

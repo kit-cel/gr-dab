@@ -53,7 +53,7 @@ namespace gr {
 
       const static uint8_t d_length_xpad_subfield_table[8];
       /*!< Lookup table for length of X-PAD data subfield.*/
-      char d_dynamic_label[256];
+      uint8_t d_dynamic_label[256];
       /*!< Character array with dynamic label. Size is maximum length of a dynamic label.*/
       uint8_t d_dyn_lab_index; /*!< Indexing the first unwritten byte of the dynamic label array*/
       uint8_t d_dyn_lab_seg_index;
@@ -111,7 +111,7 @@ namespace gr {
                             int16_t *out_sample1,
                             int16_t *out_sample2);
 
-      void process_pad(uint8_t *pad, int16_t xpad_length);
+      void process_pad(uint8_t *pad, int16_t pad_length);
 
       //! Processes a subfield of a dynamic label segment.
       /*!
