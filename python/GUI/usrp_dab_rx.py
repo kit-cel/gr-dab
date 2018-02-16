@@ -121,6 +121,8 @@ class usrp_dab_rx(gr.top_block):
         ########################
         if self.dabplus:
             self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
+            # xpad handler
+            self.pad_messenger = dab.xpad_message_handler()
         else:
             self.msc_dec = dab.msc_decode(self.dab_params, address, size, protection)
             self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
@@ -160,6 +162,8 @@ class usrp_dab_rx(gr.top_block):
             self.connect((self.dabplus, 1), self.delay_right, (self.audio, 1))
             self.connect((self.dabplus, 0), self.valve_left, (self.wav_sink, 0))
             self.connect((self.dabplus, 1), self.valve_right, (self.wav_sink, 1))
+            # connect msg port for dynamic labels
+            self.msg_connect(self.dabplus, "dynamic_label", self.pad_messenger, "dynamic_label")
         else:
             self.connect(self.gain_left, self.delay_left, (self.audio, 0))
             self.connect(self.gain_right, self.delay_right, (self.audio, 1))

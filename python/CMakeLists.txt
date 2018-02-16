@@ -52,7 +52,7 @@ GR_PYTHON_INSTALL(
     transmitter_c.py
     ${CMAKE_CURRENT_BINARY_DIR}/constants.py
     dabplus_audio_decoder_ff.py
-    DESTINATION ${GR_PYTHON_DIR}/dab
+    xpad_message_handler.py DESTINATION ${GR_PYTHON_DIR}/dab
 )
 
 ########################################################################

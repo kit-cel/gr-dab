@@ -43,6 +43,7 @@ from msc_decode import *
 from msc_encode import *
 from transmitter_c import *
 from dabplus_audio_decoder_ff import *
+from xpad_message_handler import xpad_message_handler
 
 import constants
 

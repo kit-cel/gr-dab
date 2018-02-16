@@ -54,5 +54,6 @@ install(FILES
     dab_ofdm_demod_cc.xml
     dab_fic_decode_vc.xml
     dab_select_cus_vfvf.xml
-    dab_qpsk_mapper_vbvc.xml DESTINATION share/gnuradio/grc/blocks
+    dab_qpsk_mapper_vbvc.xml
+    dab_xpad_message_handler.xml DESTINATION share/gnuradio/grc/blocks
 )

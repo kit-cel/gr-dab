@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # 
-# Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+# Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
 # 
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 # 
 
 from gnuradio import gr, blocks
-from gnuradio import filter
 import dab
 
 class dabplus_audio_decoder_ff(gr.hier_block2):
@@ -49,6 +48,9 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
                                     gr.io_signature(1, 1, gr.sizeof_float * dab_params.num_carriers),
                                     # Output signature
                                     gr.io_signature2(2, 2, gr.sizeof_short, gr.sizeof_short))
+        # define message output for dynamic labels
+        self.message_port_register_hier_out("dynamic_label")
+
         self.dp = dab_params
         self.bit_rate_n = bit_rate / 8
         self.address = address
@@ -76,6 +78,7 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
 
         # connections
         self.connect(self, self.msc_decoder, self.firecode, self.rs, self.mp4)
+        self.msg_connect(self.mp4, "dynamic_label", self, "dynamic_label")
 
         if self.output_float:
             # map short samples to the range [-1,1] in floats
