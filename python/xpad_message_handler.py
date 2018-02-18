@@ -42,7 +42,5 @@ class xpad_message_handler(gr.basic_block):
 
     def handle_dynamic_label(self, msg):
         dynamic_label = pmt.to_python(msg)
-        print "got message!!!"
-        print type(dynamic_label)
-        print dynamic_label
-        print numpy.array2string(dynamic_label)
+        unicode_object = unicode(dynamic_label.data, "utf8")
+        print unicode_object
