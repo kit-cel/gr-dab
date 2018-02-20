@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1203</width>
+    <width>1058</width>
     <height>739</height>
    </rect>
   </property>
@@ -724,6 +724,16 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_dyn_lab">
+              <property name="text">
+               <string>dynamic label</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
              <layout class="QHBoxLayout" name="horizontalLayout_25">
               <item>
                <widget class="QLabel" name="label_bit_rate">
@@ -995,7 +1005,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>200</width>
+               <width>73</width>
                <height>602</height>
               </rect>
              </property>
@@ -1193,7 +1203,7 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>553</width>
+                 <width>484</width>
                  <height>1514</height>
                 </rect>
                </property>

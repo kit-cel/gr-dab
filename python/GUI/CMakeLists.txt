@@ -23,6 +23,7 @@ GR_PYTHON_INSTALL(
     FILES
     usrp_dab_rx.py
     usrp_dab_tx.py
+    dynamic_label.py
     ${GUI_PY}
     DESTINATION ${GR_PYTHON_DIR}/dab
     COMPONENT "dab_python"

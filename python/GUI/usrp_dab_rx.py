@@ -24,16 +24,15 @@ receive DAB+ with USRP
 """
 
 from gnuradio import gr, uhd, blocks
-from gnuradio import audio, digital
+from gnuradio import audio
 from gnuradio import qtgui
 from gnuradio import fft
 import osmosdr
 import dab
-import time, math
-
+import dynamic_label
 
 class usrp_dab_rx(gr.top_block):
-    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, use_rtl, src_path, sink_path = "None", prev_src=None):
+    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, use_rtl, qt_label_dyn_lab, src_path, sink_path = "None", prev_src=None):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -42,6 +41,7 @@ class usrp_dab_rx(gr.top_block):
         self.dabplus = dabplus
         self.use_usrp = use_usrp
         self.use_rtl = use_rtl
+        self.qt_label_dyn_lab = qt_label_dyn_lab
         self.src_path = src_path
         self.sink_path = sink_path
         gr.log.set_level("warn")
@@ -115,14 +115,15 @@ class usrp_dab_rx(gr.top_block):
         # FIC decoder
         ########################
         self.fic_dec = dab.fic_decode_vc(self.dab_params)
-
         ########################
         # MSC decoder
         ########################
         if self.dabplus:
             self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
-            # xpad handler
-            self.pad_messenger = dab.xpad_message_handler()
+            # create Qt class dynamic_label for a connection between gr block and GUI
+            self.dyn_lab = dynamic_label.dynamic_label(self.update_label)
+            # xpad message handling python block
+            self.pad_messenger = dab.xpad_message_handler(self.dyn_lab)
         else:
             self.msc_dec = dab.msc_decode(self.dab_params, address, size, protection)
             self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
@@ -174,6 +175,12 @@ class usrp_dab_rx(gr.top_block):
         if self.use_usrp:
             self.set_freq(self.frequency)
 
+########################
+# feedback methods
+########################
+    def update_label(self, label):
+        print label
+        self.qt_label_dyn_lab.setText(label)
 
 ########################
 # getter methods
