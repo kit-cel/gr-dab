@@ -475,7 +475,6 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def adjust_audio_sampling_rate(self):
         self.timer_audio_sampling_rate.stop()
         new_sampling_rate = self.my_receiver.get_sample_rate()
-        print "key adjust"
         if new_sampling_rate != self.audio_bit_rate and new_sampling_rate != -1:
             self.audio_bit_rate = new_sampling_rate
             self.statusBar.showMessage("Adjusting audio sampling rate to " + str(new_sampling_rate))
