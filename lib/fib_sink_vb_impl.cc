@@ -92,8 +92,7 @@ namespace gr {
           extension = (uint8_t)(data[1] & 0x1f);
           cn = (uint8_t)(data[1] & 0x80);
           if (cn == 1)
-            GR_LOG_DEBUG(d_logger,
-                         "[WARNING, INFO FOR FUTURE CONFIGURATION]: ");
+            GR_LOG_DEBUG(d_logger, "[WARNING, INFO FOR FUTURE CONFIGURATION]: ");
           oe = (uint8_t)(data[1] & 0x40);
           if (cn == 1)
             GR_LOG_DEBUG(d_logger, "[WARNING, INFO FOR OTHER ENSEMBLE]");
@@ -113,8 +112,9 @@ namespace gr {
                              (int) change_flag %
                              (int) occurrence_change);
               uint8_t alarm_flag = (uint8_t)((data[4] & 0x20) >> 5);
-              if (alarm_flag == 1)
+              if (alarm_flag == 1) {
                 GR_LOG_DEBUG(d_logger, ", [ALARM MESSAGE ACCESSIBLE] ");
+              }
               uint16_t CIF_counter = (uint16_t)(
                       (data[4] & 0x1f) * 250 + (data[5]));
               GR_LOG_DEBUG(d_logger,
@@ -400,17 +400,14 @@ namespace gr {
             }
             case FIB_SI_EXTENSION_SERVICE_COMP_LABEL:
               memcpy(label, &data[5], 16);
-              GR_LOG_DEBUG(d_logger,
-                           format("[service component label] %s") % label);
+              GR_LOG_DEBUG(d_logger, format("[service component label] %s") % label);
               break;
             case FIB_SI_EXTENSION_DATA_SERVICE_LABEL:
               memcpy(label, &data[5], 16);
-              GR_LOG_DEBUG(d_logger,
-                           format("[data service label]: %s") % label);
+              GR_LOG_DEBUG(d_logger, format("[data service label]: %s") % label);
               break;
             default:
-              GR_LOG_DEBUG(d_logger,
-                           format("[unknown extension (%d)") % (int) extension);
+              GR_LOG_DEBUG(d_logger, format("[unknown extension (%d)") % (int) extension);
               break;
           }
           break;
@@ -423,12 +420,10 @@ namespace gr {
               GR_LOG_DEBUG(d_logger, "paging - not supported yet");
               break;
             case FIB_FIDC_EXTENSION_TMC:
-              GR_LOG_DEBUG(d_logger,
-                           "TMC (traffic message channel) - not supported yet");
+              GR_LOG_DEBUG(d_logger, "TMC (traffic message channel) - not supported yet");
               break;
             case FIB_FIDC_EXTENSION_EWS:
-              GR_LOG_DEBUG(d_logger,
-                           "EWS (emergency warning service) - not supported yet");
+              GR_LOG_DEBUG(d_logger, "EWS (emergency warning service) - not supported yet");
               break;
             default:
               GR_LOG_DEBUG(d_logger, format("unsupported extension (%d)") %
@@ -436,8 +431,7 @@ namespace gr {
           }
           break;
         case FIB_FIG_TYPE_CA:
-          GR_LOG_DEBUG(d_logger,
-                       "FIB type CA (conditional access) not supported yet");
+          GR_LOG_DEBUG(d_logger, "FIB type CA (conditional access) not supported yet");
           break;
         default:
           GR_LOG_DEBUG(d_logger, "unsupported FIG type");

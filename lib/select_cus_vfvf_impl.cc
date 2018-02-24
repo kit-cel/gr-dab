@@ -48,7 +48,8 @@ namespace gr {
               d_vlen(vlen),
               d_frame_len(frame_len),
               d_address(address),
-              d_size(size) {}
+              d_size(size) {
+    }
 
     /*
      * Our virtual destructor.

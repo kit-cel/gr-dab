@@ -60,14 +60,14 @@ extern "C" {
 
 
 #ifdef _WIN32
-#pragma pack(push, 8)
-#ifndef NEAACDECAPI
-#define NEAACDECAPI __cdecl
-#endif
+  #pragma pack(push, 8)
+  #ifndef NEAACDECAPI
+    #define NEAACDECAPI __cdecl
+  #endif
 #else
-#ifndef NEAACDECAPI
-#define NEAACDECAPI
-#endif
+  #ifndef NEAACDECAPI
+    #define NEAACDECAPI
+  #endif
 #endif
 
 #define FAAD2_VERSION "2.7"
@@ -138,72 +138,74 @@ extern "C" {
 
 typedef void *NeAACDecHandle;
 
-typedef struct mp4AudioSpecificConfig {
-  /* Audio Specific Info */
-  unsigned char objectTypeIndex;
-  unsigned char samplingFrequencyIndex;
-  unsigned long samplingFrequency;
-  unsigned char channelsConfiguration;
+typedef struct mp4AudioSpecificConfig
+{
+    /* Audio Specific Info */
+    unsigned char objectTypeIndex;
+    unsigned char samplingFrequencyIndex;
+    unsigned long samplingFrequency;
+    unsigned char channelsConfiguration;
 
-  /* GA Specific Info */
-  unsigned char frameLengthFlag;
-  unsigned char dependsOnCoreCoder;
-  unsigned short coreCoderDelay;
-  unsigned char extensionFlag;
-  unsigned char aacSectionDataResilienceFlag;
-  unsigned char aacScalefactorDataResilienceFlag;
-  unsigned char aacSpectralDataResilienceFlag;
-  unsigned char epConfig;
+    /* GA Specific Info */
+    unsigned char frameLengthFlag;
+    unsigned char dependsOnCoreCoder;
+    unsigned short coreCoderDelay;
+    unsigned char extensionFlag;
+    unsigned char aacSectionDataResilienceFlag;
+    unsigned char aacScalefactorDataResilienceFlag;
+    unsigned char aacSpectralDataResilienceFlag;
+    unsigned char epConfig;
 
-  char sbr_present_flag;
-  char forceUpSampling;
-  char downSampledSBR;
+    char sbr_present_flag;
+    char forceUpSampling;
+    char downSampledSBR;
 } mp4AudioSpecificConfig;
 
-typedef struct NeAACDecConfiguration {
-  unsigned char defObjectType;
-  unsigned long defSampleRate;
-  unsigned char outputFormat;
-  unsigned char downMatrix;
-  unsigned char useOldADTSFormat;
-  unsigned char dontUpSampleImplicitSBR;
+typedef struct NeAACDecConfiguration
+{
+    unsigned char defObjectType;
+    unsigned long defSampleRate;
+    unsigned char outputFormat;
+    unsigned char downMatrix;
+    unsigned char useOldADTSFormat;
+    unsigned char dontUpSampleImplicitSBR;
 } NeAACDecConfiguration, *NeAACDecConfigurationPtr;
 
-typedef struct NeAACDecFrameInfo {
-  unsigned long bytesconsumed;
-  unsigned long samples;
-  unsigned char channels;
-  unsigned char error;
-  unsigned long samplerate;
+typedef struct NeAACDecFrameInfo
+{
+    unsigned long bytesconsumed;
+    unsigned long samples;
+    unsigned char channels;
+    unsigned char error;
+    unsigned long samplerate;
 
-  /* SBR: 0: off, 1: on; upsample, 2: on; downsampled, 3: off; upsampled */
-  unsigned char sbr;
+    /* SBR: 0: off, 1: on; upsample, 2: on; downsampled, 3: off; upsampled */
+    unsigned char sbr;
 
-  /* MPEG-4 ObjectType */
-  unsigned char object_type;
+    /* MPEG-4 ObjectType */
+    unsigned char object_type;
 
-  /* AAC header type; MP4 will be signalled as RAW also */
-  unsigned char header_type;
+    /* AAC header type; MP4 will be signalled as RAW also */
+    unsigned char header_type;
 
-  /* multichannel configuration */
-  unsigned char num_front_channels;
-  unsigned char num_side_channels;
-  unsigned char num_back_channels;
-  unsigned char num_lfe_channels;
-  unsigned char channel_position[64];
+    /* multichannel configuration */
+    unsigned char num_front_channels;
+    unsigned char num_side_channels;
+    unsigned char num_back_channels;
+    unsigned char num_lfe_channels;
+    unsigned char channel_position[64];
 
-  /* PS: 0: off, 1: on */
-  unsigned char ps;
+    /* PS: 0: off, 1: on */
+    unsigned char ps;
 } NeAACDecFrameInfo;
 
-char *NEAACDECAPI NeAACDecGetErrorMessage(unsigned char errcode);
+char* NEAACDECAPI NeAACDecGetErrorMessage(unsigned char errcode);
 
 unsigned long NEAACDECAPI NeAACDecGetCapabilities(void);
 
 NeAACDecHandle NEAACDECAPI NeAACDecOpen(void);
 
-NeAACDecConfigurationPtr NEAACDECAPI
-NeAACDecGetCurrentConfiguration(NeAACDecHandle hDecoder);
+NeAACDecConfigurationPtr NEAACDECAPI NeAACDecGetCurrentConfiguration(NeAACDecHandle hDecoder);
 
 unsigned char NEAACDECAPI NeAACDecSetConfiguration(NeAACDecHandle hDecoder,
                                                    NeAACDecConfigurationPtr config);
@@ -224,24 +226,24 @@ char NEAACDECAPI NeAACDecInit2(NeAACDecHandle hDecoder,
 
 /* Init the library for DRM */
 char NEAACDECAPI NeAACDecInitDRM(NeAACDecHandle *hDecoder,
-                                 unsigned long samplerate,
+	                         unsigned long samplerate,
                                  unsigned char channels);
 
 char NEAACDECAPI NeAACDecInitDAB(NeAACDecHandle *hDecoder,
-                                 unsigned long samplerate,
+	                         unsigned long samplerate,
                                  unsigned char channels,
-                                 unsigned char sbr);
+	                         unsigned char sbr);
 
 void NEAACDECAPI NeAACDecPostSeekReset(NeAACDecHandle hDecoder, long frame);
 
 void NEAACDECAPI NeAACDecClose(NeAACDecHandle hDecoder);
 
-void *NEAACDECAPI NeAACDecDecode(NeAACDecHandle hDecoder,
+void* NEAACDECAPI NeAACDecDecode(NeAACDecHandle hDecoder,
                                  NeAACDecFrameInfo *hInfo,
                                  unsigned char *buffer,
                                  unsigned long buffer_size);
 
-void *NEAACDECAPI NeAACDecDecode2(NeAACDecHandle hDecoder,
+void* NEAACDECAPI NeAACDecDecode2(NeAACDecHandle hDecoder,
                                   NeAACDecFrameInfo *hInfo,
                                   unsigned char *buffer,
                                   unsigned long buffer_size,
@@ -253,7 +255,7 @@ char NEAACDECAPI NeAACDecAudioSpecificConfig(unsigned char *pBuffer,
                                              mp4AudioSpecificConfig *mp4ASC);
 
 #ifdef _WIN32
-#pragma pack(pop)
+  #pragma pack(pop)
 #endif
 
 #ifdef __cplusplus

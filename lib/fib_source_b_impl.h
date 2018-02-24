@@ -75,8 +75,7 @@ namespace gr {
       static char d_programme_service_label[176]; //21*8+8, service label (FIG 1/0)
       std::string d_service_labels;
 
-      int write_label(char *out_ptr, std::string label,
-                      int num_chars = 16);//default for 16 characters (16 byte)
+      int write_label(char *out_ptr, std::string label, int num_chars = 16); //default for 16 characters (16 byte)
 
     public:
       fib_source_b_impl(int transmission_mode, int coutry_ID,

@@ -92,16 +92,17 @@ namespace gr {
              consumed_items < ninput_items[0] &&
              consumed_items < ninput_items[1]) {
         if (*trigger == 1 && d_ns_added < d_ns_length) {
-          for (i = 0; i < d_ns_length - d_ns_added &&
-                      i < noutput_items - produced_items; i++)
+          for (i = 0; i < d_ns_length - d_ns_added && i < noutput_items - produced_items; i++) {
             *optr++ = 0;
+          }
           produced_items += i;
           d_ns_added += i;
         } else {
           if (*trigger == 0)
             d_ns_added = 0;
-          for (int i = 0; i < d_symbol_length; i++)
-            *optr++ = *iptr++;
+          memcpy(optr, iptr, d_symbol_length);
+          iptr += d_symbol_length;
+          optr += d_symbol_length;
           produced_items += d_symbol_length;
           trigger++;
           consumed_items++;

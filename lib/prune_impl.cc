@@ -88,8 +88,7 @@ namespace gr {
       }
       // Tell runtime system how many input items we consumed on
       // each input stream.
-      consume_each((noutput_items / (d_length - d_prune_start - d_prune_end)) *
-                   d_length);
+      consume_each((noutput_items / (d_length - d_prune_start - d_prune_end)) * d_length);
 
       // Tell runtime system how many output items we produced.
       return noutput_items;

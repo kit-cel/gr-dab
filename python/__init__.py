@@ -26,13 +26,7 @@ This is the GNU Radio DAB module.
 import os
 
 # import swig generated symbols into the dab namespace
-try:
-    # this might fail if the module is python-only
-    from dab_swig import *
-except ImportError:
-    dirname, filename = os.path.split(os.path.abspath(__file__))
-    __path__.append(os.path.join(dirname, "..", "..", "swig"))
-    from dab_swig import *
+from dab_swig import *
 
 from parameters import *
 from ofdm_demod_cc import *

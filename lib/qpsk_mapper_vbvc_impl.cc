@@ -65,7 +65,9 @@ namespace gr {
         for (int j = 0; j < d_symbol_length/8; ++j) {
           // iterate over the symbol vector, but each byte has 8 bit, which are accessed manually
           for (int k = 0; k < 8; k++) {
-            out[i*d_symbol_length + j*8 + k] = gr_complex((in[i*(d_symbol_length/4) + j]&(0x80>>k))>0?-I_SQRT2:I_SQRT2,(in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&(0x80>>k))>0?-I_SQRT2:I_SQRT2);
+            out[i*d_symbol_length + j*8 + k] =
+                    gr_complex((in[i*(d_symbol_length/4) + j]&(0x80>>k))>0?-I_SQRT2:I_SQRT2,
+                               (in[i*(d_symbol_length/4) + d_symbol_length/8 + j]&(0x80>>k))>0?-I_SQRT2:I_SQRT2);
           }
         }
       }

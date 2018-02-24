@@ -45,13 +45,14 @@ namespace gr {
 
     sum_phasor_trig_vcc_impl::sum_phasor_trig_vcc_impl(unsigned int length)
             : gr::sync_block("sum_phasor_trig_vcc",
-                             gr::io_signature::make2(2, 2, sizeof(gr_complex) *
-                                                           length,
+                             gr::io_signature::make2(2, 2,
+                                                     sizeof(gr_complex) * length,
                                                      sizeof(char)),
-                             gr::io_signature::make2(2, 2, sizeof(gr_complex) *
-                                                           length,
+                             gr::io_signature::make2(2, 2,
+                                                     sizeof(gr_complex) * length,
                                                      sizeof(char))),
-              d_length(length), d_last_symbol(length, 0) {
+              d_length(length),
+              d_last_symbol(length, 0) {
     }
 
 
@@ -75,10 +76,7 @@ namespace gr {
               out[j] = in[j] * d_last_symbol[j];
           } else {
             for (unsigned int j = 0; j < d_length; j++) {
-              // printf("%p\n", &lastout[j]);
-              // printf("%p\n", &out[j+ptrdiff_t(-d_length)]);
               out[j] = in[j] * lastout[j];
-              // out[j] = in[j] * (&out[j-d_length])[0];
             }
           }
 

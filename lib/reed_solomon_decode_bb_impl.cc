@@ -128,8 +128,7 @@ namespace gr {
         uint8_t superframe[d_superframe_size];
         memcpy(superframe, &in[n * d_superframe_size], d_superframe_size);
         DecodeSuperframe(superframe, d_superframe_size);
-        memcpy(&out[n * d_superframe_size_rs], superframe,
-               d_superframe_size_rs);
+        memcpy(&out[n * d_superframe_size_rs], superframe, d_superframe_size_rs);
       }
       // Tell runtime system how many input items we consumed on
       // each input stream.

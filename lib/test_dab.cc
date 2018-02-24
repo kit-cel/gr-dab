@@ -36,8 +36,7 @@ int
 main(int argc, char **argv) {
   CppUnit::TextTestRunner runner;
   std::ofstream xmlfile(get_unittest_path("dab.xml").c_str());
-  CppUnit::XmlOutputter *xmlout = new CppUnit::XmlOutputter(&runner.result(),
-                                                            xmlfile);
+  CppUnit::XmlOutputter *xmlout = new CppUnit::XmlOutputter(&runner.result(), xmlfile);
 
   runner.addTest(qa_dab::suite());
   runner.setOutputter(xmlout);

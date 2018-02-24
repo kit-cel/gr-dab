@@ -73,10 +73,7 @@ namespace gr {
         for (int j = 0;
              j < d_vector_length; j++) { //iteration over elements of vector
           //*out++ = in[vec_length * (i + (scrambling_length-1) - d_scrambling_vector[j % scrambling_length]) + j];
-          *out++ = in[d_vector_length * (i + (d_scrambling_length - 1) -
-                                         d_scrambling_vector[j %
-                                                             d_scrambling_length]) +
-                      j];
+          *out++ = in[d_vector_length * (i + (d_scrambling_length - 1) - d_scrambling_vector[j % d_scrambling_length]) + j];
         }
       }
 

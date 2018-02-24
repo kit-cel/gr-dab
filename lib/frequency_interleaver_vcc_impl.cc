@@ -36,10 +36,8 @@ namespace gr {
   namespace dab {
 
     frequency_interleaver_vcc::sptr
-    frequency_interleaver_vcc::make(
-            const std::vector<short> &interleaving_sequence) {
-      return gnuradio::get_initial_sptr
-              (new frequency_interleaver_vcc_impl(interleaving_sequence));
+    frequency_interleaver_vcc::make(const std::vector<short> &interleaving_sequence) {
+      return gnuradio::get_initial_sptr(new frequency_interleaver_vcc_impl(interleaving_sequence));
     }
 
     frequency_interleaver_vcc_impl::frequency_interleaver_vcc_impl(
@@ -64,8 +62,9 @@ namespace gr {
       gr_complex *out = (gr_complex *) output_items[0];
 
       for (int i = 0; i < noutput_items; i++) {
-        for (unsigned int j = 0; j < d_length; j++)
+        for (unsigned int j = 0; j < d_length; j++) {
           out[d_interleaving_sequence[j]] = in[j];
+        }
         out += d_length;
         in += d_length;
       }
