@@ -26,16 +26,28 @@
 namespace gr {
   namespace dab {
 /*! \brief sink for DAB/DAB+ FIBs, interprets MSC and SI
- * crc16 check of incoming fibs
- * reads correct fibs
- * generates json objects with service and multiplex information
- *
+ * CRC16 check of incoming fibs.
+ * Reads correct fibs.
+ * Generates json objects with service and multiplex information.
  */
     class fib_sink_vb_impl : public fib_sink_vb {
 
     private:
+      /*! \brief Processes an incoming FIB.
+       * If CRC16 fails, dump the FIB,
+       * otherwise extract Fast Information Groups (FIGs) and read header information.
+       *
+       * @param fib Pointer to the first byte of the 30 byte FIB.
+       * @return 0 if CRC failed, 1 if CRC succeeded.
+       */
       int process_fib(const char *fib);
-
+      /*! \brief Processes a FIG.
+       * Switch between FIG types, extract information and write it to logger.
+       * Write and collect information in JSON objects for transport to GUI.
+       * @param type Type of the FIG. See ETSI EN 300 401 chapter 5.2.2.
+       * @param data Pointer to the FIG data buffer.
+       * @param length Length of the FIG data buffer in bytes.
+       */
       int process_fig(uint8_t type, const char *data, uint8_t length);
 
       bool d_crc_passed;

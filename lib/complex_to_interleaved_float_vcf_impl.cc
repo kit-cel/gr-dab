@@ -37,19 +37,15 @@ namespace gr {
 
     complex_to_interleaved_float_vcf::sptr
     complex_to_interleaved_float_vcf::make(unsigned int length) {
-      return gnuradio::get_initial_sptr
-              (new complex_to_interleaved_float_vcf_impl(length));
+      return gnuradio::get_initial_sptr(new complex_to_interleaved_float_vcf_impl(length));
     }
 
-    complex_to_interleaved_float_vcf_impl::complex_to_interleaved_float_vcf_impl(
-            unsigned int length)
+    complex_to_interleaved_float_vcf_impl::complex_to_interleaved_float_vcf_impl(unsigned int length)
             : gr::sync_block("complex_to_interleaved_float_vcf",
                              gr::io_signature::make(1, 1,
-                                                    sizeof(gr_complex) *
-                                                    length),
+                                                    sizeof(gr_complex) * length),
                              gr::io_signature::make(1, 1,
-                                                    sizeof(float) * length *
-                                                    2)),
+                                                    sizeof(float) * length * 2)),
               d_length(length) {
     }
 

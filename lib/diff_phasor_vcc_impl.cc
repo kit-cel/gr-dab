@@ -44,10 +44,8 @@ namespace gr {
 
     diff_phasor_vcc_impl::diff_phasor_vcc_impl(unsigned int length)
             : gr::sync_block("diff_phasor_vcc",
-                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                          length),
-                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                          length)),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) * length),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) * length)),
               d_length(length) {
       set_history(2);
     }

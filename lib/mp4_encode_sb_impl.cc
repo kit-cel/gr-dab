@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * Code from the following third party modules is used:
  * - ODR-AudioEnc, Copyright (C) 2011 Martin Storsjo, (C) 2017 Matthias P. Braendli; Licensed under the Apache License, Version 2.0 (the "License")
@@ -43,22 +44,26 @@ namespace gr {
     mp4_encode_sb::sptr
     mp4_encode_sb::make(int bit_rate_n, int channels, int samp_rate,
                         int afterburner) {
-      return gnuradio::get_initial_sptr
-              (new mp4_encode_sb_impl(bit_rate_n, channels, samp_rate,
-                                      afterburner));
+      return gnuradio::get_initial_sptr(new mp4_encode_sb_impl(bit_rate_n,
+                                                               channels,
+                                                               samp_rate,
+                                                               afterburner));
     }
 
     /*
      * The private constructor
      */
-    mp4_encode_sb_impl::mp4_encode_sb_impl(int bit_rate_n, int channels,
-                                           int samp_rate, int afterburner)
+    mp4_encode_sb_impl::mp4_encode_sb_impl(int bit_rate_n,
+                                           int channels,
+                                           int samp_rate,
+                                           int afterburner)
             : gr::block("mp4_encode_sb",
-                        gr::io_signature::make(channels, channels,
-                                               sizeof(int16_t)),
+                        gr::io_signature::make(channels, channels, sizeof(int16_t)),
                         gr::io_signature::make(1, 1, sizeof(unsigned char))),
-              d_bit_rate_n(bit_rate_n), d_channels(channels),
-              d_samp_rate(samp_rate), d_afterburner(afterburner) {
+              d_bit_rate_n(bit_rate_n),
+              d_channels(channels),
+              d_samp_rate(samp_rate),
+              d_afterburner(afterburner) {
       // check input arguments
       if (d_bit_rate_n < 1 || d_bit_rate_n > 24) {
         throw std::out_of_range(
@@ -71,8 +76,7 @@ namespace gr {
       }
       // initialize AAC encoder
       d_aot = AOT_NONE;
-      if (init_aac_encoder(&d_aac_encoder, d_channels, d_samp_rate,
-                           d_afterburner, &d_aot)) {
+      if (init_aac_encoder(&d_aac_encoder, d_channels, d_samp_rate, d_afterburner, &d_aot)) {
         GR_LOG_INFO(d_logger, "AAC enc init succeeded");
       } else {
         GR_LOG_ERROR(d_logger, "AAC enc init failed");
@@ -86,8 +90,7 @@ namespace gr {
 
       // set input size (number of items per channel(in this case one item is a int16_t))
       d_input_size = info.frameLength;
-      GR_LOG_INFO(d_logger,
-                  format("AAC Encoding: framelen = %d") % info.frameLength);
+      GR_LOG_INFO(d_logger, format("AAC Encoding: framelen = %d") % info.frameLength);
 
       // set output size to the superframe size (without Reed Solomon parity check words)
       d_output_size = d_bit_rate_n * 110;
@@ -126,8 +129,7 @@ namespace gr {
           mode = MODE_2;
           break;
         default:
-          GR_LOG_ERROR(d_logger,
-                       format("Unsupported channels number %d") % channels);
+          GR_LOG_ERROR(d_logger, format("Unsupported channels number %d") % channels);
           return false;
       }
 
@@ -165,14 +167,12 @@ namespace gr {
         return false;
       }
       // set aac samplerate
-      if (aacEncoder_SetParam(*encoder, AACENC_SAMPLERATE, sample_rate) !=
-          AACENC_OK) {
+      if (aacEncoder_SetParam(*encoder, AACENC_SAMPLERATE, sample_rate) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to set the sample rate");
         return false;
       }
       // set aac channel mode
-      if (aacEncoder_SetParam(*encoder, AACENC_CHANNELMODE, mode) !=
-          AACENC_OK) {
+      if (aacEncoder_SetParam(*encoder, AACENC_CHANNELMODE, mode) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to set the channel mode");
         return false;
       }
@@ -182,28 +182,24 @@ namespace gr {
         return false;
       }
       // set aac granule length (in samples) to 960 (DRM/DAB+)
-      if (aacEncoder_SetParam(*encoder, AACENC_GRANULE_LENGTH, 960) !=
-          AACENC_OK) {
+      if (aacEncoder_SetParam(*encoder, AACENC_GRANULE_LENGTH, 960) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to set the granule length");
         return false;
       }
       // set aac transport type
-      if (aacEncoder_SetParam(*encoder, AACENC_TRANSMUX, TT_DABPLUS) !=
-          AACENC_OK) {
+      if (aacEncoder_SetParam(*encoder, AACENC_TRANSMUX, TT_DABPLUS) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to set the RAW transmux");
         return false;
       }
       // set aac bit rate
       GR_LOG_INFO(d_logger,
                   format("AAC bitrate set to: %d") % (d_bit_rate_n * 8000));
-      if (aacEncoder_SetParam(*encoder, AACENC_BITRATE, d_bit_rate_n * 8000) !=
-          AACENC_OK) {
+      if (aacEncoder_SetParam(*encoder, AACENC_BITRATE, d_bit_rate_n * 8000) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to set the bitrate");
         return false;
       }
       // set aac afterburner tool
-      if (aacEncoder_SetParam(*encoder, AACENC_AFTERBURNER, afterburner) !=
-          AACENC_OK) {
+      if (aacEncoder_SetParam(*encoder, AACENC_AFTERBURNER, afterburner) != AACENC_OK) {
         GR_LOG_ERROR(d_logger, "Unable to set the afterburner mode");
         return false;
       }
@@ -227,7 +223,8 @@ namespace gr {
      * @return true if no errors occurred
      */
     bool
-    mp4_encode_sb_impl::encode(int16_t *input_buffer, int size_input_buffer,
+    mp4_encode_sb_impl::encode(int16_t *input_buffer,
+                               int size_input_buffer,
                                unsigned char *output_buffer,
                                int size_output_buffer) {
       AACENC_ERROR err;
@@ -277,15 +274,15 @@ namespace gr {
           out_args.numOutBytes > size_output_buffer) {
         throw std::runtime_error(
                 (format("too much samples (%d) to write in ouput buffer (%d samples left)") %
-                 out_args.numOutBytes % size_output_buffer).str());
+                 out_args.numOutBytes %
+                 size_output_buffer).str());
       }
       nproduced += out_args.numOutBytes;
       return true;
     }
 
     void
-    mp4_encode_sb_impl::forecast(int noutput_items,
-                                 gr_vector_int &ninput_items_required) {
+    mp4_encode_sb_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items * d_input_size / d_output_size;
       ninput_items_required[1] = noutput_items * d_input_size / d_output_size;
     }
@@ -298,16 +295,14 @@ namespace gr {
       const int16_t *in_ch1 = (const int16_t *) input_items[0];
       unsigned char *out = (unsigned char *) output_items[0];
       int16_t input_buffer[d_input_size * 2];
-      GR_LOG_DEBUG(d_logger,
-                   format("New buffer with %d samples") % noutput_items);
+      GR_LOG_DEBUG(d_logger, format("New buffer with %d samples") % noutput_items);
 
       nconsumed = 0;
       nproduced = 0;
       do {
         // copy frame to buffer
         if (d_channels == 1) {
-          memcpy(input_buffer, &in_ch1[nconsumed],
-                 d_input_size * sizeof(int16_t));
+          memcpy(input_buffer, &in_ch1[nconsumed], d_input_size * sizeof(int16_t));
         } else if (d_channels == 2) { // merge channels if stereo
           const int16_t *in_ch2 = (const int16_t *) input_items[1];
           for (int i = 0; i < d_input_size; ++i) {
@@ -315,9 +310,8 @@ namespace gr {
             input_buffer[2 * i + 1] = in_ch2[nconsumed + i];
           }
         }
-        // send filled buffer to encoder
-        encode(input_buffer, d_input_size * d_channels, &out[nproduced],
-               noutput_items - nproduced); // encode input stream
+        // send filled buffer to encoder and encode input stream
+        encode(input_buffer, d_input_size * d_channels, &out[nproduced], noutput_items - nproduced);
       } while (nproduced < noutput_items / d_output_size);
 
       // Tell runtime system how many input items we consumed on

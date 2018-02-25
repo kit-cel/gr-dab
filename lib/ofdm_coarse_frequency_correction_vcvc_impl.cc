@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,10 +35,10 @@ namespace gr {
     ofdm_coarse_frequency_correction_vcvc::make(int fft_length,
                                                 int num_carriers,
                                                 int cyclic_prefix_length) {
-      return gnuradio::get_initial_sptr
-              (new ofdm_coarse_frequency_correction_vcvc_impl(fft_length,
-                                                              num_carriers,
-                                                              cyclic_prefix_length));
+      return gnuradio::get_initial_sptr(
+              new ofdm_coarse_frequency_correction_vcvc_impl(fft_length,
+                                                             num_carriers,
+                                                             cyclic_prefix_length));
     }
 
     /*
@@ -46,20 +47,16 @@ namespace gr {
     ofdm_coarse_frequency_correction_vcvc_impl::ofdm_coarse_frequency_correction_vcvc_impl(
             int fft_length, int num_carriers, int cyclic_prefix_length)
             : gr::sync_block("ofdm_coarse_frequency_correction_vcvc",
-                             gr::io_signature::make(1, 1, fft_length *
-                                                          sizeof(gr_complex)),
-                             gr::io_signature::make(1, 1, num_carriers *
-                                                          sizeof(gr_complex))),
+                             gr::io_signature::make(1, 1, fft_length * sizeof(gr_complex)),
+                             gr::io_signature::make(1, 1, num_carriers * sizeof(gr_complex))),
               d_fft_length(fft_length),
               d_num_carriers(num_carriers),
               d_cyclic_prefix_length(cyclic_prefix_length),
               d_freq_offset(0),
               d_snr(0) {
       unsigned int alignment = volk_get_alignment();
-      d_mag_squared = (float *) volk_malloc(sizeof(float) * num_carriers + 1,
-                                            alignment);
+      d_mag_squared = (float *) volk_malloc(sizeof(float) * num_carriers + 1, alignment);
     }
-
     /*
      * Our virtual destructor.
      */
@@ -71,19 +68,15 @@ namespace gr {
      * Fine frequency synchronization in the range of one sub-carrier spacing is already done.
      */
     void
-    ofdm_coarse_frequency_correction_vcvc_impl::measure_energy(
-            const gr_complex *symbol) {
+    ofdm_coarse_frequency_correction_vcvc_impl::measure_energy(const gr_complex *symbol) {
       unsigned int i, index;
       float energy = 0, max = 0;
       // first energy measurement is processed completely
-      volk_32fc_magnitude_squared_32f(d_mag_squared, symbol,
-                                      d_num_carriers + 1);
+      volk_32fc_magnitude_squared_32f(d_mag_squared, symbol, d_num_carriers + 1);
       volk_32f_accumulator_s32f(&energy, d_mag_squared, d_num_carriers + 1);
       // subtract the central (DC) carrier which is not occupied
-      energy -= std::real(symbol[d_num_carriers]) *
-                std::real(symbol[d_num_carriers]) +
-                std::imag(symbol[d_num_carriers]) *
-                std::imag(symbol[d_num_carriers]);
+      energy -= std::real(symbol[d_num_carriers]) * std::real(symbol[d_num_carriers]) +
+                std::imag(symbol[d_num_carriers]) * std::imag(symbol[d_num_carriers]);
       max = energy;
       index = 0;
       /* the energy measurements with all possible carrier offsets are calculated over a moving sum,
@@ -94,26 +87,19 @@ namespace gr {
         energy -= std::real(symbol[i - 1]) * std::real(symbol[i - 1]) +
                   std::imag(symbol[i - 1]) * std::imag(symbol[i - 1]);
         /* diff for zero carrier */
-        energy += std::real(symbol[i + d_num_carriers / 2 - 1]) *
-                  std::real(symbol[i + d_num_carriers / 2 - 1]) +
-                  std::imag(symbol[i + d_num_carriers / 2 - 1]) *
-                  std::imag(symbol[i + d_num_carriers / 2 - 1]);
-        energy -= std::real(symbol[i + d_num_carriers / 2]) *
-                  std::real(symbol[i + d_num_carriers / 2]) +
-                  std::imag(symbol[i + d_num_carriers / 2]) *
-                  std::imag(symbol[i + d_num_carriers / 2]);
+        energy += std::real(symbol[i + d_num_carriers / 2 - 1]) * std::real(symbol[i + d_num_carriers / 2 - 1]) +
+                  std::imag(symbol[i + d_num_carriers / 2 - 1]) * std::imag(symbol[i + d_num_carriers / 2 - 1]);
+        energy -= std::real(symbol[i + d_num_carriers / 2]) * std::real(symbol[i + d_num_carriers / 2]) +
+                  std::imag(symbol[i + d_num_carriers / 2]) * std::imag(symbol[i + d_num_carriers / 2]);
         /* diff on rigth side */
-        energy += std::real(symbol[i + d_num_carriers]) *
-                  std::real(symbol[i + d_num_carriers]) +
-                  std::imag(symbol[i + d_num_carriers]) *
-                  std::imag(symbol[i + d_num_carriers]);
+        energy += std::real(symbol[i + d_num_carriers]) * std::real(symbol[i + d_num_carriers]) +
+                  std::imag(symbol[i + d_num_carriers]) * std::imag(symbol[i + d_num_carriers]);
         /* new max found? */
         if (energy > max) {
           max = energy;
           index = i;
         }
       }
-
       d_freq_offset = index;
     }
 
@@ -121,18 +107,14 @@ namespace gr {
      * @return estimated SNR float value
      */
     void
-    ofdm_coarse_frequency_correction_vcvc_impl::measure_snr(
-            const gr_complex *symbol) {
+    ofdm_coarse_frequency_correction_vcvc_impl::measure_snr(const gr_complex *symbol) {
       // measure normalized energy of occupied sub-carriers
       float energy = 0;
-      volk_32fc_magnitude_squared_32f(d_mag_squared, &symbol[d_freq_offset],
-                                      d_num_carriers + 1);
+      volk_32fc_magnitude_squared_32f(d_mag_squared, &symbol[d_freq_offset], d_num_carriers + 1);
       volk_32f_accumulator_s32f(&energy, d_mag_squared, d_num_carriers + 1);
       // subtract the central (DC) carrier which is not assigned
-      energy -= std::real(symbol[d_num_carriers + d_freq_offset]) *
-                std::real(symbol[d_num_carriers + d_freq_offset]) +
-                std::imag(symbol[d_num_carriers + d_freq_offset]) *
-                std::imag(symbol[d_num_carriers + d_freq_offset]);
+      energy -= std::real(symbol[d_num_carriers + d_freq_offset]) * std::real(symbol[d_num_carriers + d_freq_offset]) +
+                std::imag(symbol[d_num_carriers + d_freq_offset]) * std::imag(symbol[d_num_carriers + d_freq_offset]);
 
       // measure normalized energy of empty sub-carriers
       float noise_left = 0, noise_right, noise_total;
@@ -141,19 +123,15 @@ namespace gr {
       volk_32f_accumulator_s32f(&noise_left, d_mag_squared, d_freq_offset);
       // empty sub-carriers on right side
       volk_32fc_magnitude_squared_32f(d_mag_squared,
-                                      &symbol[d_freq_offset + d_num_carriers +
-                                              1],
-                                      d_fft_length - d_num_carriers -
-                                      d_freq_offset - 1);
-      volk_32f_accumulator_s32f(&noise_right, d_mag_squared,
-                                d_fft_length - d_num_carriers - d_freq_offset -
-                                1);
+                                      &symbol[d_freq_offset + d_num_carriers + 1],
+                                      d_fft_length - d_num_carriers - d_freq_offset - 1);
+      volk_32f_accumulator_s32f(&noise_right,
+                                d_mag_squared,
+                                d_fft_length - d_num_carriers - d_freq_offset - 1);
       // add noise energies from both sides to total noise
       noise_total = noise_left + noise_right;
-      noise_total += std::real(symbol[d_freq_offset + d_num_carriers / 2]) *
-                     std::real(symbol[d_freq_offset + d_num_carriers / 2]) +
-                     std::imag(symbol[d_freq_offset + d_num_carriers / 2]) *
-                     std::imag(symbol[d_freq_offset + d_num_carriers / 2]);
+      noise_total += std::real(symbol[d_freq_offset + d_num_carriers / 2]) * std::real(symbol[d_freq_offset + d_num_carriers / 2]) +
+                     std::imag(symbol[d_freq_offset + d_num_carriers / 2]) * std::imag(symbol[d_freq_offset + d_num_carriers / 2]);
 
       // normalize
       energy = energy / d_num_carriers;
@@ -186,8 +164,7 @@ namespace gr {
           tag_count++;
         }
         // copy the first half (left of central sub-carrier) of the sub-carriers to the output
-        memcpy(out, &in[i * d_fft_length + d_freq_offset],
-               d_num_carriers / 2 * sizeof(gr_complex));
+        memcpy(out, &in[i * d_fft_length + d_freq_offset], d_num_carriers / 2 * sizeof(gr_complex));
         // copy the second half (right of central sub-carrier) of the sub-carriers to the output
         memcpy(out + d_num_carriers / 2,
                &in[i * d_fft_length + d_freq_offset + d_num_carriers / 2 + 1],

@@ -74,8 +74,7 @@ namespace gr {
     }
 
     void
-    mp4_decode_bs_impl::forecast(int noutput_items,
-                                 gr_vector_int &ninput_items_required) {
+    mp4_decode_bs_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items; //TODO: how to calculate actual rate?
     }
 
@@ -117,11 +116,8 @@ namespace gr {
       * support AudioObjectType 29 (PS)
       */
 
-      int core_sr_index =
-              dacRate ? (sbrFlag ? 6 : 3) :
-              (sbrFlag ? 8 : 5);   // 24/48/16/32 kHz
-      int core_ch_config = get_aac_channel_configuration(mpegSurround,
-                                                         aacChannelMode);
+      int core_sr_index = dacRate ? (sbrFlag ? 6 : 3) : (sbrFlag ? 8 : 5);   // 24/48/16/32 kHz
+      int core_ch_config = get_aac_channel_configuration(mpegSurround, aacChannelMode);
       if (core_ch_config == -1) {
         GR_LOG_ERROR(d_logger, "Unrecognized mpeg surround config (ignored)");
         return false;
@@ -192,14 +188,14 @@ namespace gr {
 
       // initialize AAC decoder at the beginning
       if (!d_aacInitialized) {
-        if (!initialize(dacRate, sbrFlag, mpegSurround, aacChannelMode))
+        if (!initialize(dacRate, sbrFlag, mpegSurround, aacChannelMode)) {
           return 0;
+        }
         d_aacInitialized = true;
         GR_LOG_DEBUG(d_logger, "AAC initialized");
       }
 
-      outBuffer = (int16_t *) NeAACDecDecode(aacHandle, &hInfo, buffer,
-                                             bufferLength);
+      outBuffer = (int16_t *) NeAACDecDecode(aacHandle, &hInfo, buffer, bufferLength);
       sample_rate = hInfo.samplerate;
 
       samples = hInfo.samples;
@@ -266,12 +262,8 @@ namespace gr {
       return (crc ^ accumulator) == 0;
     }
 
-    uint16_t mp4_decode_bs_impl::BinToDec(const uint8_t *data, size_t offset,
-                                          size_t length) {
-      uint32_t output =
-              (*(data + offset / 8) << 16) | ((*(data + offset / 8 + 1)) << 8) |
-              (*(data + offset / 8 +
-                 2));      // should be big/little endian save
+    uint16_t mp4_decode_bs_impl::BinToDec(const uint8_t *data, size_t offset, size_t length) {
+      uint32_t output = (*(data + offset / 8) << 16) | ((*(data + offset / 8 + 1)) << 8) | (*(data + offset / 8 + 2));
       output >>= 24 - length - offset % 8;
       output &= (0xFFFF >> (16 - length));
       return static_cast<uint16_t>(output);
@@ -282,8 +274,7 @@ namespace gr {
                                      gr_vector_int &ninput_items,
                                      gr_vector_const_void_star &input_items,
                                      gr_vector_void_star &output_items) {
-      const unsigned char *in =
-              (const unsigned char *) input_items[0] + d_superframe_size;
+      const unsigned char *in = (const unsigned char *) input_items[0] + d_superframe_size;
       int16_t *out1 = (int16_t *) output_items[0];
       int16_t *out2 = (int16_t *) output_items[1];
       d_nsamples_produced = 0;
@@ -294,15 +285,16 @@ namespace gr {
         // bit 16 is unused
         d_dac_rate = (in[n * d_superframe_size + 2] >> 6) & 01; // bit 17
         d_sbr_flag = (in[n * d_superframe_size + 2] >> 5) & 01; // bit 18
-        d_aac_channel_mode =
-                (in[n * d_superframe_size + 2] >> 4) & 01; // bit 19
+        d_aac_channel_mode = (in[n * d_superframe_size + 2] >> 4) & 01; // bit 19
         d_ps_flag = (in[n * d_superframe_size + 2] >> 3) & 01; // bit 20
         d_mpeg_surround = (in[n * d_superframe_size + 2] & 07); // bits 21 .. 23
         // log header information
         GR_LOG_DEBUG(d_logger,
                      format("superframe header: dac_rate %d, sbr_flag %d, aac_mode %d, ps_flag %d, surround %d") %
-                     (int) d_dac_rate % (int) d_sbr_flag %
-                     (int) d_aac_channel_mode % (int) d_ps_flag %
+                     (int) d_dac_rate %
+                     (int) d_sbr_flag %
+                     (int) d_aac_channel_mode %
+                     (int) d_ps_flag %
                      (int) d_mpeg_surround);
 
         switch (2 * d_dac_rate + d_sbr_flag) {
@@ -310,50 +302,41 @@ namespace gr {
           case 0:
             d_num_aus = 4;
             d_au_start[0] = 8;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
-            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 +
-                            in[n * d_superframe_size + 5];
-            d_au_start[3] = in[n * d_superframe_size + 6] * 16 +
-                            (in[n * d_superframe_size + 7] >> 4);
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 + in[n * d_superframe_size + 5];
+            d_au_start[3] = in[n * d_superframe_size + 6] * 16 + (in[n * d_superframe_size + 7] >> 4);
             d_au_start[4] = d_superframe_size;
             break;
 
           case 1:
             d_num_aus = 2;
             d_au_start[n * d_superframe_size + 0] = 5;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
             d_au_start[2] = d_superframe_size;
             break;
 
           case 2:
             d_num_aus = 6;
             d_au_start[0] = 11;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
-            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 +
-                            in[n * d_superframe_size + 5];
-            d_au_start[3] = in[n * d_superframe_size + 6] * 16 +
-                            (in[n * d_superframe_size + 7] >> 4);
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 + in[n * d_superframe_size + 5];
+            d_au_start[3] = in[n * d_superframe_size + 6] * 16 + (in[n * d_superframe_size + 7] >> 4);
             d_au_start[4] = (in[n * d_superframe_size + 7] & 0xf) * 256 + in[8];
-            d_au_start[5] = in[n * d_superframe_size + 9] * 16 +
-                            (in[n * d_superframe_size + 10] >> 4);
+            d_au_start[5] = in[n * d_superframe_size + 9] * 16 + (in[n * d_superframe_size + 10] >> 4);
             d_au_start[6] = d_superframe_size;
             break;
 
           case 3:
             d_num_aus = 3;
             d_au_start[0] = 6;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
-            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 +
-                            in[n * d_superframe_size + 5];
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 + in[n * d_superframe_size + 5];
             d_au_start[3] = d_superframe_size;
             break;
         }
 
-        // each of the d_num_aus AUs of each superframe (110 * d_bit_rate_n packed bytes) is now processed separately
+        /* Each of the d_num_aus AUs of each superframe (110 * d_bit_rate_n packed bytes)
+         * is now processed separately. */
 
         for (int i = 0; i < d_num_aus; i++) {
           int16_t aac_frame_length;
@@ -373,8 +356,7 @@ namespace gr {
           }
 
           // CRC check of each AU (the 2 byte (16 bit) CRC word is excluded in aac_frame_length)
-          if (crc16(&in[n * d_superframe_size + d_au_start[i]],
-                    aac_frame_length)) {
+          if (crc16(&in[n * d_superframe_size + d_au_start[i]], aac_frame_length)) {
             //GR_LOG_DEBUG(d_logger, format("CRC check of AU %d successful") % i);
             // handle proper AU
             handle_aac_frame(&in[n * d_superframe_size + d_au_start[i]],

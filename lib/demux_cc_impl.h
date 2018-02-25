@@ -35,14 +35,20 @@ namespace gr {
     class demux_cc_impl : public demux_cc {
     private:
       unsigned int d_symbol_lenght;
+      /*!< Length in bytes of one OFDM symbol. */
       unsigned int d_symbols_fic;
+      /*!< Number of OFDM symbols with FIC content per transmission frame. */
       unsigned int d_symbols_msc;
+      /*!< Number of OFDM symbols with MSC content per transmission frame. */
       gr_complex d_fillval;
+      /*!< Complex value, used to fill gaps in the transmission frame
+       * (e.g. caused to a loss of sync) to avoid discontinuity in data flow. */
+
       unsigned int d_fic_counter;
-/*!< counts the symbols containing fic data;
- * the number of fic symbols per transmission frame does not match
- * with the number of transmitted fibs*/
-      unsigned int d_msc_counter; /*!< counts the symbols containing msc data*/
+      /*!< Counts the symbols containing fic data.
+       * The number of fic symbols per transmission frame does not match
+       * with the number of transmitted fibs. */
+      unsigned int d_msc_counter; /*!< Counts the symbols containing msc data. */
 
     public:
       demux_cc_impl(unsigned int symbol_length, unsigned int symbols_fic,

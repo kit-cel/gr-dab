@@ -43,16 +43,13 @@ namespace gr {
     frequency_interleaver_vcc_impl::frequency_interleaver_vcc_impl(
             const std::vector<short> &interleaving_sequence)
             : gr::sync_block("frequency_interleaver_vcc",
-                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                          interleaving_sequence.size()),
-                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                          interleaving_sequence.size())),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) * interleaving_sequence.size()),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) * interleaving_sequence.size())),
               d_interleaving_sequence(interleaving_sequence),
               d_length(interleaving_sequence.size()) {
       for (unsigned int i = 0; i < d_length; i++)
         assert(d_interleaving_sequence[i] < (short) d_length);
     }
-
 
     int
     frequency_interleaver_vcc_impl::work(int noutput_items,

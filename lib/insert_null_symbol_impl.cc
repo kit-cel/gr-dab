@@ -42,12 +42,9 @@ namespace gr {
     }
 
 
-    insert_null_symbol_impl::insert_null_symbol_impl(int ns_length,
-                                                     int symbol_length)
+    insert_null_symbol_impl::insert_null_symbol_impl(int ns_length, int symbol_length)
             : gr::block("insert_null_symbol",
-                        gr::io_signature::make2(2, 2, sizeof(gr_complex) *
-                                                      symbol_length,
-                                                sizeof(char)),
+                        gr::io_signature::make2(2, 2, sizeof(gr_complex) * symbol_length, sizeof(char)),
                         gr::io_signature::make(1, 1, sizeof(gr_complex))),
               d_ns_length(ns_length), d_symbol_length(symbol_length),
               d_ns_added(0) {
@@ -65,12 +62,12 @@ namespace gr {
     }
 
     void
-    insert_null_symbol_impl::forecast(int noutput_items,
-                                      gr_vector_int &ninput_items_required) {
+    insert_null_symbol_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       int in_req = noutput_items / d_symbol_length;
       unsigned ninputs = ninput_items_required.size();
-      for (unsigned i = 0; i < ninputs; i++)
+      for (unsigned i = 0; i < ninputs; i++) {
         ninput_items_required[i] = in_req;
+      }
     }
 
 
@@ -88,9 +85,9 @@ namespace gr {
       int consumed_items = 0;
       int i;
 
-      while (noutput_items - produced_items >= d_symbol_length &&
-             consumed_items < ninput_items[0] &&
-             consumed_items < ninput_items[1]) {
+      while (noutput_items - produced_items >= d_symbol_length
+             && consumed_items < ninput_items[0]
+             && consumed_items < ninput_items[1]) {
         if (*trigger == 1 && d_ns_added < d_ns_length) {
           for (i = 0; i < d_ns_length - d_ns_added && i < noutput_items - produced_items; i++) {
             *optr++ = 0;
@@ -98,8 +95,9 @@ namespace gr {
           produced_items += i;
           d_ns_added += i;
         } else {
-          if (*trigger == 0)
+          if (*trigger == 0) {
             d_ns_added = 0;
+          }
           memcpy(optr, iptr, d_symbol_length);
           iptr += d_symbol_length;
           optr += d_symbol_length;

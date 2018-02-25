@@ -1,8 +1,10 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
- * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
- * The class firecode_checker is adapted from the Qt-DAB software, Copyright Jan van Katwijk (Lazy Chair Computing J.vanKatwijk@gmail.com)
+ * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
+ *
+ * The class firecode_checker is adapted from the Qt-DAB software
+ * Copyright Jan van Katwijk (Lazy Chair Computing J.vanKatwijk@gmail.com)
  * 
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,8 +40,7 @@ namespace gr {
 
     firecode_check_bb::sptr
     firecode_check_bb::make(int bit_rate_n) {
-      return gnuradio::get_initial_sptr
-              (new firecode_check_bb_impl(bit_rate_n));
+      return gnuradio::get_initial_sptr(new firecode_check_bb_impl(bit_rate_n));
     }
 
     /*
@@ -60,8 +61,7 @@ namespace gr {
     }
 
     void
-    firecode_check_bb_impl::forecast(int noutput_items,
-                                     gr_vector_int &ninput_items_required) {
+    firecode_check_bb_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items;
     }
 
@@ -78,14 +78,12 @@ namespace gr {
       while (d_nconsumed < noutput_items / d_frame_size - 4) {
         if (fc.check(&in[d_nconsumed * d_frame_size])) {
           // fire code OK, copy superframe to output
-          memcpy(out + d_nproduced * d_frame_size,
-                 in + d_nconsumed * d_frame_size, d_frame_size * 5);
+          memcpy(out + d_nproduced * d_frame_size, in + d_nconsumed * d_frame_size, d_frame_size * 5);
           d_nproduced += 5;
           d_nconsumed += 5;
           d_firecode_passed = true;
         } else {
-          GR_LOG_DEBUG(d_logger, format("fire code failed at frame %d") %
-                                 (nitems_read(0) / d_frame_size));
+          GR_LOG_DEBUG(d_logger, format("fire code failed at frame %d") % (nitems_read(0) / d_frame_size));
           // shift of one logical frame
           d_nconsumed++;
           d_firecode_passed = false;

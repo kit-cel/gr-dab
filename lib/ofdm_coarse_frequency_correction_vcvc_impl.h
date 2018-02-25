@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +33,7 @@ namespace gr {
  * @param num_carriers number of occupied carriers; corresponding to the output vector length
  * @param cyclic_prefix_length length of the cyclic prefix; corresponding to the length of the energy measurement
  */
-    class ofdm_coarse_frequency_correction_vcvc_impl
-            : public ofdm_coarse_frequency_correction_vcvc {
+    class ofdm_coarse_frequency_correction_vcvc_impl : public ofdm_coarse_frequency_correction_vcvc {
     private:
       int d_fft_length;
       int d_num_carriers;

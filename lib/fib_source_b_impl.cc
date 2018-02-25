@@ -103,13 +103,14 @@ namespace gr {
                            const std::vector <uint8_t> &protection_mode,
                            const std::vector <uint8_t> &data_rate_n,
                            const std::vector <uint8_t> &dabplus) {
-          return gnuradio::get_initial_sptr
-                  (new fib_source_b_impl(transmission_mode, country_ID,
-                                         num_subch, ensemble_label,
-                                         programme_service_labels,
-                                         service_comp_label, service_comp_lang,
-                                         protection_mode,
-                                         data_rate_n, dabplus));
+          return gnuradio::get_initial_sptr(new fib_source_b_impl(transmission_mode,
+                                                                  country_ID, num_subch,
+                                                                  ensemble_label,
+                                                                  programme_service_labels,
+                                                                  service_comp_label,
+                                                                  service_comp_lang,
+                                                                  protection_mode, data_rate_n,
+                                                                  dabplus));
         }
 
         /*

@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * Code from the following third party modules is used:
  * - ODR-AudioEnc, Copyright (C) 2011 Martin Storsjo, (C) 2017 Matthias P. Braendli; Licensed under the Apache License, Version 2.0 (the "License")

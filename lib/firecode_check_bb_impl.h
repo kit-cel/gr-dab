@@ -28,19 +28,17 @@
 namespace gr {
   namespace dab {
 /*! \brief checks firecode of logical frames
- *
  * Checks firecode of each logical frame as a qa test for the msc_decoder.
  * According to ETSI TS 102 563 every fifth logical frame starts with a 16 bit firecode word.
- *
  * @param bit_rate_n data rate in multiples of 8kbit/s
  */
     class firecode_check_bb_impl : public firecode_check_bb {
     private:
-      int d_bit_rate_n;
-      int d_frame_size; /*!< size in bytes of one transmission frame (depending on bit_rate)*/
-      int d_nproduced, d_nconsumed; /*!< control variable for buffer read/write operations */
-      bool d_firecode_passed; /*!< boolean variable for displaying firecode fails*/
-      firecode_checker fc; /*!< instance of the class firecode_checker*/
+      int d_bit_rate_n; /*!< Byte rate. */
+      int d_frame_size; /*!< Size in bytes of one transmission frame (depending on bit_rate_n).*/
+      int d_nproduced, d_nconsumed; /*!< Control variable for buffer read/write operations. */
+      bool d_firecode_passed; /*!< Boolean variable for displaying firecode fails. */
+      firecode_checker fc; /*!< Instance of the class firecode_checker. */
 
     public:
       firecode_check_bb_impl(int bit_rate_n);

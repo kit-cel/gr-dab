@@ -32,8 +32,7 @@
 namespace gr {
   namespace dab {
 
-    class complex_to_interleaved_float_vcf_impl
-            : public complex_to_interleaved_float_vcf {
+    class complex_to_interleaved_float_vcf_impl : public complex_to_interleaved_float_vcf {
 
     private:
       unsigned int d_length; /*!< length of the complex input vector */

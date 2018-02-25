@@ -1,10 +1,13 @@
 /* -*- c++ -*- */
 
 /*
-* 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
-* A major part of this code is adapted from the kjmp2 library, slightly modified and written into a GNURadio block.
-* Note that this is an altered version of kjmp2 and not the original library.
-*/
+ * 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
+ *
+ * A major part of this code is adapted from the kjmp2 library,
+ * slightly modified and written into a GNURadio block.
+ * Note that this is an altered version of kjmp2 and not the original library.
+ */
 
 /******************************************************************************
 ** kjmp2 -- a minimal MPEG-1/2 Audio Layer II decoder library                **

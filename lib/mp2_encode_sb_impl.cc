@@ -1,10 +1,13 @@
 /* -*- c++ -*- */
 /* 
- * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * Code from the following third party modules is used:
- * - ODR-AudioEnc, Copyright (C) 2011 Martin Storsjo, (C) 2017 Matthias P. Braendli; Licensed under the Apache License, Version 2.0 (the "License")
- * - libtoolame-dab taken from ODR-AudioEnc, derived from TooLAME, licensed under LGPL v2.1 or later. See libtoolame-dab/LGPL.txt. This is built into a shared library.
+ * - ODR-AudioEnc, Copyright (C) 2011 Martin Storsjo, (C) 2017 Matthias P. Braendli;
+ *   Licensed under the Apache License, Version 2.0 (the "License")
+ * - libtoolame-dab taken from ODR-AudioEnc, derived from TooLAME, licensed under LGPL v2.1 or later.
+ *   See libtoolame-dab/LGPL.txt. This is built into a shared library.
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,18 +43,15 @@ namespace gr {
 
     mp2_encode_sb::sptr
     mp2_encode_sb::make(int bit_rate_n, int channels, int sample_rate) {
-      return gnuradio::get_initial_sptr
-              (new mp2_encode_sb_impl(bit_rate_n, channels, sample_rate));
+      return gnuradio::get_initial_sptr(new mp2_encode_sb_impl(bit_rate_n, channels, sample_rate));
     }
 
     /*
      * The private constructor
      */
-    mp2_encode_sb_impl::mp2_encode_sb_impl(int bit_rate_n, int channels,
-                                           int sample_rate)
+    mp2_encode_sb_impl::mp2_encode_sb_impl(int bit_rate_n, int channels, int sample_rate)
             : gr::block("mp2_encode_sb",
-                        gr::io_signature::make(channels, channels,
-                                               sizeof(int16_t)),
+                        gr::io_signature::make(channels, channels, sizeof(int16_t)),
                         gr::io_signature::make(1, 1, sizeof(unsigned char))),
               d_bit_rate_n(bit_rate_n), d_channels(channels),
               d_samp_rate(sample_rate) {
@@ -60,8 +60,7 @@ namespace gr {
       }
       if (!(d_samp_rate == 24000 || d_samp_rate == 48000)) {
         throw std::invalid_argument(
-                (format("samp_rate must be 24kHz or 48kHz, not %d") %
-                 d_samp_rate).str());
+                (format("samp_rate must be 24kHz or 48kHz, not %d") % d_samp_rate).str());
       }
       d_input_size = 1152;
       // output size depends on bitrate and sample_rate, d_output_size is max output size
@@ -101,8 +100,7 @@ namespace gr {
       } else if (d_channels == 1) {
         dab_channel_mode = 'm'; // Default to mono
       } else {
-        GR_LOG_ERROR(d_logger,
-                     format("Unsupported channels number %d") % d_channels);
+        GR_LOG_ERROR(d_logger, format("Unsupported channels number %d") % d_channels);
         return false;
       }
       if (err == 0) {
@@ -122,8 +120,7 @@ namespace gr {
     }
 
     void
-    mp2_encode_sb_impl::forecast(int noutput_items,
-                                 gr_vector_int &ninput_items_required) {
+    mp2_encode_sb_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items * d_input_size / d_output_size;
     }
 
@@ -147,14 +144,11 @@ namespace gr {
       for (int i = 0; i < noutput_items / d_output_size; ++i) {
         // write next frame to buffer (1 or 2 channels for mono or stereo respectively)
         if (d_channels == 1) {
-          memcpy(input_buffers[0], &in_ch1[d_nconsumed],
-                 d_input_size * sizeof(int16_t));
+          memcpy(input_buffers[0], &in_ch1[d_nconsumed], d_input_size * sizeof(int16_t));
         } else if (d_channels == 2) { // merge channels if stereo
           const int16_t *in_ch2 = (const int16_t *) input_items[1];
-          memcpy(input_buffers[0], &in_ch1[d_nconsumed],
-                 d_input_size * sizeof(int16_t));
-          memcpy(input_buffers[1], &in_ch2[d_nconsumed],
-                 d_input_size * sizeof(int16_t));
+          memcpy(input_buffers[0], &in_ch1[d_nconsumed], d_input_size * sizeof(int16_t));
+          memcpy(input_buffers[1], &in_ch2[d_nconsumed], d_input_size * sizeof(int16_t));
         }
         // encode
         num_out_bytes = toolame_encode_frame(input_buffers, pad_buf, padlen,

@@ -75,6 +75,13 @@ namespace gr {
       static char d_programme_service_label[176]; //21*8+8, service label (FIG 1/0)
       std::string d_service_labels;
 
+      /*! \brief Writes a character string as utf-8 to byte buffer.
+       *
+       * @param out_ptr Pointer to output buffer.
+       * @param label String object.
+       * @param num_chars Lenght of the character string (without end indicator).
+       * @return Number of processed bits (= num_chars * 8).
+       */
       int write_label(char *out_ptr, std::string label, int num_chars = 16); //default for 16 characters (16 byte)
 
     public:

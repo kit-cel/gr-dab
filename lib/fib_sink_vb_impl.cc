@@ -42,10 +42,8 @@ namespace gr {
 
     fib_sink_vb::sptr
     fib_sink_vb::make() {
-      return gnuradio::get_initial_sptr
-              (new fib_sink_vb_impl());
+      return gnuradio::get_initial_sptr(new fib_sink_vb_impl());
     }
-
 
     fib_sink_vb_impl::fib_sink_vb_impl()
             : gr::sync_block("fib_sink_vb",
@@ -82,9 +80,8 @@ namespace gr {
       return 0;
     }
 
-    int
-    fib_sink_vb_impl::process_fig(uint8_t type, const char *data,
-                                  uint8_t length) {
+    void
+    fib_sink_vb_impl::process_fig(uint8_t type, const char *data, uint8_t length) {
       uint8_t cn, oe, pd, extension;
       switch (type) {
         case FIB_FIG_TYPE_MCI:
@@ -102,8 +99,7 @@ namespace gr {
           switch (extension) {
             case FIB_MCI_EXTENSION_ENSEMBLE_INFO: {
               uint8_t country_ID = (uint8_t)((data[2] & 0xf0) >> 4);
-              uint16_t ensemble_reference =
-                      (uint16_t)(data[2] & 0x0f) << 8 | (uint8_t) data[3];
+              uint16_t ensemble_reference = (uint16_t)(data[2] & 0x0f) << 8 | (uint8_t) data[3];
               uint8_t change_flag = (uint8_t)((data[4] & 0xc0) >> 6);
               uint8_t occurrence_change = data[6];
               if (change_flag != 0)
@@ -115,47 +111,43 @@ namespace gr {
               if (alarm_flag == 1) {
                 GR_LOG_DEBUG(d_logger, ", [ALARM MESSAGE ACCESSIBLE] ");
               }
-              uint16_t CIF_counter = (uint16_t)(
-                      (data[4] & 0x1f) * 250 + (data[5]));
+              uint16_t CIF_counter = (uint16_t)( (data[4] & 0x1f) * 250 + (data[5]));
               GR_LOG_DEBUG(d_logger,
                            format("ensemble info: reference %d, country ID %d, CIF counter = %d") %
                            ensemble_reference %
-                           (int) country_ID % CIF_counter);
+                           (int) country_ID %
+                           CIF_counter);
               break;
             }
             case FIB_MCI_EXTENSION_SUBCHANNEL_ORGA: {
               uint8_t subch_counter = 0;
               GR_LOG_DEBUG(d_logger, "subchannel orga: ");
               do {
-                uint8_t subchID = (uint8_t)(
-                        (data[2 + subch_counter] & 0xfc) >> 2);
-                uint16_t start_address =
-                        (uint16_t)((data[2 + subch_counter] & 0x03) << 8) |
-                        (uint8_t)(data[3 + subch_counter]);
+                uint8_t subchID = (uint8_t)((data[2 + subch_counter] & 0xfc) >> 2);
+                uint16_t start_address = (uint16_t)((data[2 + subch_counter] & 0x03) << 8) | (uint8_t)(data[3 + subch_counter]);
                 uint8_t sl_form = (uint8_t)(data[4] & 0x80);
                 if (sl_form == 0) {
-                  uint8_t table_switch = (uint8_t)(
-                          data[4 + subch_counter] & 0x40);
-                  if (table_switch != 0)
+                  uint8_t table_switch = (uint8_t)(data[4 + subch_counter] & 0x40);
+                  if (table_switch != 0) {
                     GR_LOG_DEBUG(d_logger, " [WARNING: OTHER TABLE USED] ");
-                  uint8_t table_index = (uint8_t)(
-                          data[4 + subch_counter] & 0x3f);
+                  }
+                  uint8_t table_index = (uint8_t)(data[4 + subch_counter] & 0x3f);
                   GR_LOG_DEBUG(d_logger,
                                format("subchID = %d , start address = %d, index %d") %
                                (int) subchID %
-                               (int) start_address % (int) table_index);
+                               (int) start_address %
+                               (int) table_index);
                   subch_counter += 3;
                 } else {
                   uint8_t option = (uint8_t)(data[4 + subch_counter] & 0x70);
-                  uint8_t protect_level = (uint8_t)(
-                          (data[4 + subch_counter] & 0x0c) >> 2);
-                  uint16_t subch_size =
-                          (uint16_t)((data[4 + subch_counter] & 0x03) << 8) |
-                          (uint8_t)(data[5 + subch_counter]);
+                  uint8_t protect_level = (uint8_t)((data[4 + subch_counter] & 0x0c) >> 2);
+                  uint16_t subch_size = (uint16_t)((data[4 + subch_counter] & 0x03) << 8) | (uint8_t)(data[5 + subch_counter]);
                   GR_LOG_DEBUG(d_logger,
                                format("subchID = %d , start address = %d, option %d, protect level %d, subch size %d") %
-                               (int) subchID % (int) start_address %
-                               (int) option % (int) protect_level %
+                               (int) subchID %
+                               (int) start_address %
+                               (int) option %
+                               (int) protect_level %
                                (int) subch_size);
                   subch_counter += 4;
 
@@ -186,32 +178,23 @@ namespace gr {
             case FIB_MCI_EXTENSION_SERVICE_ORGA: {
               uint8_t service_counter = 1;
               do { //iterate over services
-                uint16_t service_reference =
-                        (uint16_t)(data[service_counter + 1] & 0x0f) << 8 |
-                        (uint8_t) data[service_counter + 2];
-                GR_LOG_DEBUG(d_logger, format("service orga: reference %d ") %
-                                       service_reference);
-                uint8_t local_flag = (uint8_t)(
-                        (data[service_counter + 3] & 0x80) >> 7);
-                if (local_flag == 1)
+                uint16_t service_reference = (uint16_t)(data[service_counter + 1] & 0x0f) << 8 | (uint8_t) data[service_counter + 2];
+                GR_LOG_DEBUG(d_logger, format("service orga: reference %d ") % service_reference);
+                uint8_t local_flag = (uint8_t)((data[service_counter + 3] & 0x80) >> 7);
+                if (local_flag == 1) {
                   GR_LOG_DEBUG(d_logger, "[LOCAL FLAG SET] ");
+                }
                 uint8_t ca = (uint8_t)((data[service_counter + 3] & 0x70) >> 4);
-                if (ca != 0)
+                if (ca != 0) {
                   GR_LOG_DEBUG(d_logger, "[CONDITIONAL ACCESS USED] ");
-                uint8_t num_service_comps = (uint8_t)(
-                        data[service_counter + 3] & 0x0f);
-                GR_LOG_DEBUG(d_logger, format("(%d components):") %
-                                       (int) num_service_comps);
-                for (int i = 0; i <
-                                num_service_comps; i++) { //iterate over service components
-                  uint8_t TMID = (uint8_t)(
-                          (data[service_counter + 4 + i * 2] & 0xc0) >> 6);
-                  uint8_t comp_type = (uint8_t)(
-                          data[service_counter + 4 + i * 2] & 0x3f);
-                  uint8_t subchID = (uint8_t)(
-                          (data[service_counter + 5 + i * 2] & 0xfc) >> 2);
-                  uint8_t ps = (uint8_t)(
-                          (data[service_counter + 5 + i * 2 + 1] & 0x02) >> 1);
+                }
+                uint8_t num_service_comps = (uint8_t)(data[service_counter + 3] & 0x0f);
+                GR_LOG_DEBUG(d_logger, format("(%d components):") % (int) num_service_comps);
+                for (int i = 0; i < num_service_comps; i++) { //iterate over service components
+                  uint8_t TMID = (uint8_t)( (data[service_counter + 4 + i * 2] & 0xc0) >> 6);
+                  uint8_t comp_type = (uint8_t)( data[service_counter + 4 + i * 2] & 0x3f);
+                  uint8_t subchID = (uint8_t)((data[service_counter + 5 + i * 2] & 0xfc) >> 2);
+                  uint8_t ps = (uint8_t)((data[service_counter + 5 + i * 2 + 1] & 0x02) >> 1);
                   if (TMID == 0) {
                     GR_LOG_DEBUG(d_logger,
                                  format("(audio stream, type %d, subchID %d, primary %d)") %
@@ -242,11 +225,13 @@ namespace gr {
                     GR_LOG_DEBUG(d_logger,
                                  format("(data stream, type %d, subchID %d, primary %d)") %
                                  (int) comp_type %
-                                 (int) subchID % (int) ps);
+                                 (int) subchID %
+                                 (int) ps);
                   } else if (TMID == 2) {
                     GR_LOG_DEBUG(d_logger,
                                  format("(FIDC, type %d, subchID %d, primary %d)") %
-                                 (int) comp_type % (int) subchID %
+                                 (int) comp_type %
+                                 (int) subchID %
                                  (int) ps);
                   } else {
                     GR_LOG_DEBUG(d_logger, "[packed data]");
@@ -269,25 +254,24 @@ namespace gr {
               uint8_t service_comp_counter = 0;
               do {
                 uint16_t service_reference =
-                        (uint16_t)(data[service_comp_counter + 2] & 0x0f) << 8 |
-                        (uint8_t) data[service_comp_counter + 3];
-                uint8_t SCIdS = (uint8_t)(
-                        data[service_comp_counter + 4] & 0x0f);
+                        (uint16_t)(data[service_comp_counter + 2] & 0x0f) << 8 | (uint8_t) data[service_comp_counter + 3];
+                uint8_t SCIdS = (uint8_t)(data[service_comp_counter + 4] & 0x0f);
                 if ((data[service_comp_counter + 5] & 0x80) == 0) {
-                  uint8_t subchID = (uint8_t)(
-                          data[service_comp_counter + 5] & 0x3f);
+                  uint8_t subchID = (uint8_t)(data[service_comp_counter + 5] & 0x3f);
                   GR_LOG_DEBUG(d_logger,
                                format("service component global definition: reference %d, SCIdS %d, subchID %d") %
-                               service_reference % (int) SCIdS % (int) subchID);
+                               service_reference %
+                               (int) SCIdS %
+                               (int) subchID);
                   service_comp_counter += 5;
                 } else {
                   uint16_t subchID =
-                          (uint16_t)(data[service_comp_counter + 5] & 0x0f)
-                                  << 8 |
-                          (uint8_t) data[service_comp_counter + 6];
+                          (uint16_t)(data[service_comp_counter + 5] & 0x0f)<< 8 | (uint8_t) data[service_comp_counter + 6];
                   GR_LOG_DEBUG(d_logger,
                                format("service component global definition: reference %d, SCIdS %d, subchID %d") %
-                               service_reference % (int) SCIdS % (int) subchID);
+                               service_reference %
+                               (int) SCIdS %
+                               (int) subchID);
                   service_comp_counter += 6;
                 }
               } while (1 + service_comp_counter < length);
@@ -306,16 +290,14 @@ namespace gr {
               GR_LOG_DEBUG(d_logger, "programme number");
               break;
             case FIB_SI_EXTENSION_PROGRAMME_TYPE: {
-              GR_LOG_DEBUG(d_logger, format("programme type, %d components") %
-                                     ((length - 1) / 4));
+              GR_LOG_DEBUG(d_logger, format("programme type, %d components") % ((length - 1) / 4));
               for (int i = 0; i < (length - 1) / 4; i++) {
                 uint8_t programme_type = (uint8_t)(data[2 + i * 4 + 3] & 0x1f);
-                uint16_t service_reference =
-                        (uint16_t)(data[2 + i * 4] & 0x0f) << 8 |
-                        (uint8_t) data[2 + i * 4 + 1];
-                GR_LOG_DEBUG(d_logger, format("reference %d, type: %d") %
-                                       service_reference %
-                                       (int) programme_type);
+                uint16_t service_reference = (uint16_t)(data[2 + i * 4] & 0x0f) << 8 | (uint8_t) data[2 + i * 4 + 1];
+                GR_LOG_DEBUG(d_logger,
+                             format("reference %d, type: %d") %
+                             service_reference %
+                             (int) programme_type);
 
                 // write programme type to json
                 if (d_programme_type_written_trigger < 0) {
@@ -326,8 +308,7 @@ namespace gr {
                      << (int) service_reference << ",\"programme_type\":"
                      << (int) programme_type << "}\0";
                   d_programme_type_current = ss.str();
-                  if ((int) service_reference ==
-                      d_programme_type_written_trigger) {
+                  if ((int) service_reference == d_programme_type_written_trigger) {
                     std::stringstream ss_json;
                     ss_json << d_programme_type_current << "]" << "\0";
                     d_programme_type_current = "\0";
@@ -346,8 +327,7 @@ namespace gr {
               GR_LOG_DEBUG(d_logger, "announcement switching");
               break;
             default:
-              GR_LOG_DEBUG(d_logger, format("unsupported extension (%d)") %
-                                     (int) extension);
+              GR_LOG_DEBUG(d_logger, format("unsupported extension (%d)") % (int) extension);
               break;
           }
           break;
@@ -361,18 +341,15 @@ namespace gr {
             case FIB_SI_EXTENSION_ENSEMBLE_LABEL: {
               uint8_t country_ID = (uint8_t)((data[2] & 0xf0) >> 4);
               memcpy(label, &data[4], 16);
-              GR_LOG_DEBUG(d_logger, format("[ensemble label](%d): %s") %
-                                     (int) country_ID % label);
+              GR_LOG_DEBUG(d_logger, format("[ensemble label](%d): %s") % (int) country_ID % label);
               // write json for ensemble label and country ID
               std::stringstream ss;
-              ss << "{" << "\"" << label << "\":{" << "\"country_ID\":"
-                 << (int) country_ID << "}}";
+              ss << "{" << "\"" << label << "\":{" << "\"country_ID\":" << (int) country_ID << "}}";
               d_json_ensemble_info = ss.str();
               break;
             }
             case FIB_SI_EXTENSION_PROGRAMME_SERVICE_LABEL: {
-              uint16_t service_reference =
-                      (uint16_t)(data[2] & 0x0f) << 8 | (uint8_t) data[3];
+              uint16_t service_reference = (uint16_t)(data[2] & 0x0f) << 8 | (uint8_t) data[3];
               memcpy(label, &data[4], 16);
               GR_LOG_DEBUG(d_logger,
                            format("[programme service label] (reference %d): %s") %
@@ -386,8 +363,7 @@ namespace gr {
                    << label << "\",\"reference\":"
                    << (int) service_reference << "}\0";
                 d_service_labels_current = ss.str();
-                if ((int) service_reference ==
-                    d_service_labels_written_trigger) {
+                if ((int) service_reference == d_service_labels_written_trigger) {
                   std::stringstream ss_json;
                   ss_json << d_service_labels_current << "]" << "\0";
                   d_service_labels_current = "\0";
@@ -426,8 +402,7 @@ namespace gr {
               GR_LOG_DEBUG(d_logger, "EWS (emergency warning service) - not supported yet");
               break;
             default:
-              GR_LOG_DEBUG(d_logger, format("unsupported extension (%d)") %
-                                     (int) extension);
+              GR_LOG_DEBUG(d_logger, format("unsupported extension (%d)") % (int) extension);
           }
           break;
         case FIB_FIG_TYPE_CA:
@@ -437,7 +412,6 @@ namespace gr {
           GR_LOG_DEBUG(d_logger, "unsupported FIG type");
           break;
       }
-      return 0;
     }
 
     int

@@ -34,14 +34,16 @@ namespace gr {
     private:
 
       std::vector<short> d_interleaving_sequence;
-      unsigned int d_length; /*!< length of d_interleaving_sequence*/
+      /*!< Vector containing the sequence, which is controlling the interleaving
+       * of the OFDM sub carriers. */
+      unsigned int d_length; /*!< Length of  the vector d_interleaving_sequence. */
 
     public:
-      frequency_interleaver_vcc_impl(
-              const std::vector<short> &interleaving_sequence);
+      frequency_interleaver_vcc_impl(const std::vector<short> &interleaving_sequence);
 
-      void set_sequence(
-              const std::vector<short> &interleaving_sequence) { d_interleaving_sequence = interleaving_sequence; }
+      void set_sequence(const std::vector<short> &interleaving_sequence) {
+        d_interleaving_sequence = interleaving_sequence;
+      }
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,

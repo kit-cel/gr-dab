@@ -28,12 +28,11 @@ namespace gr {
   namespace dab {
 /*! \brief vector wise working differential phasor calculation
  * this block has the same functionality as the gr-digital diff_phasor_cc block,
- * but is working on vector basis
+ * but is working on vector basis.
  */
     class diff_phasor_vcc_impl : public diff_phasor_vcc {
     private:
-
-      unsigned int d_length;
+      unsigned int d_length; /*!< Length of each complex vector. */
 
     public:
       diff_phasor_vcc_impl(unsigned int length);

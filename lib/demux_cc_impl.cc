@@ -36,9 +36,8 @@ namespace gr {
     demux_cc::sptr
     demux_cc::make(unsigned int symbol_length, unsigned int symbols_fic,
                    unsigned int symbol_msc, gr_complex fillval) {
-      return gnuradio::get_initial_sptr
-              (new demux_cc_impl(symbol_length, symbols_fic, symbol_msc,
-                                 fillval));
+      return gnuradio::get_initial_sptr(new demux_cc_impl(symbol_length, symbols_fic,
+                                                          symbol_msc, fillval));
     }
 
     /*
@@ -48,10 +47,8 @@ namespace gr {
                                  unsigned int symbols_fic,
                                  unsigned int symbol_msc, gr_complex fillval)
             : gr::block("demux_cc",
-                        gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                     symbol_length),
-                        gr::io_signature::make(2, 2, sizeof(gr_complex) *
-                                                     symbol_length)),
+                        gr::io_signature::make(1, 1, sizeof(gr_complex) * symbol_length),
+                        gr::io_signature::make(2, 2, sizeof(gr_complex) * symbol_length)),
               d_symbol_lenght(symbol_length),
               d_symbols_fic(symbols_fic),
               d_symbols_msc(symbol_msc),
@@ -95,18 +92,20 @@ namespace gr {
       for (int i = 0; i < noutput_items; ++i) {
         if (tag_count < tags.size() &&
             tags[tag_count].offset - nitems_read(0) - nconsumed == 0) {
-          // this input symbol is tagged: a new frame begins here
+          // This input symbol is tagged: a new frame begins here.
           if (d_fic_counter % d_symbols_fic == 0 &&
               d_msc_counter % d_symbols_msc == 0) {
-            // we are at the beginning of a frame and also finished writing the last frame
-            // we can remove this first symbol of the frame (phase reference symbol) and copy the other symbols
+            /* We are at the beginning of a frame and also finished writing the last frame.
+             * We can remove this first symbol of the frame (phase reference symbol)
+             * and copy the other symbols. */
             tag_count++;
             nconsumed++;
             d_fic_counter = 0;
             d_msc_counter = 0;
           } else {
-            // we did not finish the last frame, maybe we lost track in sync
-            // lets fill the remaining symbols with fillval before continuing with the new input frame
+            /* We did not finish the last frame, maybe we lost track in sync during a frame.
+             * Let's fill the remaining symbols with fillval
+             * before continuing with the new input frame. */
             if (d_fic_counter % d_symbols_fic != 0) {
               memset(&fic_out[fic_syms_written++ * d_symbol_lenght], 0,
                      d_symbol_lenght * sizeof(gr_complex));
@@ -118,7 +117,7 @@ namespace gr {
             }
           }
         } else if (d_fic_counter < d_symbols_fic) {
-          // copy this symbol to fic output
+          // copy this symbol to fic output.
           memcpy(&fic_out[fic_syms_written++ * d_symbol_lenght],
                  &in[nconsumed++ * d_symbol_lenght],
                  d_symbol_lenght * sizeof(gr_complex));

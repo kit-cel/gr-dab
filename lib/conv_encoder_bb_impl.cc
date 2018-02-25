@@ -81,8 +81,7 @@ namespace gr {
     void
     conv_encoder_bb_impl::forecast(int noutput_items,
                                    gr_vector_int &ninput_items_required) {
-      ninput_items_required[0] =
-              (noutput_items / (d_framesize * 4 + 3)) * d_framesize;
+      ninput_items_required[0] = (noutput_items / (d_framesize * 4 + 3)) * d_framesize;
     }
 
     int
