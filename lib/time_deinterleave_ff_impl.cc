@@ -30,8 +30,8 @@ namespace gr {
     time_deinterleave_ff::sptr
     time_deinterleave_ff::make(int vector_length,
                                const std::vector<unsigned char> &scrambling_vector) {
-      return gnuradio::get_initial_sptr
-              (new time_deinterleave_ff_impl(vector_length, scrambling_vector));
+      return gnuradio::get_initial_sptr(new time_deinterleave_ff_impl(vector_length,
+                                                                      scrambling_vector));
     }
 
     /*
@@ -46,8 +46,8 @@ namespace gr {
               d_scrambling_vector(scrambling_vector) {
       d_scrambling_length = scrambling_vector.size(); // size of the scrambling vector
       set_output_multiple(d_vector_length);
-      set_history((d_scrambling_length - 1) * d_vector_length +
-                  1); //need for max delay of (scrambling_length-1) * 24ms
+      // set history (need for max delay of (scrambling_length-1) * 24ms)
+      set_history((d_scrambling_length - 1) * d_vector_length + 1);
     }
 
     /*
@@ -66,12 +66,8 @@ namespace gr {
       for (int i = 0; i < noutput_items / d_vector_length; i++) {
         // produce output vectors
         for (int j = 0; j < d_vector_length; j++) {
-          *out++ = in[d_vector_length * (i + (d_scrambling_length - 1) -
-                                         ((d_scrambling_length - 1) -
-                                          d_scrambling_vector[j %
-                                                              d_scrambling_length])) +
-                      j];
-          //*out++ = in[i*d_vector_length + d_scrambling_vector[j%d_scrambling_length]*d_vector_length + j - (j%d_scrambling_length) + d_scrambling_vector[j%d_scrambling_length]];
+          *out++ = in[d_vector_length * (i + (d_scrambling_length - 1) - ((d_scrambling_length - 1) -
+                      d_scrambling_vector[j % d_scrambling_length])) + j];
         }
       }
       // Tell runtime system how many output items we produced.

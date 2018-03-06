@@ -26,12 +26,14 @@
 
 namespace gr {
   namespace dab {
-/*! \brief unpuncturing of a stream sequence
+/*! \brief Unpuncturing of a stream bit sequence.
  *
- * unpuncturing of a stream sequence according to the puncturing_vector (writing a stream element at a '1' and writing the fillval at a '0')
+ * Unpuncturing of a stream sequence according to the puncturing_vector.
+ * (writing a stream element at a '1' and writing the fillval at a '0')
  *
- * @param puncturing_vector vector with puncturing sequence, length of puncturing_vector is length of a stream sequence
- * @param fillval value to fill in for a zero of the puncturing vector
+ * @param puncturing_vector Vector with puncturing sequence,
+ * length of puncturing_vector is length of a stream sequence.
+ * @param fillval Value to fill in for a zero of the puncturing vector.
  *
  */
     class unpuncture_vff_impl : public unpuncture_vff {
@@ -44,8 +46,7 @@ namespace gr {
       unsigned int d_vlen_out;
 
     public:
-      unpuncture_vff_impl(const std::vector<unsigned char> &puncturing_vector,
-                          float fillval);
+      unpuncture_vff_impl(const std::vector<unsigned char> &puncturing_vector, float fillval);
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,

@@ -48,7 +48,7 @@ namespace gr {
        * @param data Pointer to the FIG data buffer.
        * @param length Length of the FIG data buffer in bytes.
        */
-      int process_fig(uint8_t type, const char *data, uint8_t length);
+      void process_fig(uint8_t type, const char *data, uint8_t length);
 
       bool d_crc_passed;
 

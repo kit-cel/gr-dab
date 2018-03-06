@@ -25,7 +25,8 @@
 
 namespace gr {
   namespace dab {
-/*! \brief applies time interleaving to a vector (convolutional interleaving -> scrambling and delay)
+/*! \brief Applies time interleaving to a vector
+ * convolutional interleaving -> scrambling and delay
  *
  * Applies convolutional interleaving to a vector with its max[vector_length] followers,
  * the scrambling_vector describes which vector element comes from which follower.
@@ -33,7 +34,7 @@ namespace gr {
  * More information to the interleaving rules on ETSI EN 300 401 chapter 12.
  *
  * @param vector_length length of input vectors
- * @param scrambling_vector vector with scrambling parameters (see DAB standard p.138)
+ * @param scrambling_vector vector with scrambling parameters (see ETSI EN 300 401 chapter 12)
  *
  */
 
@@ -43,8 +44,7 @@ namespace gr {
       std::vector<unsigned char> d_scrambling_vector;
 
     public:
-      time_interleave_bb_impl(int vector_length,
-                              const std::vector<unsigned char> &scrambling_vector);
+      time_interleave_bb_impl(int vector_length, const std::vector<unsigned char> &scrambling_vector);
 
       ~time_interleave_bb_impl();
 

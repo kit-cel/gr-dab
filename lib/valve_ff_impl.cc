@@ -30,8 +30,7 @@ namespace gr {
 
     valve_ff::sptr
     valve_ff::make(bool closed, bool feed_with_zeros) {
-      return gnuradio::get_initial_sptr
-              (new valve_ff_impl(closed, feed_with_zeros));
+      return gnuradio::get_initial_sptr(new valve_ff_impl(closed, feed_with_zeros));
     }
 
     /*
@@ -41,7 +40,8 @@ namespace gr {
             : gr::block("valve_ff",
                         gr::io_signature::make(1, 1, sizeof(float)),
                         gr::io_signature::make(1, 1, sizeof(float))),
-              d_feed_with_zeros(feed_with_zeros), d_closed(closed) {}
+              d_feed_with_zeros(feed_with_zeros), d_closed(closed) {
+    }
 
     /*
      * Our virtual destructor.
@@ -50,8 +50,7 @@ namespace gr {
     }
 
     void
-    valve_ff_impl::forecast(int noutput_items,
-                            gr_vector_int &ninput_items_required) {
+    valve_ff_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items;
     }
 

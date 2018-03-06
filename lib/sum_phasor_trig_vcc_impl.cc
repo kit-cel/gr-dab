@@ -45,12 +45,8 @@ namespace gr {
 
     sum_phasor_trig_vcc_impl::sum_phasor_trig_vcc_impl(unsigned int length)
             : gr::sync_block("sum_phasor_trig_vcc",
-                             gr::io_signature::make2(2, 2,
-                                                     sizeof(gr_complex) * length,
-                                                     sizeof(char)),
-                             gr::io_signature::make2(2, 2,
-                                                     sizeof(gr_complex) * length,
-                                                     sizeof(char))),
+                             gr::io_signature::make2(2, 2, sizeof(gr_complex) * length, sizeof(char)),
+                             gr::io_signature::make2(2, 2, sizeof(gr_complex) * length, sizeof(char))),
               d_length(length),
               d_last_symbol(length, 0) {
     }
@@ -68,8 +64,9 @@ namespace gr {
 
       for (int i = 0; i < noutput_items; i++) {
         if (*frame_start == 1) {
-          for (unsigned int j = 0; j < d_length; j++)
+          for (unsigned int j = 0; j < d_length; j++) {
             out[j] = in[j];
+          }
         } else {
           if (i == 0) {
             for (unsigned int j = 0; j < d_length; j++)
@@ -86,14 +83,14 @@ namespace gr {
 
         /* need to remember last OFDM symbol before leaving function */
         if (i == noutput_items - 1) {
-          for (unsigned int j = 0; j < d_length; j++)
+          for (unsigned int j = 0; j < d_length; j++) {
             d_last_symbol[j] = out[j];
+          }
         }
 
         lastout = out;
         out += d_length;
         in += d_length;
-
       }
 
       return noutput_items;

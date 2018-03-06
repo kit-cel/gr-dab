@@ -31,8 +31,10 @@ namespace gr {
     select_cus_vfvf::sptr
     select_cus_vfvf::make(unsigned int vlen, unsigned int frame_len,
                           unsigned int address, unsigned int size) {
-      return gnuradio::get_initial_sptr
-              (new select_cus_vfvf_impl(vlen, frame_len, address, size));
+      return gnuradio::get_initial_sptr(new select_cus_vfvf_impl(vlen,
+                                                                 frame_len,
+                                                                 address,
+                                                                 size));
     }
 
     /*
@@ -76,8 +78,7 @@ namespace gr {
         if (d_address <= (nitems_read(0) + i) % d_frame_len &&
             (nitems_read(0) + i) % d_frame_len < d_address + d_size) {
           //this cu is one of the selected subchannel -> copy it to ouput buffer
-          memcpy(&out[nwritten++ * d_vlen], &in[i * d_vlen],
-                 d_vlen * sizeof(float));
+          memcpy(&out[nwritten++ * d_vlen], &in[i * d_vlen], d_vlen * sizeof(float));
         }
       }
       // Tell runtime system how many input items we consumed on

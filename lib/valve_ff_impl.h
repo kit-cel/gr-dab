@@ -25,9 +25,9 @@
 
 namespace gr {
   namespace dab {
-/*! \brief lets samples pass or not depending on the state of closed
- * @param feed_with_zeros if valve is closed feed_with_zeros decides if zeros are sent or nothing
- * @param closed decides if valve is closed or opened
+/*! \brief Lets samples pass or not depending on the state of an input variable.
+ * @param feed_with_zeros If valve is closed send zeros if true, else send nothing.
+ * @param closed Controls if valve is closed or opened.
  */
     class valve_ff_impl : public valve_ff {
     private:

@@ -25,13 +25,16 @@
 
 namespace gr {
   namespace dab {
-/*! \brief selects items out of a stream, defined by start address and size
- * This block is used to select the data of one MSC sub-channel out of a transmission frame.
+/*! \brief Selects items out of a stream, defined by start address and size.
+ * This block is used to select the data of one MSC sub-channel
+ * out of a transmission frame.
  *
- * @param vlen vector size of input and output vectors, defining the item size on witch the address and size variables base on
- * @param frame_length length in items of a frame (each item is a vector with size vlen)
- * @param address number of the first item in each frame to be copied
- * @param size number of items to copy in each frame
+ * @param vlen Vector size of input and output vectors,
+ * defining the item size on witch the address and size variables base on.
+ * @param frame_length Length in items of a frame.
+ * (each item is a vector with size vlen)
+ * @param address Number of the first item in each frame to be copied.
+ * @param size Number of items to copy in each frame.
  */
     class select_cus_vfvf_impl : public select_cus_vfvf {
     private:

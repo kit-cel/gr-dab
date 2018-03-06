@@ -38,17 +38,15 @@ namespace gr {
     ofdm_move_and_insert_zero::sptr
     ofdm_move_and_insert_zero::make(unsigned int fft_length,
                                     unsigned int num_carriers) {
-      return gnuradio::get_initial_sptr
-              (new ofdm_move_and_insert_zero_impl(fft_length, num_carriers));
+      return gnuradio::get_initial_sptr(new ofdm_move_and_insert_zero_impl(fft_length,
+                                                                           num_carriers));
     }
 
     ofdm_move_and_insert_zero_impl::ofdm_move_and_insert_zero_impl(
             unsigned int fft_length, unsigned int num_carriers)
             : gr::sync_block("ofdm_move_and_insert_zero",
-                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                          num_carriers),
-                             gr::io_signature::make(1, 1, sizeof(gr_complex) *
-                                                          fft_length)),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) * num_carriers),
+                             gr::io_signature::make(1, 1, sizeof(gr_complex) * fft_length)),
               d_fft_length(fft_length), d_num_carriers(num_carriers) {
       d_zeros_on_left = (d_fft_length - d_num_carriers) / 2;
     }

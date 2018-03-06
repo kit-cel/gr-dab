@@ -26,9 +26,10 @@
 
 namespace gr {
   namespace dab {
-    class ofdm_insert_pilot_vcc_impl : public ofdm_insert_pilot_vcc {
-    private:
 
+    class ofdm_insert_pilot_vcc_impl : public ofdm_insert_pilot_vcc {
+
+    private:
       std::vector <gr_complex> d_pilot;
       char d_start;
 

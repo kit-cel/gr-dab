@@ -35,8 +35,7 @@ namespace gr {
       unsigned int d_zeros_on_left;
 
     public:
-      ofdm_move_and_insert_zero_impl(unsigned int fft_length,
-                                     unsigned int num_carriers);
+      ofdm_move_and_insert_zero_impl(unsigned int fft_length, unsigned int num_carriers);
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,

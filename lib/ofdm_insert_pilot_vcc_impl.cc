@@ -44,21 +44,17 @@ namespace gr {
     ofdm_insert_pilot_vcc_impl::ofdm_insert_pilot_vcc_impl(
             const std::vector <gr_complex> &pilot)
             : gr::block("ofdm_insert_pilot_vcc",
-                        gr::io_signature::make2(2, 2, sizeof(gr_complex) *
-                                                      pilot.size(),
-                                                sizeof(char)),
-                        gr::io_signature::make2(2, 2, sizeof(gr_complex) *
-                                                      pilot.size(),
-                                                sizeof(char))),
+                        gr::io_signature::make2(2, 2, sizeof(gr_complex) * pilot.size(), sizeof(char)),
+                        gr::io_signature::make2(2, 2, sizeof(gr_complex) * pilot.size(), sizeof(char))),
               d_pilot(pilot), d_start(0) {
     }
 
     void
-    ofdm_insert_pilot_vcc_impl::forecast(int noutput_items,
-                                         gr_vector_int &ninput_items_required) {
+    ofdm_insert_pilot_vcc_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       unsigned ninputs = ninput_items_required.size();
-      for (unsigned int i = 0; i < ninputs; i++)
+      for (unsigned int i = 0; i < ninputs; i++) {
         ninput_items_required[i] = noutput_items;
+      }
     }
 
 
@@ -76,15 +72,16 @@ namespace gr {
       int n_produced = 0;
       int n_consumed = 0;
 
-      for (; n_consumed < ninput_items[1] && n_consumed < ninput_items[1] &&
-             n_produced < noutput_items; n_produced++) {
+      for (; n_consumed < ninput_items[1] && n_consumed < ninput_items[1] && n_produced < noutput_items; n_produced++) {
         if (*frame_start == 1 && d_start == 0) {
           d_start = 1;
-          for (unsigned int j = 0; j < d_pilot.size(); j++)
+          for (unsigned int j = 0; j < d_pilot.size(); j++) {
             *optr++ = d_pilot[j];
+          }
         } else {
-          for (unsigned int j = 0; j < d_pilot.size(); j++)
+          for (unsigned int j = 0; j < d_pilot.size(); j++) {
             *optr++ = *iptr++;
+          }
           frame_start++;
           n_consumed++;
           d_start = 0;
@@ -92,9 +89,6 @@ namespace gr {
         *o_frame_start++ = d_start;
       }
       consume_each(n_consumed);
-
-      // printf("ninput_items: %d, noutput_items: %d, consumed: %d, produced: %d\n",ninput_items[0],noutput_items, n_consumed, n_produced);
-
       return n_produced;
     }
 
