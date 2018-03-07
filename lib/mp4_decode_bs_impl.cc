@@ -78,6 +78,7 @@ namespace gr {
       d_dyn_lab_seg_index = 0;
       d_dyn_lab_curr_char_field_length = 0;
       d_last_dyn_lab_seg = false;
+      d_data_group_length = 0;
       // declare output message port for dynamic_label messages
       message_port_register_out(pmt::intern(std::string("dynamic_label")));
     }
@@ -235,13 +236,25 @@ namespace gr {
                 break;
               }
               uint8_t curr_subfield_length = d_length_xpad_subfield_table[ci->length];
-              /* Define a ptr that points at the first byte in order of the subfield.
+              /* Define a ptr which points at the first byte in order of the subfield.
                * This ist the last logical byte because the bytes are still reversed! */
               uint8_t *xpad_subfield = &pad[pad_length - curr_subfield_start -
                                             (curr_subfield_length - 1)];
               // process the X-PAD data sub-field according to its application type
               switch (ci->app_type) {
                 case 1: { // Data group length indicator; this indicates the start of a new data group
+                  // reverse the order of the bytes to do the CRC
+                  uint8_t data_group_length_ind[4];
+                  for (int j = 0; j < 4; ++j) {
+                    data_group_length_ind[j] = xpad_subfield[curr_subfield_length-1-j];
+                  }
+                  if(crc16(const_cast<const uint8_t *>(data_group_length_ind), 2)){
+                    // CRC OK, lets process the following data group
+                    d_data_group_length = (uint16_t)(data_group_length_ind[0]&0x3f) << 8 | data_group_length_ind[1];
+                    GR_LOG_DEBUG(d_logger, format("data group length indicator (length %d)") %(int)d_data_group_length);
+                  } else{
+                    // the CRC failed and we cannot process the following data group
+                  }
                   break;
                 }
                 case 2: { // Dynamic label segment, start of X-PAD data group
@@ -289,6 +302,12 @@ namespace gr {
                     /* We process a command segment and have to do nothing. */
                   }
                   break;
+                }
+                case 12: { // MOT, start of X-PAD data group, see ETSI EN 301 234
+
+                }
+                case 13: { // MOT, continuation of X-PAD data group, see ETSI EN 301 234
+
                 }
                 default:
                   break;

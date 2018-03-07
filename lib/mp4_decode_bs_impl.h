@@ -73,6 +73,7 @@ namespace gr {
         uint8_t app_type: 5;
         uint8_t length : 3;
       }; /*!< Structure with bit fields of the content idicator. */
+      // Dynamic label objects.
       struct dynamic_label_header {
         uint8_t field3 : 4;
         uint8_t field2 : 4;
@@ -88,6 +89,8 @@ namespace gr {
       uint8_t d_dyn_lab_seg[64];
       /*!< Buffer for one dynamic label segment. Size is maximum length of a
        * segment (16 bytes char field + 2 bytes header + 2 bytes CRC) */
+      // MSC data group objects.
+      uint16_t d_data_group_length; /*!< Length in byte of the current MSC data group.*/
 
 
       bool crc16(const uint8_t *msg, int16_t len);
