@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /*
- * Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * GNU Radio block written for gr-dab including the following third party elements:
  * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class and the PAD processing
@@ -46,16 +47,11 @@ namespace gr {
   namespace dab {
 
     // lookup table for length of X-PAD data subfield
-    const uint8_t mp4_decode_bs_impl::d_length_xpad_subfield_table[8] = {4, 6,
-                                                                         8, 12,
-                                                                         16, 24,
-                                                                         32,
-                                                                         48};
+    const uint8_t mp4_decode_bs_impl::d_length_xpad_subfield_table[8] = {4, 6, 8, 12, 16, 24, 32, 48};
 
     mp4_decode_bs::sptr
     mp4_decode_bs::make(int bit_rate_n) {
-      return gnuradio::get_initial_sptr
-              (new mp4_decode_bs_impl(bit_rate_n));
+      return gnuradio::get_initial_sptr(new mp4_decode_bs_impl(bit_rate_n));
     }
 
     /*
@@ -69,8 +65,7 @@ namespace gr {
       d_superframe_size = bit_rate_n * 110;
       d_aacInitialized = false;
       baudRate = 48000;
-      set_output_multiple(960 *
-                          4); //TODO: right? baudRate*0.12 for output of one superframe
+      set_output_multiple(960 * 4); //TODO: right? baudRate*0.12 for output of one superframe
       aacHandle = NeAACDecOpen();
       //memset(d_aac_frame, 0, 960);
       d_sample_rate = -1;
@@ -81,6 +76,8 @@ namespace gr {
       d_data_group_length = 0;
       // declare output message port for dynamic_label messages
       message_port_register_out(pmt::intern(std::string("dynamic_label")));
+      d_expecting_start_of_data_group = false;
+      d_data_group_nwritten = 0; // TODO: not a nice style
     }
 
     /*
@@ -90,14 +87,13 @@ namespace gr {
     }
 
     void
-    mp4_decode_bs_impl::forecast(int noutput_items,
-                                 gr_vector_int &ninput_items_required) {
+    mp4_decode_bs_impl::forecast(int noutput_items, gr_vector_int &ninput_items_required) {
       ninput_items_required[0] = noutput_items; //TODO: how to calculate actual rate?
     }
 
     // returns aac channel configuration
-    int mp4_decode_bs_impl::get_aac_channel_configuration(
-            int16_t m_mpeg_surround_config, uint8_t aacChannelMode) {
+    int mp4_decode_bs_impl::get_aac_channel_configuration(int16_t m_mpeg_surround_config,
+                                                          uint8_t aacChannelMode) {
       switch (m_mpeg_surround_config) {
         case 0:     // no surround
           return aacChannelMode ? 2 : 1;
@@ -116,6 +112,7 @@ namespace gr {
                                         uint8_t aacChannelMode) {
       long unsigned int sample_rate;
       uint8_t channels;
+
       /* AudioSpecificConfig structure (the only way to select 960 transform here!)
       *
       *  00010 = AudioObjectType 2 (AAC LC)
@@ -133,11 +130,8 @@ namespace gr {
       * support AudioObjectType 29 (PS)
       */
 
-      int core_sr_index =
-              dacRate ? (sbrFlag ? 6 : 3) :
-              (sbrFlag ? 8 : 5);   // 24/48/16/32 kHz
-      int core_ch_config = get_aac_channel_configuration(mpegSurround,
-                                                         aacChannelMode);
+      int core_sr_index = dacRate ? (sbrFlag ? 6 : 3) : (sbrFlag ? 8 : 5); // 24/48/16/32 kHz
+      int core_ch_config = get_aac_channel_configuration(mpegSurround, aacChannelMode);
       if (core_ch_config == -1) {
         GR_LOG_ERROR(d_logger, "Unrecognized mpeg surround config (ignored)");
         return false;
@@ -219,8 +213,7 @@ namespace gr {
               n_ci_elements++;
               break;
             }
-            subfield_length_sum += d_length_xpad_subfield_table[
-                    (uint8_t)(pad[pad_length - 3 - n_ci_elements] & 0xe0) >> 5];
+            subfield_length_sum += d_length_xpad_subfield_table[(uint8_t)(pad[pad_length - 3 - n_ci_elements] & 0xe0) >> 5];
             n_ci_elements++;
           }
           // sanity check: sum of ci sizes must be equal to xpad_size
@@ -251,9 +244,11 @@ namespace gr {
                   if(crc16(const_cast<const uint8_t *>(data_group_length_ind), 2)){
                     // CRC OK, lets process the following data group
                     d_data_group_length = (uint16_t)(data_group_length_ind[0]&0x3f) << 8 | data_group_length_ind[1];
+                    d_expecting_start_of_data_group = true;
                     GR_LOG_DEBUG(d_logger, format("data group length indicator (length %d)") %(int)d_data_group_length);
                   } else{
                     // the CRC failed and we cannot process the following data group
+                    d_expecting_start_of_data_group = false;
                   }
                   break;
                 }
@@ -262,12 +257,10 @@ namespace gr {
                    * because it is the start of a new segment. */
                   d_dyn_lab_seg_index = 0;
                   // read dynamic label segment header (first 2 bytes in logical order)
-                  dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header *) &xpad_subfield[
-                          curr_subfield_length - 2];
+                  dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header *) &xpad_subfield[curr_subfield_length - 2];
                   if (dyn_lab_seg_header->c == 0) { // message segment
                     // write the length of the char field of the current segment to a variable
-                    d_dyn_lab_curr_char_field_length =
-                            dyn_lab_seg_header->field1 + 1;
+                    d_dyn_lab_curr_char_field_length = dyn_lab_seg_header->field1 + 1;
                     // check if this segment is the first one of a dynamic label
                     if (dyn_lab_seg_header->first) {
                       // reset dynamic label index and overwrite the buffer
@@ -280,8 +273,7 @@ namespace gr {
                       d_last_dyn_lab_seg = false;
                     }
                     // process this subfield as a part of a dynamic label segment
-                    process_dynamic_label_segment_subfield(xpad_subfield,
-                                                           curr_subfield_length);
+                    process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
                   } else { // command segment
                     if (dyn_lab_seg_header->field1 == 1) {
                       // clear display command
@@ -296,18 +288,47 @@ namespace gr {
                     /* If we continue a subfield and already wrote bytes in the
                      * subfield buffer, we are processing a message segment
                      * and no command segment. */
-                    process_dynamic_label_segment_subfield(xpad_subfield,
-                                                           curr_subfield_length);
+                    process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
                   } else {
                     /* We process a command segment and have to do nothing. */
                   }
                   break;
                 }
                 case 12: { // MOT, start of X-PAD data group, see ETSI EN 301 234
-
+                  if(d_expecting_start_of_data_group){
+                    /* The last sub-field was a data group length indicator
+                     * with a correct CRC word so this is what we expecting.
+                     * We can start collecting the data for the MSC data group now. */
+                    // Copy the subfield data to the buffer.
+                    for (int j = 0; j < curr_subfield_length; ++j) {
+                      d_msc_data_group[j] = xpad_subfield[curr_subfield_length-1-j];
+                    }
+                    d_data_group_nwritten += curr_subfield_length;
+                    // Check if we already finished the MSC data group.
+                    if(d_data_group_nwritten >= d_data_group_length){
+                      // we finished the MSC data group and can process it now
+                      // TODO process msc data group function
+                    }
+                    d_expecting_start_of_data_group = false;
+                  }
+                  break;
                 }
                 case 13: { // MOT, continuation of X-PAD data group, see ETSI EN 301 234
-
+                  /* We only take this subfield, if the MSC data group reception
+                   * was properly initialized before. */
+                  if(!d_expecting_start_of_data_group && d_data_group_nwritten > 0){
+                    // Copy the subfield data to the buffer.
+                    for (int j = 0; j < curr_subfield_length; ++j) {
+                      d_msc_data_group[d_data_group_nwritten + j] = xpad_subfield[curr_subfield_length-1-j];
+                    }
+                    d_data_group_nwritten += curr_subfield_length;
+                    // Check if we finished the MSC data group.
+                    if(d_data_group_nwritten >= d_data_group_length){
+                      // we finished the MSC data group and can process it now
+                      // TODO process msc data group function
+                    }
+                  }
+                  break;
                 }
                 default:
                   break;
@@ -319,9 +340,8 @@ namespace gr {
             GR_LOG_ERROR(d_logger,
                          format("XPAD length (%d) does not match with the total "
                                         "length of the content indicators (%d)") %
-                         (int) (pad_length - 2 %
-                                             (int) (subfield_length_sum +
-                                                    n_ci_elements)));
+                                (int) (pad_length - 2 %
+                                (int) (subfield_length_sum + n_ci_elements)));
           }
         } else {
           // no X-PAD; we are finished here
@@ -329,22 +349,18 @@ namespace gr {
       }
     }
 
-    void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(
-            uint8_t *subfield, uint8_t subfield_length) {
+    void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(uint8_t *subfield, uint8_t subfield_length) {
       // check if this sub-field contains padding bytes
       uint8_t num_valid_bytes;
-      if (subfield_length >
-          d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index) {
-        num_valid_bytes =
-                d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index;
+      if (subfield_length > d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index) {
+        num_valid_bytes = d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index;
       } else {
         num_valid_bytes = subfield_length;
       }
 
       // Write the complete subfield (with header) to the buffer in logical order.
       for (int j = 0; j < num_valid_bytes; ++j) {
-        d_dyn_lab_seg[d_dyn_lab_seg_index + j] = subfield[subfield_length - 1 -
-                                                          j];
+        d_dyn_lab_seg[d_dyn_lab_seg_index + j] = subfield[subfield_length - 1 - j];
       }
       d_dyn_lab_seg_index += num_valid_bytes;
 
@@ -352,13 +368,10 @@ namespace gr {
       if (d_dyn_lab_seg_index >= d_dyn_lab_curr_char_field_length + 4) {
         // We have completely written the segment to the buffer.
         // Do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer.
-        if (crc16(const_cast<const uint8_t *>(d_dyn_lab_seg),
-                  d_dyn_lab_seg_index - 2)) {
-          GR_LOG_DEBUG(d_logger,
-                       format("DYNAMIC LABEL SEGMENT: CRC OK, copying data in buffer"));
+        if (crc16(const_cast<const uint8_t *>(d_dyn_lab_seg), d_dyn_lab_seg_index - 2)) {
+          GR_LOG_DEBUG(d_logger, format("DYNAMIC LABEL SEGMENT: CRC OK, copying data in buffer"));
           // We received a correct label segment and can write it to the dynamic label buffer.
-          memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2],
-                 d_dyn_lab_seg_index - 4);
+          memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2], d_dyn_lab_seg_index - 4);
           d_dyn_lab_index += d_dyn_lab_seg_index - 4;
           d_dyn_lab_seg_index = 0;
           if (d_last_dyn_lab_seg) {
@@ -398,8 +411,9 @@ namespace gr {
 
       // initialize AAC decoder at the beginning
       if (!d_aacInitialized) {
-        if (!initialize(dacRate, sbrFlag, mpegSurround, aacChannelMode))
+        if (!initialize(dacRate, sbrFlag, mpegSurround, aacChannelMode)) {
           return 0;
+        }
         d_aacInitialized = true;
         GR_LOG_DEBUG(d_logger, "AAC initialized");
       }
@@ -418,8 +432,7 @@ namespace gr {
       d_sample_rate = sample_rate;
       channels = hInfo.channels;
       if (hInfo.error != 0) {
-        GR_LOG_ERROR(d_logger, format("Warning:  %s") %
-                               faacDecGetErrorMessage(hInfo.error));
+        GR_LOG_ERROR(d_logger, format("Warning:  %s") % faacDecGetErrorMessage(hInfo.error));
         return 0;
       }
 
@@ -440,7 +453,6 @@ namespace gr {
         }
       } else
         GR_LOG_ERROR(d_logger, "Cannot handle these channels -> dump samples");
-
       d_nsamples_produced += samples / 2;
       return samples / 2;
     }
@@ -472,12 +484,8 @@ namespace gr {
       return (crc ^ accumulator) == 0;
     }
 
-    uint16_t mp4_decode_bs_impl::BinToDec(const uint8_t *data, size_t offset,
-                                          size_t length) {
-      uint32_t output =
-              (*(data + offset / 8) << 16) | ((*(data + offset / 8 + 1)) << 8) |
-              (*(data + offset / 8 +
-                 2));      // should be big/little endian save
+    uint16_t mp4_decode_bs_impl::BinToDec(const uint8_t *data, size_t offset, size_t length) {
+      uint32_t output = (*(data + offset / 8) << 16) | ((*(data + offset / 8 + 1)) << 8) | (*(data + offset / 8 + 2)); // should be big/little endian save
       output >>= 24 - length - offset % 8;
       output &= (0xFFFF >> (16 - length));
       return static_cast<uint16_t>(output);
@@ -488,8 +496,7 @@ namespace gr {
                                      gr_vector_int &ninput_items,
                                      gr_vector_const_void_star &input_items,
                                      gr_vector_void_star &output_items) {
-      const unsigned char *in =
-              (const unsigned char *) input_items[0] + d_superframe_size;
+      const unsigned char *in = (const unsigned char *) input_items[0] + d_superframe_size;
       int16_t *out1 = (int16_t *) output_items[0];
       int16_t *out2 = (int16_t *) output_items[1];
       d_nsamples_produced = 0;
@@ -508,54 +515,46 @@ namespace gr {
         GR_LOG_DEBUG(d_logger,
                      format("superframe header: dac_rate %d, sbr_flag %d, "
                                     "aac_mode %d, ps_flag %d, surround %d") %
-                     (int) d_dac_rate % (int) d_sbr_flag %
-                     (int) d_aac_channel_mode % (int) d_ps_flag %
-                     (int) d_mpeg_surround);
+                             (int) d_dac_rate %
+                             (int) d_sbr_flag %
+                             (int) d_aac_channel_mode %
+                             (int) d_ps_flag %
+                             (int) d_mpeg_surround);
 
         switch (2 * d_dac_rate + d_sbr_flag) {
           default:    // cannot happen
           case 0:
             d_num_aus = 4;
             d_au_start[0] = 8;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
-            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 +
-                            in[n * d_superframe_size + 5];
-            d_au_start[3] = in[n * d_superframe_size + 6] * 16 +
-                            (in[n * d_superframe_size + 7] >> 4);
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 + in[n * d_superframe_size + 5];
+            d_au_start[3] = in[n * d_superframe_size + 6] * 16 + (in[n * d_superframe_size + 7] >> 4);
             d_au_start[4] = d_superframe_size;
             break;
 
           case 1:
             d_num_aus = 2;
             d_au_start[n * d_superframe_size + 0] = 5;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
             d_au_start[2] = d_superframe_size;
             break;
 
           case 2:
             d_num_aus = 6;
             d_au_start[0] = 11;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
-            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 +
-                            in[n * d_superframe_size + 5];
-            d_au_start[3] = in[n * d_superframe_size + 6] * 16 +
-                            (in[n * d_superframe_size + 7] >> 4);
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 + in[n * d_superframe_size + 5];
+            d_au_start[3] = in[n * d_superframe_size + 6] * 16 + (in[n * d_superframe_size + 7] >> 4);
             d_au_start[4] = (in[n * d_superframe_size + 7] & 0xf) * 256 + in[8];
-            d_au_start[5] = in[n * d_superframe_size + 9] * 16 +
-                            (in[n * d_superframe_size + 10] >> 4);
+            d_au_start[5] = in[n * d_superframe_size + 9] * 16 + (in[n * d_superframe_size + 10] >> 4);
             d_au_start[6] = d_superframe_size;
             break;
 
           case 3:
             d_num_aus = 3;
             d_au_start[0] = 6;
-            d_au_start[1] = in[n * d_superframe_size + 3] * 16 +
-                            (in[n * d_superframe_size + 4] >> 4);
-            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 +
-                            in[n * d_superframe_size + 5];
+            d_au_start[1] = in[n * d_superframe_size + 3] * 16 + (in[n * d_superframe_size + 4] >> 4);
+            d_au_start[2] = (in[n * d_superframe_size + 4] & 0xf) * 256 + in[n * d_superframe_size + 5];
             d_au_start[3] = d_superframe_size;
             break;
         }
@@ -576,13 +575,11 @@ namespace gr {
           // sanity check for the aac_frame_length
           if ((aac_frame_length >= 960) || (aac_frame_length < 0)) {
             throw std::out_of_range(
-                    (boost::format("aac frame length not in range (%d)") %
-                     aac_frame_length).str());
+                    (boost::format("aac frame length not in range (%d)") % aac_frame_length).str());
           }
 
           // CRC check of each AU (the 2 byte (16 bit) CRC word is excluded in aac_frame_length)
-          if (crc16(&in[n * d_superframe_size + d_au_start[i]],
-                    aac_frame_length)) {
+          if (crc16(&in[n * d_superframe_size + d_au_start[i]], aac_frame_length)) {
             //GR_LOG_DEBUG(d_logger, format("CRC check of AU %d successful") % i);
             // handle proper AU
             handle_aac_frame(&in[n * d_superframe_size + d_au_start[i]],

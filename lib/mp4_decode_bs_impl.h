@@ -1,7 +1,8 @@
 /* -*- c++ -*- */
 /*
  *
- * Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2018, 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL)
+ * Karlsruhe Institute of Technology (KIT).
  *
  * GNU Radio block written for gr-dab including the following third party elements:
  * -QT-DAB: classes mp4Processor and faad-decoder except the reed-solomon class and the PAD processing
@@ -91,6 +92,15 @@ namespace gr {
        * segment (16 bytes char field + 2 bytes header + 2 bytes CRC) */
       // MSC data group objects.
       uint16_t d_data_group_length; /*!< Length in byte of the current MSC data group.*/
+      bool d_expecting_start_of_data_group;
+      /*!< Only true after the reception of a data group length indicator.
+       * This indicator must follow an X-PAD subfield with the start section
+       * of a MSC data field, or we missed something there.*/
+      uint8_t d_msc_data_group[1024];
+      /*!< Buffer for the storage of a MSC data group of max length of 1024 byte. */
+      uint16_t d_data_group_nwritten;
+      /*!< Number of bytes written to the buffer d_msc_data_group so far.
+       * The MSC data group is complete, if this counter is equal to d_data_group_length.*/
 
 
       bool crc16(const uint8_t *msg, int16_t len);
