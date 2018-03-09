@@ -111,6 +111,10 @@ namespace gr {
         uint8_t repetition_index : 4;
         uint8_t continuity_index : 4;
       }; /*!< Structure with bit fields of the MSC data group header. */
+      uint16_t d_mot_segment_nwritten;
+      /*!< Number of bytes written to the MOT buffer (in form of segments) so far. */
+      uint8_t d_mot_body[65536];
+      /*!< Buffer for the storage of a Multimedia Object Transfer (MOT) body. */
 
 
       bool crc16(const uint8_t *msg, int16_t len);

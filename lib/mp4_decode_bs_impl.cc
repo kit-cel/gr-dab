@@ -78,6 +78,7 @@ namespace gr {
       message_port_register_out(pmt::intern(std::string("dynamic_label")));
       d_expecting_start_of_data_group = false;
       d_data_group_nwritten = 0; // TODO: not a nice style
+      d_mot_segment_nwritten = 0;
     }
 
     /*
@@ -406,32 +407,51 @@ namespace gr {
 
     void mp4_decode_bs_impl::process_msc_data_group(uint8_t *data_group,
                                                     uint16_t data_group_length) {
+      // For structure of MSC data group see ETSI EN 300 401 section 5.3.3
       // Read the header information and check, if the CRC flag is set.
       d_msc_data_group_header *header = (d_msc_data_group_header*) data_group;
-      uint16_t reading_offset = 2; // Offset for the pointer data_group marking present byte to read.
+      /* Offset for the pointer data_group marking present byte to read.*/
+      uint16_t reading_offset = 2;
       if(header->crc_flag){
         // Do CRC.
         if(crc16(const_cast<const uint8_t *>(data_group), data_group_length-2)){
           GR_LOG_DEBUG(d_logger, format("CRC succeeded for MOT"));
-          if(header->data_group_type == 0){
+          if(header->extension_flag){
+            // We don't support the extension field, caused to no support of conditional access.
+            reading_offset += 2;
+          }
+          if(header->data_group_type == 4){ // MOT body
             // So far, we ignore the continuity and repetition index and handle each MOT.
+            // TODO: Implement memory of successfully received groups.
             if(header->segment_flag){
               // A segment field is present, we read it.
-              GR_LOG_DEBUG(d_logger, format("MOT: Segment field present."));
+              uint8_t last = (uint8_t)(data_group[reading_offset] & 0x80);
+              uint16_t seg_num = (uint16_t)(data_group[reading_offset]&0x7f)<<8 | data_group[reading_offset+1];
+              GR_LOG_DEBUG(d_logger, format("MOT: Segment field present. Last %d, seg num %d") %(int)last %(int)seg_num);
               reading_offset += 2;
             }
             if(header->user_access_flag){
+              // So far, we ignore the user access field.
               uint8_t user_access_length_indicator = (uint8_t)(data_group[reading_offset] & 0x0f);
               reading_offset += user_access_length_indicator + 1;
               GR_LOG_DEBUG(d_logger, format("MOT: User access field present."));
-            } else{
-              // No user access field;
             }
             GR_LOG_DEBUG(d_logger, format("MOT: Data field length %d.") %(int)(data_group_length-2-reading_offset));
+            // Here comes the actual data. Copy data to MOT buffer.
+            memcpy(&d_mot_body[d_mot_segment_nwritten],
+                   data_group,
+                   data_group_length-2-reading_offset);
+            d_mot_segment_nwritten += data_group_length-2-reading_offset;
+            if(header->segment_flag && (data_group[2+2*header->extension_flag]&0x80)>>7){
+              // This MSC data group transports the last segment of the current MOT body.
+              // TODO Process MOT body.
+            }
           } else{
-            // We don't handle CA messages.
-            GR_LOG_DEBUG(d_logger, format("MOT: Received CA message and dump it."));
+            // This data group type is not supported.
+            GR_LOG_DEBUG(d_logger, format("MOT: Received unsupported data group type."));
           }
+        } else{
+          // CRC failed, we have to dump this MSC data group.
         }
       } else{
         // We don't handle MSC data groups without a CRC word.
