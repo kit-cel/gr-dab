@@ -186,7 +186,7 @@ namespace gr {
 
     void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t pad_length) {
       // read F-PAD field (header of X-PAD)
-      fixed_pad *fpad = (fixed_pad *) &pad[pad_length - 2];
+      d_fixed_pad *fpad = (d_fixed_pad *) &pad[pad_length - 2];
       // check if the X-PAD contains one or multiple content indicators
       if (fpad->content_ind == 0) {
         /* no content indicators: the X-PAD content is a continuation of a data
@@ -223,7 +223,7 @@ namespace gr {
             uint8_t curr_subfield_start = 3 + n_ci_elements;
             for (int i = 0; i < n_ci_elements; ++i) {
               // read content indicator (CI)
-              content_ind *ci = (content_ind *) &pad[pad_length - 3 - i];
+              d_content_ind *ci = (d_content_ind *) &pad[pad_length - 3 - i];
               // if we arrived at the end marker, we can leave before assigning any byte space
               if (ci->app_type == 0) {
                 break;
@@ -257,7 +257,7 @@ namespace gr {
                    * because it is the start of a new segment. */
                   d_dyn_lab_seg_index = 0;
                   // read dynamic label segment header (first 2 bytes in logical order)
-                  dynamic_label_header *dyn_lab_seg_header = (dynamic_label_header *) &xpad_subfield[curr_subfield_length - 2];
+                  d_dynamic_label_header *dyn_lab_seg_header = (d_dynamic_label_header *) &xpad_subfield[curr_subfield_length - 2];
                   if (dyn_lab_seg_header->c == 0) { // message segment
                     // write the length of the char field of the current segment to a variable
                     d_dyn_lab_curr_char_field_length = dyn_lab_seg_header->field1 + 1;
@@ -304,10 +304,15 @@ namespace gr {
                       d_msc_data_group[j] = xpad_subfield[curr_subfield_length-1-j];
                     }
                     d_data_group_nwritten += curr_subfield_length;
+                    GR_LOG_DEBUG(d_logger, format("wrote first MOT subfield (length %d)") %(int)curr_subfield_length);
                     // Check if we already finished the MSC data group.
                     if(d_data_group_nwritten >= d_data_group_length){
                       // we finished the MSC data group and can process it now
-                      // TODO process msc data group function
+                      GR_LOG_DEBUG(d_logger, format("finished MOT (length %d)") %(int)d_data_group_nwritten);
+                      process_msc_data_group(d_msc_data_group, d_data_group_length);
+                      // Reset length and counter variable.
+                      d_data_group_nwritten = 0;
+                      d_data_group_length = 0;
                     }
                     d_expecting_start_of_data_group = false;
                   }
@@ -322,10 +327,15 @@ namespace gr {
                       d_msc_data_group[d_data_group_nwritten + j] = xpad_subfield[curr_subfield_length-1-j];
                     }
                     d_data_group_nwritten += curr_subfield_length;
+                    GR_LOG_DEBUG(d_logger, format("wrote continuing MOT subfield (length %d)") %(int)curr_subfield_length);
                     // Check if we finished the MSC data group.
                     if(d_data_group_nwritten >= d_data_group_length){
                       // we finished the MSC data group and can process it now
-                      // TODO process msc data group function
+                      GR_LOG_DEBUG(d_logger, format("finished MOT (length %d)") %(int)d_data_group_nwritten);
+                      process_msc_data_group(d_msc_data_group, d_data_group_length);
+                      // Reset length and counter variable.
+                      d_data_group_nwritten = 0;
+                      d_data_group_length = 0;
                     }
                   }
                   break;
@@ -391,6 +401,40 @@ namespace gr {
           d_dyn_lab_index = 0;
           d_last_dyn_lab_seg = false;
         }
+      }
+    }
+
+    void mp4_decode_bs_impl::process_msc_data_group(uint8_t *data_group,
+                                                    uint16_t data_group_length) {
+      // Read the header information and check, if the CRC flag is set.
+      d_msc_data_group_header *header = (d_msc_data_group_header*) data_group;
+      uint16_t reading_offset = 2; // Offset for the pointer data_group marking present byte to read.
+      if(header->crc_flag){
+        // Do CRC.
+        if(crc16(const_cast<const uint8_t *>(data_group), data_group_length-2)){
+          GR_LOG_DEBUG(d_logger, format("CRC succeeded for MOT"));
+          if(header->data_group_type == 0){
+            // So far, we ignore the continuity and repetition index and handle each MOT.
+            if(header->segment_flag){
+              // A segment field is present, we read it.
+              GR_LOG_DEBUG(d_logger, format("MOT: Segment field present."));
+              reading_offset += 2;
+            }
+            if(header->user_access_flag){
+              uint8_t user_access_length_indicator = (uint8_t)(data_group[reading_offset] & 0x0f);
+              reading_offset += user_access_length_indicator + 1;
+              GR_LOG_DEBUG(d_logger, format("MOT: User access field present."));
+            } else{
+              // No user access field;
+            }
+            GR_LOG_DEBUG(d_logger, format("MOT: Data field length %d.") %(int)(data_group_length-2-reading_offset));
+          } else{
+            // We don't handle CA messages.
+            GR_LOG_DEBUG(d_logger, format("MOT: Received CA message and dump it."));
+          }
+        }
+      } else{
+        // We don't handle MSC data groups without a CRC word.
       }
     }
 

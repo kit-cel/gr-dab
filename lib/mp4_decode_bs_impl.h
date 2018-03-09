@@ -60,7 +60,7 @@ namespace gr {
       uint8_t d_dyn_lab_seg_index;
       /*!< Signalizing how many bytes of the current segment are already written to the buffer. */
       bool d_last_dyn_lab_seg;
-      struct fixed_pad {
+      struct d_fixed_pad {
         // first byte "L-1"
         uint8_t byte_l_ind : 4;
         uint8_t xpad_ind : 2;
@@ -70,12 +70,12 @@ namespace gr {
         uint8_t content_ind : 1;
         uint8_t byte_l_data : 6;
       }; /*!< Structure with bit fields of the 2 F-PAD bytes at the end of the PAD field. */
-      struct content_ind {
+      struct d_content_ind {
         uint8_t app_type: 5;
         uint8_t length : 3;
       }; /*!< Structure with bit fields of the content idicator. */
       // Dynamic label objects.
-      struct dynamic_label_header {
+      struct d_dynamic_label_header {
         uint8_t field3 : 4;
         uint8_t field2 : 4;
 
@@ -101,6 +101,16 @@ namespace gr {
       uint16_t d_data_group_nwritten;
       /*!< Number of bytes written to the buffer d_msc_data_group so far.
        * The MSC data group is complete, if this counter is equal to d_data_group_length.*/
+      struct d_msc_data_group_header {
+        uint8_t data_group_type : 4;
+        uint8_t user_access_flag : 1;
+        uint8_t segment_flag : 1;
+        uint8_t crc_flag : 1;
+        uint8_t extension_flag : 1;
+
+        uint8_t repetition_index : 4;
+        uint8_t continuity_index : 4;
+      }; /*!< Structure with bit fields of the MSC data group header. */
 
 
       bool crc16(const uint8_t *msg, int16_t len);
@@ -126,7 +136,7 @@ namespace gr {
 
       void process_pad(uint8_t *pad, int16_t pad_length);
 
-      //! Processes a subfield of a dynamic label segment.
+      //! \brief Processes a subfield of a dynamic label segment.
       /*!
        * @param subfield Pointer to the last logical byte (the last logical byte
        * corresponds to the first byte in the array order, caused
@@ -134,6 +144,16 @@ namespace gr {
        * @param subfield_length Length of the subfield of a dynamic label segment in bytes.
        */
       void process_dynamic_label_segment_subfield(uint8_t *subfield, uint8_t subfield_length);
+
+      //! \brief Processes a MSC data group.
+      /*!- Read header information.
+       * - CRC
+       * - Publish message if MSC data group is correct.
+       * @param data_group Pointer to the first logical byte of the MSC data group buffer.
+       * (The byte order is not anymore reversed at that time.)
+       * @param data_group_length Length in bytes of the MSC data group.
+       */
+      void process_msc_data_group(uint8_t *data_group, uint16_t data_group_length);
 
       int16_t MP42PCM(uint8_t dacRate,
                       uint8_t sbrFlag,
