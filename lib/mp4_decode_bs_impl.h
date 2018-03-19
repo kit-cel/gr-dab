@@ -111,7 +111,14 @@ namespace gr {
         uint8_t repetition_index : 4;
         uint8_t continuity_index : 4;
       }; /*!< Structure with bit fields of the MSC data group header. */
-      uint16_t d_mot_segment_nwritten;
+      uint32_t d_mot_body_size; /*!< Total size in bytes of the current MOT body. */
+      uint8_t d_content_type; /*!< Content of the MOT. See TS 101 756, table 17. */
+      uint16_t d_content_subtype; /*!< Detailed content of the MOT. See TS 101 756, table 17. */
+      uint8_t d_segment_count;
+      /*!< Counts the segments and compares with the received seg_num in each
+       * MSC data group header to detect a loss of a MOT segment.
+       */
+      uint16_t d_mot_body_nwritten; /*!< Counts the written bytes of the current segment. */
       /*!< Number of bytes written to the MOT buffer (in form of segments) so far. */
       uint8_t d_mot_body[65536];
       /*!< Buffer for the storage of a Multimedia Object Transfer (MOT) body. */

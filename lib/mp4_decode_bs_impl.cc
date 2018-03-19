@@ -39,6 +39,7 @@
 #include <string>
 #include <boost/format.hpp>
 #include "neaacdec.h"
+#include "MOT.h"
 #include <pmt/pmt.h>
 
 using namespace boost;
@@ -78,7 +79,11 @@ namespace gr {
       message_port_register_out(pmt::intern(std::string("dynamic_label")));
       d_expecting_start_of_data_group = false;
       d_data_group_nwritten = 0; // TODO: not a nice style
-      d_mot_segment_nwritten = 0;
+      d_mot_body_nwritten = 0;
+      d_mot_body_size = 0;
+      d_content_type = 0;
+      d_content_subtype = 0;
+      d_segment_count = 0;
     }
 
     /*
@@ -246,10 +251,10 @@ namespace gr {
                     // CRC OK, lets process the following data group
                     d_data_group_length = (uint16_t)(data_group_length_ind[0]&0x3f) << 8 | data_group_length_ind[1];
                     d_expecting_start_of_data_group = true;
-                    GR_LOG_DEBUG(d_logger, format("data group length indicator (length %d)") %(int)d_data_group_length);
                   } else{
                     // the CRC failed and we cannot process the following data group
                     d_expecting_start_of_data_group = false;
+                    GR_LOG_DEBUG(d_logger, format("data group length indicator CRC failed"));
                   }
                   break;
                 }
@@ -305,7 +310,6 @@ namespace gr {
                       d_msc_data_group[j] = xpad_subfield[curr_subfield_length-1-j];
                     }
                     d_data_group_nwritten += curr_subfield_length;
-                    GR_LOG_DEBUG(d_logger, format("wrote first MOT subfield (length %d)") %(int)curr_subfield_length);
                     // Check if we already finished the MSC data group.
                     if(d_data_group_nwritten >= d_data_group_length){
                       // we finished the MSC data group and can process it now
@@ -328,11 +332,9 @@ namespace gr {
                       d_msc_data_group[d_data_group_nwritten + j] = xpad_subfield[curr_subfield_length-1-j];
                     }
                     d_data_group_nwritten += curr_subfield_length;
-                    GR_LOG_DEBUG(d_logger, format("wrote continuing MOT subfield (length %d)") %(int)curr_subfield_length);
                     // Check if we finished the MSC data group.
                     if(d_data_group_nwritten >= d_data_group_length){
                       // we finished the MSC data group and can process it now
-                      GR_LOG_DEBUG(d_logger, format("finished MOT (length %d)") %(int)d_data_group_nwritten);
                       process_msc_data_group(d_msc_data_group, d_data_group_length);
                       // Reset length and counter variable.
                       d_data_group_nwritten = 0;
@@ -380,7 +382,6 @@ namespace gr {
         // We have completely written the segment to the buffer.
         // Do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer.
         if (crc16(const_cast<const uint8_t *>(d_dyn_lab_seg), d_dyn_lab_seg_index - 2)) {
-          GR_LOG_DEBUG(d_logger, format("DYNAMIC LABEL SEGMENT: CRC OK, copying data in buffer"));
           // We received a correct label segment and can write it to the dynamic label buffer.
           memcpy(&d_dynamic_label[d_dyn_lab_index], &d_dyn_lab_seg[2], d_dyn_lab_seg_index - 4);
           d_dyn_lab_index += d_dyn_lab_seg_index - 4;
@@ -395,7 +396,7 @@ namespace gr {
             d_last_dyn_lab_seg = false;
           }
         } else { // the CRC failed and we reset the whole dynamic label
-          GR_LOG_DEBUG(d_logger, format("CRC FAILED"));
+          GR_LOG_DEBUG(d_logger, format("DYNAMIC LABEL CRC FAILED"));
           // TODO wait for the start of the next dynamic label
           d_dyn_lab_seg_index = 0;
           d_dyn_lab_curr_char_field_length = 0;
@@ -415,44 +416,72 @@ namespace gr {
       if(header->crc_flag){
         // Do CRC.
         if(crc16(const_cast<const uint8_t *>(data_group), data_group_length-2)){
-          GR_LOG_DEBUG(d_logger, format("CRC succeeded for MOT"));
           if(header->extension_flag){
             // We don't support the extension field, caused to no support of conditional access.
             reading_offset += 2;
           }
-          if(header->data_group_type == 4){ // MOT body
-            // So far, we ignore the continuity and repetition index and handle each MOT.
-            // TODO: Implement memory of successfully received groups.
-            if(header->segment_flag){
-              // A segment field is present, we read it.
-              uint8_t last = (uint8_t)(data_group[reading_offset] & 0x80);
-              uint16_t seg_num = (uint16_t)(data_group[reading_offset]&0x7f)<<8 | data_group[reading_offset+1];
-              GR_LOG_DEBUG(d_logger, format("MOT: Segment field present. Last %d, seg num %d") %(int)last %(int)seg_num);
-              reading_offset += 2;
-            }
-            if(header->user_access_flag){
-              // So far, we ignore the user access field.
-              uint8_t user_access_length_indicator = (uint8_t)(data_group[reading_offset] & 0x0f);
-              reading_offset += user_access_length_indicator + 1;
-              GR_LOG_DEBUG(d_logger, format("MOT: User access field present."));
-            }
-            GR_LOG_DEBUG(d_logger, format("MOT: Data field length %d.") %(int)(data_group_length-2-reading_offset));
-            // Here comes the actual data. Copy data to MOT buffer.
-            memcpy(&d_mot_body[d_mot_segment_nwritten],
-                   data_group,
-                   data_group_length-2-reading_offset);
-            d_mot_segment_nwritten += data_group_length-2-reading_offset;
-            if(header->segment_flag && (data_group[2+2*header->extension_flag]&0x80)>>7){
-              // This MSC data group transports the last segment of the current MOT body.
-              // TODO Process MOT body.
-            }
-          } else{
-            // This data group type is not supported.
-            GR_LOG_DEBUG(d_logger, format("MOT: Received unsupported data group type."));
+          // So far, we ignore the continuity and repetition index and handle each MOT.
+          // TODO: Implement memory of successfully received groups.
+          if(header->segment_flag){
+            // A segment field is present, we read it.
+            uint8_t last = (uint8_t)(data_group[reading_offset] & 0x80);
+            uint16_t seg_num = (uint16_t)(data_group[reading_offset]&0x7f)<<8 | data_group[reading_offset+1];
+            // TODO: check seg num with seg counter
+            GR_LOG_DEBUG(d_logger, format("segment, num %d, last %d") %(int)seg_num %(int)last);
+            reading_offset += 2;
           }
+          if(header->user_access_flag){
+            // So far, we ignore the user access field.
+            uint8_t user_access_length_indicator = (uint8_t)(data_group[reading_offset] & 0x0f);
+            reading_offset += user_access_length_indicator + 1;
+          }
+          // Read the segmentation header.
+          uint8_t rep_count = (uint8_t)(data_group[reading_offset] & 0xe0);
+          uint16_t seg_size = (uint16_t)(data_group[reading_offset] & 0x1f) << 8 | data_group[reading_offset+1];
+          reading_offset += 2;
+          // switch MSC data group types
+          switch(header->data_group_type){
+            case MSC_DATA_GROUP_TYPE_HEADER: {
+              // Read header core.
+              d_mot_body_size = (((uint32_t)data_group[reading_offset]<<8 |
+                      data_group[reading_offset+1])<<8 |
+                      data_group[reading_offset+2])<<4 |
+                      ((data_group[reading_offset+3]&0xf0)>>4);
+              uint16_t header_size = ((uint16_t)(data_group[reading_offset+3]&0x0f)<<8 |
+                      data_group[reading_offset+4])<<1 |
+                      ((data_group[reading_offset+5]&0x80)>>7);
+              d_content_type = (data_group[reading_offset+5]&0x7e)>>1;
+              d_content_subtype = (uint16_t)(data_group[reading_offset+5]&0x01)<<8 |
+                      data_group[reading_offset+6];
+              GR_LOG_DEBUG(d_logger, format("MOT HEADER: body size %d, header size %d, content type %d, subtype %d") %(int)d_mot_body_size %(int)header_size %(int)d_content_type %(int)d_content_subtype);
+              // Read the header extensions.
+              // TODO Actually read them.
+              break;
+            }
+            case MSC_DATA_GROUP_TYPE_BODY: {
+              // TODO read segmentation header
+              // Here comes the actual data. Copy data to MOT buffer.
+              memcpy(&d_mot_body[d_mot_body_nwritten],
+                     data_group,
+                     data_group_length-2-reading_offset);
+              d_mot_body_nwritten += data_group_length-2-reading_offset;
+              if(header->segment_flag && (data_group[2+2*header->extension_flag]&0x80)>>7){
+                // This MSC data group transports the last segment of the current MOT body.
+                // TODO Process MOT body.
+              }
+              break;
+            }
+            default:
+              GR_LOG_DEBUG(d_logger, format("MSC data group type %d not supported")
+                                     %(int)header->data_group_type);
+          }
+
         } else{
           // CRC failed, we have to dump this MSC data group.
+          GR_LOG_DEBUG(d_logger, format("CRC failed for MOT"));
         }
+        // Increase segment counter.
+        d_segment_count++;
       } else{
         // We don't handle MSC data groups without a CRC word.
       }
@@ -575,15 +604,6 @@ namespace gr {
                 (in[n * d_superframe_size + 2] >> 4) & 01; // bit 19
         d_ps_flag = (in[n * d_superframe_size + 2] >> 3) & 01; // bit 20
         d_mpeg_surround = (in[n * d_superframe_size + 2] & 07); // bits 21 .. 23
-        // log header information
-        GR_LOG_DEBUG(d_logger,
-                     format("superframe header: dac_rate %d, sbr_flag %d, "
-                                    "aac_mode %d, ps_flag %d, surround %d") %
-                             (int) d_dac_rate %
-                             (int) d_sbr_flag %
-                             (int) d_aac_channel_mode %
-                             (int) d_ps_flag %
-                             (int) d_mpeg_surround);
 
         switch (2 * d_dac_rate + d_sbr_flag) {
           default:    // cannot happen
