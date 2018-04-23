@@ -29,10 +29,10 @@ from gnuradio import qtgui
 from gnuradio import fft
 import osmosdr
 import dab
-import dynamic_label
+import xpad
 
 class usrp_dab_rx(gr.top_block):
-    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, use_rtl, qt_label_dyn_lab, src_path, sink_path = "None", prev_src=None):
+    def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, use_rtl, qt_label_dyn_lab, qt_label_mot_image, src_path, sink_path = "None", prev_src=None):
         gr.top_block.__init__(self)
 
         self.dab_mode = dab_mode
@@ -42,6 +42,8 @@ class usrp_dab_rx(gr.top_block):
         self.use_usrp = use_usrp
         self.use_rtl = use_rtl
         self.qt_label_dyn_lab = qt_label_dyn_lab
+        self.qt_label_mot_image = qt_label_mot_image
+
         self.src_path = src_path
         self.sink_path = sink_path
         gr.log.set_level("warn")
@@ -54,7 +56,9 @@ class usrp_dab_rx(gr.top_block):
         self.correct_ffe = True
         self.equalize_magnitude = True
         self.frequency = frequency
-        self.dab_params = dab.parameters.dab_parameters(self.dab_mode, self.sample_rate, self.verbose)
+        self.dab_params = dab.parameters.dab_parameters(self.dab_mode,
+                                                        self.sample_rate,
+                                                        self.verbose)
         self.rx_params = dab.parameters.receiver_parameters(self.dab_mode, self.softbits,
                                                             self.filter_input,
                                                             self.autocorrect_sample_rate,
@@ -120,10 +124,12 @@ class usrp_dab_rx(gr.top_block):
         ########################
         if self.dabplus:
             self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
-            # create Qt class dynamic_label for a connection between gr block and GUI
-            self.dyn_lab = dynamic_label.dynamic_label(self.update_label)
+            # Create Qt classes for a connection between gr block mp4_decode and GUI.
+            self.dyn_lab = xpad.xpad(self.update_label)
+            self.mot_image = xpad.xpad(self.update_mot_image)
             # xpad message handling python block
-            self.pad_messenger = dab.xpad_message_handler(self.dyn_lab)
+            self.pad_label_messenger = dab.xpad_message_handler(self.dyn_lab, type="dynamic_label")
+            self.pad_mot_messenger = dab.xpad_message_handler(self.mot_image, type="mot_image")
         else:
             self.msc_dec = dab.msc_decode(self.dab_params, address, size, protection)
             self.unpack = blocks.packed_to_unpacked_bb_make(1, gr.GR_MSB_FIRST)
@@ -164,7 +170,8 @@ class usrp_dab_rx(gr.top_block):
             self.connect((self.dabplus, 0), self.valve_left, (self.wav_sink, 0))
             self.connect((self.dabplus, 1), self.valve_right, (self.wav_sink, 1))
             # connect msg port for dynamic labels
-            self.msg_connect(self.dabplus, "dynamic_label", self.pad_messenger, "dynamic_label")
+            self.msg_connect(self.dabplus, "dynamic_label", self.pad_label_messenger, "dynamic_label")
+            self.msg_connect(self.dabplus, "mot_image", self.pad_mot_messenger, "mot_image")
         else:
             self.connect(self.gain_left, self.delay_left, (self.audio, 0))
             self.connect(self.gain_right, self.delay_right, (self.audio, 1))
@@ -179,8 +186,11 @@ class usrp_dab_rx(gr.top_block):
 # feedback methods
 ########################
     def update_label(self, label):
-        print label
         self.qt_label_dyn_lab.setText(label)
+
+    def update_mot_image(self, image):
+        print 'update mot image'
+        self.qt_label_mot_image.setText(image)
 
 ########################
 # getter methods

@@ -22,19 +22,19 @@
 
 from PyQt4.QtCore import QObject, pyqtSignal
 
-class dynamic_label(QObject):
+class xpad(QObject):
     """
     Sub-class of QObject, used to communicate from the gr block xpad_message_handler
     to the GUI, using pyQt signals.
     """
-    # define a new pyQt signal for the signalling and transport of a new dynamic_label
-    new_label = pyqtSignal('QString', name='new_label')
+    # define a new pyQt signal for the signalling and transport of a new dynamic_label/mot_image
+    new_xpad = pyqtSignal('QString', name='new_xpad')
 
     def __init__(self, slot, parent=None):
-        super(dynamic_label, self).__init__(parent)
-        # connect the signal new_label to the slot callable
-        self.new_label.connect(slot)
+        super(xpad, self).__init__(parent)
+        # connect the signal new_label/new_image to the slot callable
+        self.new_xpad.connect(slot)
 
-    def emit_label(self, label):
+    def emit_label(self, data):
         # emit signal now
-        self.new_label.emit(label)
+        self.new_xpad.emit(data)

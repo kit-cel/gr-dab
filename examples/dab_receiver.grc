@@ -89,7 +89,7 @@
     </param>
     <param>
       <key>value</key>
-      <value>201072000</value>
+      <value>208064000</value>
     </param>
     <param>
       <key>_enabled</key>
@@ -254,7 +254,7 @@
     </param>
     <param>
       <key>samp_rate</key>
-      <value>32000</value>
+      <value>48000</value>
     </param>
   </block>
   <block>
@@ -367,7 +367,7 @@
     <key>dab_dabplus_audio_decoder_ff</key>
     <param>
       <key>address</key>
-      <value>54</value>
+      <value>234</value>
     </param>
     <param>
       <key>bit_rate</key>

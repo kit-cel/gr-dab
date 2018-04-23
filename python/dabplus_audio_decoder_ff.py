@@ -50,6 +50,7 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
                                     gr.io_signature2(2, 2, gr.sizeof_short, gr.sizeof_short))
         # define message output for dynamic labels
         self.message_port_register_hier_out("dynamic_label")
+        self.message_port_register_hier_out("mot_image")
 
         self.dp = dab_params
         self.bit_rate_n = bit_rate / 8
@@ -79,6 +80,7 @@ class dabplus_audio_decoder_ff(gr.hier_block2):
         # connections
         self.connect(self, self.msc_decoder, self.firecode, self.rs, self.mp4)
         self.msg_connect(self.mp4, "dynamic_label", self, "dynamic_label")
+        self.msg_connect(self.mp4, "mot_image", self, "mot_image")
 
         if self.output_float:
             # map short samples to the range [-1,1] in floats

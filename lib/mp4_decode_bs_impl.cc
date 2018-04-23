@@ -83,8 +83,10 @@ namespace gr {
     {
       set_output_multiple(960 * 4);
       aacHandle = NeAACDecOpen();
-      // declare output message port for dynamic_label messages
+      // Declare output message port for dynamic_label messages.
       message_port_register_out(pmt::intern(std::string("dynamic_label")));
+      // Declare output massage port for MOT JFIF images.
+      message_port_register_out(pmt::intern(std::string("mot_image")));
     }
 
     /*
@@ -498,10 +500,14 @@ namespace gr {
                          seg_size);
                   d_mot_body_nwritten += seg_size;
                   if (header->segment_flag &&
-                      (data_group[2 + 2 * header->extension_flag] & 0x80) >> 7) {
+                      (data_group[2 + 2 * header->extension_flag] & 0x80) >> 7 &&
+                      d_mot_body_nwritten == d_mot_body_size) {
                     // This MSC data group transports the last segment of the current MOT body.
-                    // Process MOT body.
-
+                    // Publish MOT body through the message port.
+                    message_port_pub(pmt::intern(std::string("mot_image")),
+                                     pmt::init_u8vector((size_t) d_mot_body_nwritten,
+                                                        const_cast<const uint8_t *>(d_mot_body)));
+                    GR_LOG_DEBUG(d_logger, format("Published MOT image message."));
                   }
                 } else {
                   // We have to wait for the next MOT header.

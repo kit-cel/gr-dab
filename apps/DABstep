@@ -270,7 +270,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                 self.label_path.setStyleSheet('color: black')
                 # set up and start flowgraph
                 self.my_receiver = usrp_dab_rx.usrp_dab_rx(self.spin_dab_mode.value(), self.spinbox_frequency.value(), self.bit_rate, self.address, self.size, self.protection, self.audio_bit_rate, self.dabplus,
-                                                  self.src_is_USRP, self.src_is_RTL, self.label_dyn_lab, self.file_path)
+                                                  self.src_is_USRP, self.src_is_RTL, self.label_dyn_lab, self.label_mot_image, self.file_path)
                 self.my_receiver.set_volume(0)
                 self.my_receiver.start()
                 # status bar
@@ -447,7 +447,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                                self.spinbox_frequency.value(), self.bit_rate,
                                                                self.address, self.size,
                                                                self.protection, self.audio_bit_rate, self.dabplus,
-                                                               self.src_is_USRP, self.src_is_RTL, self.label_dyn_lab, self.file_path, prev_src=self.temp_src)
+                                                               self.src_is_USRP, self.src_is_RTL, self.label_dyn_lab, self.label_mot_image, self.file_path, prev_src=self.temp_src)
             self.my_receiver.set_volume(float(self.slider_volume.value()) / 100)
             self.my_receiver.start()
             self.statusBar.showMessage("Audio playing.")
@@ -483,7 +483,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
                                                        self.spinbox_frequency.value(), self.bit_rate,
                                                        self.address, self.size,
                                                        self.protection, self.audio_bit_rate, self.dabplus,
-                                                       self.src_is_USRP, self.src_is_RTL, self.label_dyn_lab, self.file_path, prev_src=self.temp_src)
+                                                       self.src_is_USRP, self.src_is_RTL, self.label_dyn_lab, self.label_mot_image, self.file_path, prev_src=self.temp_src)
 
             self.my_receiver.start()
         elif new_sampling_rate == -1:
