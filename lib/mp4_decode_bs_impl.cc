@@ -31,6 +31,9 @@
 #include "config.h"
 #endif
 
+#include <iostream>
+using namespace std;
+
 #include <gnuradio/io_signature.h>
 #include "mp4_decode_bs_impl.h"
 #include <stdexcept>
@@ -84,6 +87,7 @@ namespace gr {
       d_content_type = 0;
       d_content_subtype = 0;
       d_segment_count = 0;
+      d_transport_ID = 0;
     }
 
     /*
@@ -409,82 +413,133 @@ namespace gr {
     void mp4_decode_bs_impl::process_msc_data_group(uint8_t *data_group,
                                                     uint16_t data_group_length) {
       // For structure of MSC data group see ETSI EN 300 401 section 5.3.3
-      // Read the header information and check, if the CRC flag is set.
+      // Read the header information.
       d_msc_data_group_header *header = (d_msc_data_group_header*) data_group;
       /* Offset for the pointer data_group marking present byte to read.*/
       uint16_t reading_offset = 2;
-      if(header->crc_flag){
+      if(header->crc_flag){ // Check if a CRC word is present.
         // Do CRC.
         if(crc16(const_cast<const uint8_t *>(data_group), data_group_length-2)){
           if(header->extension_flag){
             // We don't support the extension field, caused to no support of conditional access.
-            reading_offset += 2;
+            reading_offset += 2; // Skip extension field if present.
           }
           // So far, we ignore the continuity and repetition index and handle each MOT.
           // TODO: Implement memory of successfully received groups.
-          if(header->segment_flag){
+          if(header->segment_flag) {
             // A segment field is present, we read it.
-            uint8_t last = (uint8_t)(data_group[reading_offset] & 0x80);
-            uint16_t seg_num = (uint16_t)(data_group[reading_offset]&0x7f)<<8 | data_group[reading_offset+1];
+            uint8_t last = (uint8_t)(data_group[reading_offset] & 0x80) >> 7;
+            uint16_t seg_num = (uint16_t)(data_group[reading_offset] & 0x7f) << 8 |
+                               data_group[reading_offset + 1];
             // TODO: check seg num with seg counter
-            GR_LOG_DEBUG(d_logger, format("segment, num %d, last %d") %(int)seg_num %(int)last);
             reading_offset += 2;
-          }
-          if(header->user_access_flag){
-            // So far, we ignore the user access field.
-            uint8_t user_access_length_indicator = (uint8_t)(data_group[reading_offset] & 0x0f);
-            reading_offset += user_access_length_indicator + 1;
-          }
-          // Read the segmentation header.
-          uint8_t rep_count = (uint8_t)(data_group[reading_offset] & 0xe0);
-          uint16_t seg_size = (uint16_t)(data_group[reading_offset] & 0x1f) << 8 | data_group[reading_offset+1];
-          reading_offset += 2;
-          // switch MSC data group types
-          switch(header->data_group_type){
-            case MSC_DATA_GROUP_TYPE_HEADER: {
-              // Read header core.
-              d_mot_body_size = (((uint32_t)data_group[reading_offset]<<8 |
-                      data_group[reading_offset+1])<<8 |
-                      data_group[reading_offset+2])<<4 |
-                      ((data_group[reading_offset+3]&0xf0)>>4);
-              uint16_t header_size = ((uint16_t)(data_group[reading_offset+3]&0x0f)<<8 |
-                      data_group[reading_offset+4])<<1 |
-                      ((data_group[reading_offset+5]&0x80)>>7);
-              d_content_type = (data_group[reading_offset+5]&0x7e)>>1;
-              d_content_subtype = (uint16_t)(data_group[reading_offset+5]&0x01)<<8 |
-                      data_group[reading_offset+6];
-              GR_LOG_DEBUG(d_logger, format("MOT HEADER: body size %d, header size %d, content type %d, subtype %d") %(int)d_mot_body_size %(int)header_size %(int)d_content_type %(int)d_content_subtype);
-              // Read the header extensions.
-              // TODO Actually read them.
-              break;
-            }
-            case MSC_DATA_GROUP_TYPE_BODY: {
-              // TODO read segmentation header
-              // Here comes the actual data. Copy data to MOT buffer.
-              memcpy(&d_mot_body[d_mot_body_nwritten],
-                     data_group,
-                     data_group_length-2-reading_offset);
-              d_mot_body_nwritten += data_group_length-2-reading_offset;
-              if(header->segment_flag && (data_group[2+2*header->extension_flag]&0x80)>>7){
-                // This MSC data group transports the last segment of the current MOT body.
-                // TODO Process MOT body.
-              }
-              break;
-            }
-            default:
-              GR_LOG_DEBUG(d_logger, format("MSC data group type %d not supported")
-                                     %(int)header->data_group_type);
-          }
 
+            uint16_t transport_ID = 0;
+            if (header->user_access_flag) {
+              // Read the user access field.
+              uint8_t user_access_length_indicator = (uint8_t)(data_group[reading_offset] & 0x0f);
+
+              if(user_access_length_indicator < 2){
+                // This cannot happen, we are not on the right track. Throw error message.
+                GR_LOG_ERROR(d_logger,
+                             format("MSC data group: User access length indicator is %d, "
+                                    "but must be geq than 2 bytes.") %(int)user_access_length_indicator);
+              } else{
+                // Read transport ID.
+                transport_ID = (uint16_t)(data_group[reading_offset+1])<<8 |
+                                         (data_group[reading_offset+2]);
+              }
+              reading_offset += user_access_length_indicator + 1;
+            }
+            // Read the segmentation header.
+            // rep_count indicates the remaining transmission repetitions for the current entity (on object level).
+            uint8_t rep_count = (uint8_t)(data_group[reading_offset] & 0xe0);
+            // seg_size indicates the size of the segment data field in bytes.
+            uint16_t seg_size = (uint16_t)(data_group[reading_offset] & 0x1f) << 8 |
+                                data_group[reading_offset + 1];
+            reading_offset += 2;
+            // Sanity check to prevent seg faults
+            if(data_group_length-reading_offset-2 != seg_size){
+              GR_LOG_WARN(d_logger,
+                          format("Length of MSC data group data field excluded the segmentation "
+                                 "header does not match the length of the segment size (%d), "
+                                 "indicated by the header (%d)")
+                          %(int)(data_group_length-reading_offset)
+                          %(int)seg_size);
+              // TODO: Reset MOT reader
+            }
+            // Point to beginning of the data segment
+            uint8_t *segment_data_field = &data_group[reading_offset];
+            GR_LOG_DEBUG(d_logger, format("MSC data group: segment number %d, last %d, ID %d, rep_count %d, seg_size %d, data group length %d") % (int) seg_num % (int) last %(int)transport_ID %(int)rep_count %(int)seg_size %(int)data_group_length);
+            // switch MSC data group types
+            switch (header->data_group_type) {
+              case MSC_DATA_GROUP_TYPE_HEADER: {
+                // Read header core.
+                d_mot_body_size = (((uint32_t) data_group[reading_offset] << 8 |
+                                    data_group[reading_offset + 1]) << 8 |
+                                   data_group[reading_offset + 2]) << 4 |
+                                  ((data_group[reading_offset + 3] & 0xf0) >> 4);
+                uint16_t header_size = ((uint16_t)(data_group[reading_offset + 3] & 0x0f) << 8 |
+                                        data_group[reading_offset + 4]) << 1 |
+                                       ((data_group[reading_offset + 5] & 0x80) >> 7);
+                d_content_type = (data_group[reading_offset + 5] & 0x7e) >> 1;
+                d_content_subtype = (uint16_t)(data_group[reading_offset + 5] & 0x01) << 8 |
+                                    data_group[reading_offset + 6];
+                GR_LOG_DEBUG(d_logger,
+                             format("MOT HEADER: body size %d, header size %d, content type %d, subtype %d") %
+                             (int) d_mot_body_size % (int) header_size % (int) d_content_type %
+                             (int) d_content_subtype);
+                // Read the header extensions.
+                // TODO Actually read them.
+                // Uptdate the transport ID and therefore enable the reception of the MOT body with this transport ID.
+                d_transport_ID = transport_ID;
+                d_mot_body_nwritten = 0;
+                break;
+              }
+              case MSC_DATA_GROUP_TYPE_BODY: {
+                if (d_transport_ID == transport_ID) { // Check if the appropriate header of this body segment was read before.
+                  // Here comes the actual data. Copy data to MOT buffer.
+                  memcpy(&d_mot_body[d_mot_body_nwritten],
+                         segment_data_field,
+                         seg_size);
+                  d_mot_body_nwritten += seg_size;
+                  if (header->segment_flag &&
+                      (data_group[2 + 2 * header->extension_flag] & 0x80) >> 7) {
+                    // This MSC data group transports the last segment of the current MOT body.
+                    // TODO Process MOT body.
+                    FILE *file = fopen("MOT_file.dat", "wb");
+                    fwrite(d_mot_body, sizeof(uint8_t), d_mot_body_nwritten, file);
+                    fclose(file);
+                  }
+                } else {
+                  // We have to wait for the next MOT header.
+                  d_mot_body_nwritten = 0;
+                }
+                break;
+              }
+              default:
+                GR_LOG_DEBUG(d_logger, format("MSC data group type %d not supported")
+                                       % (int) header->data_group_type);
+            }
+          }else{
+            // There is no segment field present. This case is not yet implemented.
+            GR_LOG_DEBUG(d_logger,
+                         format("No segment field present. MSC data group will be dumped."));
+          }
         } else{
           // CRC failed, we have to dump this MSC data group.
-          GR_LOG_DEBUG(d_logger, format("CRC failed for MOT"));
+          GR_LOG_DEBUG(d_logger, format("CRC failed for MSC data group."));
         }
         // Increase segment counter.
         d_segment_count++;
       } else{
         // We don't handle MSC data groups without a CRC word.
       }
+    }
+
+    void mp4_decode_bs_impl::abort_mot_reception() {
+      // Lock the
+
     }
 
     int16_t mp4_decode_bs_impl::MP42PCM(uint8_t dacRate,

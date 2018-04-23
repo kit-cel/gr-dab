@@ -118,6 +118,11 @@ namespace gr {
       /*!< Counts the segments and compares with the received seg_num in each
        * MSC data group header to detect a loss of a MOT segment.
        */
+      uint16_t d_transport_ID;
+      /*!< The transport ID identifies each MOT entity. The transport ID is written for a MOT header
+       * and can be compared with the transport ID of a MOT body to ensure that the header
+       * info is applied to the appropriate data field.
+       */
       uint16_t d_mot_body_nwritten; /*!< Counts the written bytes of the current segment. */
       /*!< Number of bytes written to the MOT buffer (in form of segments) so far. */
       uint8_t d_mot_body[65536];
@@ -165,6 +170,14 @@ namespace gr {
        * @param data_group_length Length in bytes of the MSC data group.
        */
       void process_msc_data_group(uint8_t *data_group, uint16_t data_group_length);
+
+      //! \brief Aborts the reception of a MOT entity.
+      /*! Sets variables and flags to abort the reception of the current
+       *  MOT entity. The reception continues with the next incoming MOT header
+       *  which enables the flags again. This method can be used to avoid
+       *  segmentation faults after the reception of currupted header info.
+       */
+      void abort_mot_reception();
 
       int16_t MP42PCM(uint8_t dacRate,
                       uint8_t sbrFlag,
