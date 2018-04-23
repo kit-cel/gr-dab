@@ -31,9 +31,6 @@
 #include "config.h"
 #endif
 
-#include <iostream>
-using namespace std;
-
 #include <gnuradio/io_signature.h>
 #include "mp4_decode_bs_impl.h"
 #include <stdexcept>
@@ -65,29 +62,29 @@ namespace gr {
             : gr::block("mp4_decode_bs",
                         gr::io_signature::make(1, 1, sizeof(unsigned char)),
                         gr::io_signature::make(2, 2, sizeof(int16_t))),
-              d_bit_rate_n(bit_rate_n) {
-      d_superframe_size = bit_rate_n * 110;
-      d_aacInitialized = false;
-      baudRate = 48000;
-      set_output_multiple(960 * 4); //TODO: right? baudRate*0.12 for output of one superframe
+              d_bit_rate_n(bit_rate_n),
+              d_superframe_size(bit_rate_n * 110),
+              d_aacInitialized(false),
+              baudRate(48000),
+              d_sample_rate(-1),
+              d_dyn_lab_index(0),
+              d_dyn_lab_seg_index(0),
+              d_dyn_lab_curr_char_field_length(0),
+              d_last_dyn_lab_seg(false),
+              d_data_group_length (0),
+              d_expecting_start_of_data_group(false),
+              d_data_group_nwritten(0),
+              d_mot_body_nwritten(0),
+              d_mot_body_size(0),
+              d_content_type(0),
+              d_content_subtype(0),
+              d_segment_count(0),
+              d_transport_ID(0)
+    {
+      set_output_multiple(960 * 4);
       aacHandle = NeAACDecOpen();
-      //memset(d_aac_frame, 0, 960);
-      d_sample_rate = -1;
-      d_dyn_lab_index = 0;
-      d_dyn_lab_seg_index = 0;
-      d_dyn_lab_curr_char_field_length = 0;
-      d_last_dyn_lab_seg = false;
-      d_data_group_length = 0;
       // declare output message port for dynamic_label messages
       message_port_register_out(pmt::intern(std::string("dynamic_label")));
-      d_expecting_start_of_data_group = false;
-      d_data_group_nwritten = 0; // TODO: not a nice style
-      d_mot_body_nwritten = 0;
-      d_mot_body_size = 0;
-      d_content_type = 0;
-      d_content_subtype = 0;
-      d_segment_count = 0;
-      d_transport_ID = 0;
     }
 
     /*
@@ -195,23 +192,23 @@ namespace gr {
     }
 
     void mp4_decode_bs_impl::process_pad(uint8_t *pad, int16_t pad_length) {
-      // read F-PAD field (header of X-PAD)
+      // Read F-PAD field (header of X-PAD).
       d_fixed_pad *fpad = (d_fixed_pad *) &pad[pad_length - 2];
-      // check if the X-PAD contains one or multiple content indicators
+      // Check if the X-PAD contains one or multiple content indicators.
       if (fpad->content_ind == 0) {
-        /* no content indicators: the X-PAD content is a continuation of a data
-         * group and the length is like in the previous data sub-field */
-        GR_LOG_DEBUG(d_logger, format("no CI flag set"));
-        // TODO implement this case
+        /* No content indicators: the X-PAD content is a continuation of a data
+         * group and the length is like in the previous data sub-field. */
+        GR_LOG_DEBUG(d_logger, format("No CI flag set; This case is not supported."));
+        // TODO: Implement this case.
       } else {
-        // switch to signalled X-PAD type (short, variable or no X-PAD)
+        // Wwitch to signalled X-PAD type (short, variable or no X-PAD).
         if (fpad->xpad_ind == 1) { // short X-PAD -> 4 bytes
-          GR_LOG_DEBUG(d_logger, format("short X-PAD: app type not supported"));
-          // TODO implement short X-PAD handler
+          GR_LOG_DEBUG(d_logger, format("Short X-PAD: app type not supported."));
+          // TODO Implement short X-PAD handler.
         } else if (fpad->xpad_ind == 2) { // variable X-PAD size
-          // check the number of content indicators (CIs) including the possible end marker
+          // Check the number of content indicators (CIs) including the possible end marker.
           uint8_t n_ci_elements = 0;
-          uint8_t subfield_length_sum = 0; // this only exists for the following sanity check
+          uint8_t subfield_length_sum = 0; // This variable only exists for the following sanity check.
           /* There are max 4 content indicators (CIs) in a X-PAD of var length.
            * Search for content indicators until you reached the maximum number
            * or you found the end marker. */
@@ -226,7 +223,7 @@ namespace gr {
             subfield_length_sum += d_length_xpad_subfield_table[(uint8_t)(pad[pad_length - 3 - n_ci_elements] & 0xe0) >> 5];
             n_ci_elements++;
           }
-          // sanity check: sum of ci sizes must be equal to xpad_size
+          // Sanity check: The sum of ci sizes must be equal to xpad_size.
           if (subfield_length_sum + n_ci_elements == pad_length - 2) {
             /* Iterate over CIs processing the associated X-PAD data sub-fields
              * after now knowing the end of the CIs and the start of the sub-fields. */
@@ -234,7 +231,7 @@ namespace gr {
             for (int i = 0; i < n_ci_elements; ++i) {
               // read content indicator (CI)
               d_content_ind *ci = (d_content_ind *) &pad[pad_length - 3 - i];
-              // if we arrived at the end marker, we can leave before assigning any byte space
+              // If we have arrived at the end marker, we can leave before assigning any byte space.
               if (ci->app_type == 0) {
                 break;
               }
@@ -243,57 +240,57 @@ namespace gr {
                * This ist the last logical byte because the bytes are still reversed! */
               uint8_t *xpad_subfield = &pad[pad_length - curr_subfield_start -
                                             (curr_subfield_length - 1)];
-              // process the X-PAD data sub-field according to its application type
+              // Process the X-PAD data sub-field according to its application type.
               switch (ci->app_type) {
-                case 1: { // Data group length indicator; this indicates the start of a new data group
-                  // reverse the order of the bytes to do the CRC
+                case 1: { // Data group length indicator; this indicates the start of a new data group.
+                  // Reverse the order of the bytes to do the CRC.
                   uint8_t data_group_length_ind[4];
                   for (int j = 0; j < 4; ++j) {
                     data_group_length_ind[j] = xpad_subfield[curr_subfield_length-1-j];
                   }
                   if(crc16(const_cast<const uint8_t *>(data_group_length_ind), 2)){
-                    // CRC OK, lets process the following data group
+                    // CRC OK, lets process the following data group.
                     d_data_group_length = (uint16_t)(data_group_length_ind[0]&0x3f) << 8 | data_group_length_ind[1];
                     d_expecting_start_of_data_group = true;
                   } else{
-                    // the CRC failed and we cannot process the following data group
+                    // The CRC failed and we cannot process the following data group.
                     d_expecting_start_of_data_group = false;
                     GR_LOG_DEBUG(d_logger, format("data group length indicator CRC failed"));
                   }
                   break;
                 }
-                case 2: { // Dynamic label segment, start of X-PAD data group
+                case 2: { // Dynamic label segment, start of X-PAD data group.
                   /* Reset the index for the written bytes in this segment,
                    * because it is the start of a new segment. */
                   d_dyn_lab_seg_index = 0;
-                  // read dynamic label segment header (first 2 bytes in logical order)
+                  // Read dynamic label segment header (first 2 bytes in logical order).
                   d_dynamic_label_header *dyn_lab_seg_header = (d_dynamic_label_header *) &xpad_subfield[curr_subfield_length - 2];
                   if (dyn_lab_seg_header->c == 0) { // message segment
-                    // write the length of the char field of the current segment to a variable
+                    // Write the length of the char field of the current segment to a variable.
                     d_dyn_lab_curr_char_field_length = dyn_lab_seg_header->field1 + 1;
-                    // check if this segment is the first one of a dynamic label
+                    // Check if this segment is the first one of a dynamic label.
                     if (dyn_lab_seg_header->first) {
-                      // reset dynamic label index and overwrite the buffer
+                      // Reset dynamic label index and overwrite the buffer.
                       d_dyn_lab_index = 0;
                     }
-                    // check if this is the last segment of a dynamic label
+                    // Check if this is the last segment of a dynamic label.
                     if (dyn_lab_seg_header->last) {
                       d_last_dyn_lab_seg = true;
                     } else {
                       d_last_dyn_lab_seg = false;
                     }
-                    // process this subfield as a part of a dynamic label segment
+                    // Process this subfield as a part of a dynamic label segment.
                     process_dynamic_label_segment_subfield(xpad_subfield, curr_subfield_length);
                   } else { // command segment
                     if (dyn_lab_seg_header->field1 == 1) {
                       // clear display command
-                      // TODO pass message to clear display
+                      // TODO: Pass message to clear display.
                     }
                   }
                   break;
                 }
-                case 3: { // Dynamic label segment, continuation of X-PAD data group
-                  // process this subfield as a part of a dynamic label segment
+                case 3: { // Dynamic label segment, continuation of X-PAD data group.
+                  // Process this subfield as a part of a dynamic label segment.
                   if (d_dyn_lab_seg_index != 0) {
                     /* If we continue a subfield and already wrote bytes in the
                      * subfield buffer, we are processing a message segment
@@ -304,10 +301,10 @@ namespace gr {
                   }
                   break;
                 }
-                case 12: { // MOT, start of X-PAD data group, see ETSI EN 301 234
+                case 12: { // MOT, start of X-PAD data group, see ETSI EN 301 234.
                   if(d_expecting_start_of_data_group){
                     /* The last sub-field was a data group length indicator
-                     * with a correct CRC word so this is what we expecting.
+                     * with a correct CRC word so this is what we  are expecting.
                      * We can start collecting the data for the MSC data group now. */
                     // Copy the subfield data to the buffer.
                     for (int j = 0; j < curr_subfield_length; ++j) {
@@ -316,8 +313,7 @@ namespace gr {
                     d_data_group_nwritten += curr_subfield_length;
                     // Check if we already finished the MSC data group.
                     if(d_data_group_nwritten >= d_data_group_length){
-                      // we finished the MSC data group and can process it now
-                      GR_LOG_DEBUG(d_logger, format("finished MOT (length %d)") %(int)d_data_group_nwritten);
+                      // We finished the MSC data group and can process it now.
                       process_msc_data_group(d_msc_data_group, d_data_group_length);
                       // Reset length and counter variable.
                       d_data_group_nwritten = 0;
@@ -327,7 +323,7 @@ namespace gr {
                   }
                   break;
                 }
-                case 13: { // MOT, continuation of X-PAD data group, see ETSI EN 301 234
+                case 13: { // MOT, continuation of X-PAD data group, see ETSI EN 301 234.
                   /* We only take this subfield, if the MSC data group reception
                    * was properly initialized before. */
                   if(!d_expecting_start_of_data_group && d_data_group_nwritten > 0){
@@ -350,7 +346,7 @@ namespace gr {
                 default:
                   break;
               }
-              // push index to the start of the next data subfield
+              // Push index to the start of the next data subfield.
               curr_subfield_start += d_length_xpad_subfield_table[ci->length];
             }
           } else {
@@ -361,13 +357,13 @@ namespace gr {
                                 (int) (subfield_length_sum + n_ci_elements)));
           }
         } else {
-          // no X-PAD; we are finished here
+          // No X-PAD; we are finished with that.
         }
       }
     }
 
     void mp4_decode_bs_impl::process_dynamic_label_segment_subfield(uint8_t *subfield, uint8_t subfield_length) {
-      // check if this sub-field contains padding bytes
+      // Check if this sub-field contains padding bytes.
       uint8_t num_valid_bytes;
       if (subfield_length > d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index) {
         num_valid_bytes = d_dyn_lab_curr_char_field_length + 4 - d_dyn_lab_seg_index;
@@ -381,7 +377,7 @@ namespace gr {
       }
       d_dyn_lab_seg_index += num_valid_bytes;
 
-      // check if the segment is finished
+      // Check if the segment is finished.
       if (d_dyn_lab_seg_index >= d_dyn_lab_curr_char_field_length + 4) {
         // We have completely written the segment to the buffer.
         // Do Cyclic Redundancy Check (CRC) before we copy the data to the dynamic_label buffer.
@@ -391,7 +387,7 @@ namespace gr {
           d_dyn_lab_index += d_dyn_lab_seg_index - 4;
           d_dyn_lab_seg_index = 0;
           if (d_last_dyn_lab_seg) {
-            // we finished the complete dynamic label and can publish it
+            // We finished the complete dynamic label and can publish it now.
             message_port_pub(pmt::intern(std::string("dynamic_label")),
                              pmt::init_u8vector((size_t) d_dyn_lab_index,
                                                 const_cast<const uint8_t *>(d_dynamic_label)));
@@ -399,9 +395,8 @@ namespace gr {
             d_dyn_lab_index = 0;
             d_last_dyn_lab_seg = false;
           }
-        } else { // the CRC failed and we reset the whole dynamic label
+        } else { // The CRC failed and we reset the whole dynamic label.
           GR_LOG_DEBUG(d_logger, format("DYNAMIC LABEL CRC FAILED"));
-          // TODO wait for the start of the next dynamic label
           d_dyn_lab_seg_index = 0;
           d_dyn_lab_curr_char_field_length = 0;
           d_dyn_lab_index = 0;
@@ -422,10 +417,9 @@ namespace gr {
         if(crc16(const_cast<const uint8_t *>(data_group), data_group_length-2)){
           if(header->extension_flag){
             // We don't support the extension field, caused to no support of conditional access.
-            reading_offset += 2; // Skip extension field if present.
+            reading_offset += 2; // Skip extension field, if present.
           }
           // So far, we ignore the continuity and repetition index and handle each MOT.
-          // TODO: Implement memory of successfully received groups.
           if(header->segment_flag) {
             // A segment field is present, we read it.
             uint8_t last = (uint8_t)(data_group[reading_offset] & 0x80) >> 7;
@@ -441,9 +435,12 @@ namespace gr {
 
               if(user_access_length_indicator < 2){
                 // This cannot happen, we are not on the right track. Throw error message.
-                GR_LOG_ERROR(d_logger,
+                GR_LOG_WARN(d_logger,
                              format("MSC data group: User access length indicator is %d, "
                                     "but must be geq than 2 bytes.") %(int)user_access_length_indicator);
+                // Abort the reception of the current MOT entity.
+                abort_mot_reception();
+                return void();
               } else{
                 // Read transport ID.
                 transport_ID = (uint16_t)(data_group[reading_offset+1])<<8 |
@@ -466,11 +463,12 @@ namespace gr {
                                  "indicated by the header (%d)")
                           %(int)(data_group_length-reading_offset)
                           %(int)seg_size);
-              // TODO: Reset MOT reader
+              // Abort the reception of the current MOT entity.
+              abort_mot_reception();
+              return void();
             }
             // Point to beginning of the data segment
             uint8_t *segment_data_field = &data_group[reading_offset];
-            GR_LOG_DEBUG(d_logger, format("MSC data group: segment number %d, last %d, ID %d, rep_count %d, seg_size %d, data group length %d") % (int) seg_num % (int) last %(int)transport_ID %(int)rep_count %(int)seg_size %(int)data_group_length);
             // switch MSC data group types
             switch (header->data_group_type) {
               case MSC_DATA_GROUP_TYPE_HEADER: {
@@ -485,13 +483,9 @@ namespace gr {
                 d_content_type = (data_group[reading_offset + 5] & 0x7e) >> 1;
                 d_content_subtype = (uint16_t)(data_group[reading_offset + 5] & 0x01) << 8 |
                                     data_group[reading_offset + 6];
-                GR_LOG_DEBUG(d_logger,
-                             format("MOT HEADER: body size %d, header size %d, content type %d, subtype %d") %
-                             (int) d_mot_body_size % (int) header_size % (int) d_content_type %
-                             (int) d_content_subtype);
-                // Read the header extensions.
-                // TODO Actually read them.
-                // Uptdate the transport ID and therefore enable the reception of the MOT body with this transport ID.
+                // The header extensions are skipped at this point because they are reserved for future use.
+                /* Update the transport ID and therefore enable the reception
+                 * of the MOT body with this transport ID. */
                 d_transport_ID = transport_ID;
                 d_mot_body_nwritten = 0;
                 break;
@@ -506,10 +500,8 @@ namespace gr {
                   if (header->segment_flag &&
                       (data_group[2 + 2 * header->extension_flag] & 0x80) >> 7) {
                     // This MSC data group transports the last segment of the current MOT body.
-                    // TODO Process MOT body.
-                    FILE *file = fopen("MOT_file.dat", "wb");
-                    fwrite(d_mot_body, sizeof(uint8_t), d_mot_body_nwritten, file);
-                    fclose(file);
+                    // Process MOT body.
+
                   }
                 } else {
                   // We have to wait for the next MOT header.
@@ -538,8 +530,10 @@ namespace gr {
     }
 
     void mp4_decode_bs_impl::abort_mot_reception() {
-      // Lock the
-
+      // Lock the reception for this MOT entity.
+      d_transport_ID = 0;
+      // Reset the MOT body buffer.
+      d_mot_body_nwritten = 0;
     }
 
     int16_t mp4_decode_bs_impl::MP42PCM(uint8_t dacRate,
