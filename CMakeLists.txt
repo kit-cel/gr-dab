@@ -53,14 +53,14 @@ else()
 endif ()
 
 ########################################################################
-# Find FDK-AAC-DAB
+# Find FDK-AAC
 ########################################################################
-find_package(Fdk-aac-dab REQUIRED)
-if (NOT FDK-AAC-DAB_FOUND )
-    message(FATAL_ERROR "please install fdk-aac-dab:
+find_package(Fdk-aac REQUIRED)
+if (NOT FDK-AAC_FOUND )
+    message(FATAL_ERROR "please install fdk-aac:
 You'll find it in the eponymous subdirectory; build it using:
 
-    $ cd fdk-aac-dab
+    $ cd fdk-aac
     $ ./bootstrap
     $ ./configure [--prefix ...] [--other options]
     $ make
@@ -68,7 +68,7 @@ You'll find it in the eponymous subdirectory; build it using:
 
 ")
 else()
-    message(STATUS "FDK-AAC-DAB found")
+    message(STATUS "FDK-AAC found")
 endif ()
 
 ########################################################################

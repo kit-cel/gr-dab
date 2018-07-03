@@ -28,8 +28,8 @@
 #define INCLUDED_DAB_MP4_ENCODE_SB_IMPL_H
 
 #include <dab/mp4_encode_sb.h>
-#include "fdk-aac-dab/FDK_audio.h"
-#include "fdk-aac-dab/aacenc_lib.h"
+#include "fdk-aac/FDK_audio.h"
+#include "fdk-aac/aacenc_lib.h"
 
 namespace gr {
   namespace dab {
