@@ -29,22 +29,28 @@ IF(EXISTS PYQT4_VERSION AND EXISTS PYUIC4_EXECUTABLE)
   SET(PYUIC4_FOUND TRUE)
 ELSE(EXISTS PYQT4_VERSION AND EXISTS PYUIC4_EXECUTABLE)
 
-  FIND_FILE(_find_pyqt_py FindPyQt.py PATHS ${CMAKE_MODULE_PATH})
+  FIND_FILE(_find_pyqt_py
+    FindPyQt.py
+    PATHS ${CMAKE_MODULE_PATH}
+    NO_CMAKE_FIND_ROOT_PATH
+    )
 
-  EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_pyqt_py} OUTPUT_VARIABLE pyqt_config)
-  IF(pyqt_config)
-    STRING(REGEX REPLACE "^pyqt_version:([^\n]+).*$" "\\1" PYQT4_VERSION ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_version_str:([^\n]+).*$" "\\1" PYQT4_VERSION_STR ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_version_tag:([^\n]+).*$" "\\1" PYQT4_VERSION_TAG ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_sip_dir:([^\n]+).*$" "\\1" PYQT4_SIP_DIR ${pyqt_config})
-    STRING(REGEX REPLACE ".*\npyqt_sip_flags:([^\n]+).*$" "\\1" PYQT4_SIP_FLAGS ${pyqt_config})
+  # EXECUTE_PROCESS(COMMAND ${PYTHON_EXECUTABLE} ${_find_pyqt_py} OUTPUT_VARIABLE pyqt_config)
+  # IF(pyqt_config)
+  #   STRING(REGEX REPLACE "^pyqt_version:([^\n]+).*$" "\\1" PYQT4_VERSION ${pyqt_config})
+  #   STRING(REGEX REPLACE ".*\npyqt_version_str:([^\n]+).*$" "\\1" PYQT4_VERSION_STR ${pyqt_config})
+  #   STRING(REGEX REPLACE ".*\npyqt_version_tag:([^\n]+).*$" "\\1" PYQT4_VERSION_TAG ${pyqt_config})
+  #   STRING(REGEX REPLACE ".*\npyqt_sip_dir:([^\n]+).*$" "\\1" PYQT4_SIP_DIR ${pyqt_config})
+  #   STRING(REGEX REPLACE ".*\npyqt_sip_flags:([^\n]+).*$" "\\1" PYQT4_SIP_FLAGS ${pyqt_config})
 
-    SET(PYQT4_FOUND TRUE)
-  ENDIF(pyqt_config)
+  #   SET(PYQT4_FOUND TRUE)
+  # ENDIF(pyqt_config)
 
-  FIND_PROGRAM(PYUIC4_EXECUTABLE NAMES pyuic4)
+  FIND_PROGRAM(PYUIC4_EXECUTABLE NAMES pyuic4 NO_CMAKE_FIND_ROOT_PATH)
   IF(PYUIC4_EXECUTABLE)
     SET(PYUIC4_FOUND TRUE)
+  ELSE(PYUIC4_EXECUTABLE)
+      MESSAGE(FATAL_ERROR "Could not find pyuic4")
   ENDIF(PYUIC4_EXECUTABLE)
 
   IF(PYQT4_FOUND AND PYUIC4_FOUND)
