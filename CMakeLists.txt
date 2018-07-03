@@ -81,6 +81,7 @@ else()
     message(STATUS "LIBTOOLAME-DAB found: ${LIBTOOLAME-DAB_SOURCE_DIR}")
 endif ()
 
+include(GrPython)
 find_package(PyQt4 REQUIRED)
 ########################################################################
 # Find boost
