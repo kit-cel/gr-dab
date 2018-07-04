@@ -25,7 +25,7 @@ include(GrPython)
 set(GUI_UI ${CMAKE_CURRENT_SOURCE_DIR}/user_frontend.ui)
 set(GUI_PY ${CMAKE_CURRENT_BINARY_DIR}/user_frontend.py)
 add_custom_command(OUTPUT ${GUI_PY}
-    COMMAND ${PYUIC4_EXECUTABLE} ${GUI_UI} -o ${GUI_PY}
+    COMMAND ${PYUIC5_EXECUTABLE} ${GUI_UI} -o ${GUI_PY}
     DEPENDS ${GUI_UI}
     COMMENT "Generating python code from the user interface"
 )

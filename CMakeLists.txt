@@ -82,7 +82,8 @@ else()
 endif ()
 
 include(GrPython)
-find_package(PyQt4 REQUIRED)
+# Find PyQt5
+find_program(PYUIC5_EXECUTABLE pyuic5)
 ########################################################################
 # Find boost
 ########################################################################
