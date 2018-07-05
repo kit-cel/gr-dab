@@ -27,9 +27,9 @@ from gnuradio import gr, uhd, blocks
 from gnuradio import audio, digital
 from gnuradio import qtgui
 from gnuradio import fft
+from gnuradio import filter
 import osmosdr
 import dab
-import time, math
 
 
 class usrp_dab_rx(gr.top_block):
@@ -135,8 +135,8 @@ class usrp_dab_rx(gr.top_block):
         ########################
         self.valve_left = dab.valve_ff_make(True)
         self.valve_right= dab.valve_ff_make(True)
-        self.delay_left = blocks.delay_make(gr.sizeof_float, int(audio_bit_rate))
-        self.delay_right = blocks.delay_make(gr.sizeof_float, int(audio_bit_rate))
+        self.delay_left = filter.fractional_interpolator_ff_make(0.0, 0.99)
+        self.delay_right = filter.fractional_interpolator_ff_make(0.0, 0.99)
         self.audio = audio.sink_make(audio_bit_rate)
         self.wav_sink = blocks.wavfile_sink_make("dab_audio.wav", 2, audio_bit_rate)
 
