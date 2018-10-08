@@ -2,7 +2,7 @@
 /*
  * Copyright 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
  * Copyright 2008 by Andreas Mueller
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
@@ -72,8 +72,14 @@ namespace gr {
              (uint8_t) fib[pos] != 0) { //TODO correct?
         type = fib[pos] >> 5;
         length = fib[pos] & 0x1f;
-        assert(pos + length <= FIB_LENGTH - FIB_CRC_LENGTH);
-        assert(length != 0);
+        // if ((pos + length) > (FIB_LENGTH - FIB_CRC_LENGTH)){
+        //   GR_LOG_INFO(d_logger, "pos + length: " + std::to_string((pos + length)));
+        //   return 1;
+        // }
+        // if (length != 0){
+        //   GR_LOG_INFO(d_logger, "length must be greater than zero!");
+        //   return 1;
+        // }
         process_fig(type, &fib[pos], length);
         pos += length + 1;
       }

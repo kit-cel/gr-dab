@@ -2,6 +2,7 @@
 /*
  * Copyright 2017, 2018 Moritz Luca Schmid, Communications Engineering Lab (CEL)
  * Karlsruhe Institute of Technology (KIT).
+ * Copyright 2018 Communications Engineering Lab (CEL) Karlsruhe Institute of Technology (KIT).
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +24,14 @@
 #include "config.h"
 #endif
 
-#include <stdio.h>
+#include "ofdm_synchronization_cvf_impl.h"
+#include <gnuradio/io_signature.h>
+#include <boost/format.hpp>
+#include <volk/volk.h>
+#include <complex>
 #include <sstream>
 #include <string>
-#include <boost/format.hpp>
-#include <gnuradio/io_signature.h>
-#include "ofdm_synchronization_cvf_impl.h"
-#include <volk/volk.h>
-#include <gnuradio/fxpt.h>
+#include <cstdio>
 #include <cmath>
 
 using namespace boost;
@@ -70,13 +71,14 @@ namespace gr {
               d_symbol_element_count(0),
               d_wait_for_NULL(true),
               d_on_triangle(false),
-              d_phase(0),
-              d_correlation_maximum(0),
-              d_peak_set(false) {
+              d_phase(gr_complex(1,0)),
+              d_peak_set(false),
+              d_correlation_maximum(0){
       //allocation for repeating energy measurements
       unsigned int alignment = volk_get_alignment();
       d_mag_squared = (float *) volk_malloc(sizeof(float) * d_cyclic_prefix_length, alignment);
       d_fixed_lag_corr = (gr_complex *) volk_malloc(sizeof(gr_complex) * d_cyclic_prefix_length, alignment);
+      this->set_output_multiple(d_symbol_length);
     }
 
     /*
@@ -172,6 +174,7 @@ namespace gr {
                                                 gr_vector_int &ninput_items,
                                                 gr_vector_const_void_star &input_items,
                                                 gr_vector_void_star &output_items) {
+      // Initialize this run of work
       const gr_complex *in = (const gr_complex *) input_items[0];
       gr_complex *out = (gr_complex *) output_items[0];
       d_nwritten = 0;
@@ -234,21 +237,29 @@ namespace gr {
                              d_correlation_normalized_magnitude);
               }
             }
-          } else if (d_cyclic_prefix_length * 0.75 <= d_symbol_element_count &&
-                     d_symbol_element_count < d_cyclic_prefix_length * 0.75 + d_symbol_length) {
-            // calculate the complex frequency correction value
-            float oi, oq;
-            // fixed point sine and cosine
-            int32_t angle = gr::fxpt::float_to_fixed(d_phase);
-            gr::fxpt::sincos(angle, &oq, &oi);
-            gr_complex fine_frequency_correction = gr_complex(oi, oq);
-            // set tag at next item if it is the first element of the first symbol
-            if (d_symbol_count == 0 && d_symbol_element_count == d_cyclic_prefix_length) {
-              add_item_tag(0, nitems_written(0) + d_nwritten, pmt::mp("Start"),
-                           pmt::from_float(std::arg(d_correlation)));
+          } else if (d_symbol_element_count == (3 * d_cyclic_prefix_length)/4){
+            // No full OFDM symbol in the input left
+            if (noutput_items - i < d_symbol_length || ninput_items[0] - i < d_symbol_length) {
+              this->consume_each(i);
+              return d_nwritten;
+            } else {
+              d_phase *=
+                  std::polar(float(1.0),
+                             static_cast<float>(d_cyclic_prefix_length *
+                                                d_frequency_offset_per_sample));
+              if (d_symbol_count == 0) {
+                this->add_item_tag(0, this->nitems_written(0) + d_nwritten + d_cyclic_prefix_length - d_symbol_element_count,
+                                   pmt::mp("Start"),
+                                   pmt::from_float(std::arg(d_correlation)));
+              }
+              volk_32fc_s32fc_x2_rotator_32fc(
+                  &out[d_nwritten], &in[i],
+                  std::polar(float(1.0), d_frequency_offset_per_sample),
+                  &d_phase, d_symbol_length);
+              d_nwritten += d_symbol_length;
+              d_symbol_element_count += d_symbol_length - 1;
+              i += d_symbol_length - 1;
             }
-            // now we start copying one symbol length to the output
-            out[d_nwritten++] = in[i] * fine_frequency_correction;
           }
           d_symbol_element_count++;
         }
@@ -258,15 +269,10 @@ namespace gr {
          * including the cyclic prefix, and is mixed
          * to the output symbol samples.
          */
-        d_phase += d_frequency_offset_per_sample;
-        //place phase in [-pi, +pi[
-        d_phase = std::fmod(d_phase + M_PI, 2.0f * M_PI) - M_PI;
-      }
-
+    }
       consume_each(noutput_items);
       return d_nwritten;
     }
 
   } /* namespace dab */
 } /* namespace gr */
-

@@ -96,7 +96,7 @@ namespace gr {
        * This is used to do a kind of early late synchronization to find
        * the correalation peak.
        */
-      float d_phase;
+      gr_complex d_phase;
       bool d_peak_set;
       /*!< Signalizes if we already set the peak on the current
        * correlation triangle.
@@ -139,4 +139,3 @@ namespace gr {
 } // namespace gr
 
 #endif /* INCLUDED_DAB_OFDM_SYNCHRONIZATION_CVF_IMPL_H */
-

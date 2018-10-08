@@ -14,12 +14,12 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -343,7 +343,12 @@ namespace gr {
 
           // sanity check for the address
           if (d_au_start[i + 1] < d_au_start[i]) {
-            throw std::runtime_error("AU start address invalid");
+            // throw std::runtime_error("AU start address invalid");
+            std::cout << "AU start address invalid"
+                      << "d_au_start[" << i
+                      << "] = " << d_au_start[i] << "; d_au_start[" << (i+1)
+                      << "]=" << d_au_start[i + 1] << std::endl;
+            continue;
             // should not happen, the header is firecode checked
           }
           aac_frame_length = d_au_start[i + 1] - d_au_start[i] - 2;
