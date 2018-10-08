@@ -1,19 +1,20 @@
 /* -*- c++ -*- */
 /*
  * Copyright 2004 Free Software Foundation, Inc.
- * 
+ * Copyright 2018 Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ *
  * This file is part of GNU Radio
- * 
+ *
  * GNU Radio is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * GNU Radio is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with GNU Radio; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -57,6 +58,9 @@ namespace gr {
        *
        * maybe the scheduler thinks that d_symbol_length input items are needed, which uses a lot of memory
        **/
+      if (d_symbol_length <= 0){
+        throw std::runtime_error("Symbol length must be greater zero!");
+      }
       set_output_multiple(d_symbol_length);
       set_relative_rate(d_symbol_length);
     }

@@ -1,17 +1,18 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
- * 
+ * Copyright 2018 Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -55,7 +56,7 @@ namespace gr {
                                  (prune_start + prune_end - length)).str());
 
       set_output_multiple(length - prune_start - prune_end);
-      set_relative_rate((length - prune_start - prune_end) / length);
+      set_relative_rate(static_cast<float>(length - prune_start - prune_end) / static_cast<float>(length));
     }
 
     /*
@@ -96,4 +97,3 @@ namespace gr {
 
   } /* namespace dab */
 } /* namespace gr */
-
