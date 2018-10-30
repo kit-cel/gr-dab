@@ -22,7 +22,8 @@
 
 from gnuradio import gr
 import pmt
-import Image
+from PIL import Image
+import tempfile
 import numpy
 
 class xpad_message_handler(gr.basic_block):
@@ -59,8 +60,18 @@ class xpad_message_handler(gr.basic_block):
         self.qt_object.emit_label(unicode_object)
 
     def handle_mot_image(self, msg):
-        image = pmt.to_python(msg)
-        print "cyberspectrum"
-        print type(image)
-        im = Image.fromarray(image.astype(numpy.uint8))
-        print type(im)
+        image_message = pmt.to_python(msg)
+        print "got mot GR message"
+        print image_message
+        print type(image_message)
+        print len(image_message)
+        file = open("jpg_image.dat", "w")
+        image_message.tofile(file)
+
+
+        # Interprete jpg message with PIL
+        #temp_file = tempfile.TemporaryFile()
+        #temp_file.write(image_message)
+
+        # emit a signal to the GUI, containing this dynamic label string
+        self.qt_object.emit_label(image_message)

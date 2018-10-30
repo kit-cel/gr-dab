@@ -21,6 +21,9 @@
 #
 
 from PyQt4.QtCore import QObject, pyqtSignal
+from PyQt4.QtGui import QImage
+from PIL import Image
+import numpy as np
 
 class xpad(QObject):
     """
@@ -28,13 +31,25 @@ class xpad(QObject):
     to the GUI, using pyQt signals.
     """
     # define a new pyQt signal for the signalling and transport of a new dynamic_label/mot_image
-    new_xpad = pyqtSignal('QString', name='new_xpad')
+    new_label = pyqtSignal('QString', name='new_xpad_label')
+    new_image = pyqtSignal(np.ndarray, name='new_xpad_image')
 
-    def __init__(self, slot, parent=None):
+    def __init__(self, slot, type, parent=None):
         super(xpad, self).__init__(parent)
+        self.type = type
         # connect the signal new_label/new_image to the slot callable
-        self.new_xpad.connect(slot)
+        if (type == 'xpad_label'):
+            self.new_label.connect(slot)
+        elif (type == 'xpad_image'):
+            self.new_image.connect(slot)
 
-    def emit_label(self, data):
+    def emit_label(self, msg_data):
         # emit signal now
-        self.new_xpad.emit(data)
+        if (self.type == 'xpad_label'):
+            print "emit xpad py qt signal: label"
+            self.new_label.emit(msg_data)
+        elif (self.type == 'xpad_image'):
+            print "emit xpad py qt signal: image"
+            print msg_data
+            #qt_image = QImage(interpreted_image.data, 320, 240, QImage.Format_Indexed8)
+            self.new_image.emit(msg_data)

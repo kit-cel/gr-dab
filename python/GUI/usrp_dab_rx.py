@@ -27,9 +27,12 @@ from gnuradio import gr, uhd, blocks
 from gnuradio import audio
 from gnuradio import qtgui
 from gnuradio import fft
+import PyQt4.QtGui as QtGui
 import osmosdr
 import dab
 import xpad
+from PIL import Image
+from PIL.ImageQt import ImageQt
 
 class usrp_dab_rx(gr.top_block):
     def __init__(self, dab_mode, frequency, bit_rate, address, size, protection, audio_bit_rate, dabplus, use_usrp, use_rtl, qt_label_dyn_lab, qt_label_mot_image, src_path, sink_path = "None", prev_src=None):
@@ -125,8 +128,8 @@ class usrp_dab_rx(gr.top_block):
         if self.dabplus:
             self.dabplus = dab.dabplus_audio_decoder_ff(self.dab_params, bit_rate, address, size, protection, True)
             # Create Qt classes for a connection between gr block mp4_decode and GUI.
-            self.dyn_lab = xpad.xpad(self.update_label)
-            self.mot_image = xpad.xpad(self.update_mot_image)
+            self.dyn_lab = xpad.xpad(self.update_label, 'xpad_label')
+            self.mot_image = xpad.xpad(self.update_mot_image, 'xpad_image')
             # xpad message handling python block
             self.pad_label_messenger = dab.xpad_message_handler(self.dyn_lab, type="dynamic_label")
             self.pad_mot_messenger = dab.xpad_message_handler(self.mot_image, type="mot_image")
@@ -188,9 +191,18 @@ class usrp_dab_rx(gr.top_block):
     def update_label(self, label):
         self.qt_label_dyn_lab.setText(label)
 
-    def update_mot_image(self, image):
+    def update_mot_image(self, image_numpy):
         print 'update mot image'
-        self.qt_label_mot_image.setText(image)
+        self.qt_label_mot_image.setText("image angekommen in rx als numpy")
+        print image_numpy
+        print type(image_numpy)
+        print len(image_numpy)
+        print image_numpy.shape
+
+        img = Image.open("jpg_image.dat")
+        qt_image = ImageQt(img)
+        self.qt_label_mot_image.setPixmap(QtGui.QPixmap.fromImage(qt_image))
+        print "show image"
 
 ########################
 # getter methods
