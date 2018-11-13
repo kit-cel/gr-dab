@@ -26,23 +26,31 @@
 
 namespace gr {
   namespace dab {
+/*! \brief interleaves vector elements after the rules of a given interleaving sequence
+ *
+ * @param interleaving_sequence sequence defining the interleaving rules
+ */
+    class frequency_interleaver_vcc_impl : public frequency_interleaver_vcc {
+    private:
 
-class frequency_interleaver_vcc_impl : public frequency_interleaver_vcc
-{
-  private:
+      std::vector<short> d_interleaving_sequence;
+      /*!< Vector containing the sequence, which is controlling the interleaving
+       * of the OFDM sub carriers. */
+      unsigned int d_length; /*!< Length of  the vector d_interleaving_sequence. */
 
-    std::vector<short> d_interleaving_sequence;
-    unsigned int d_length;
+    public:
+      frequency_interleaver_vcc_impl(const std::vector<short> &interleaving_sequence);
 
-  public:
-    frequency_interleaver_vcc_impl(const std::vector<short> &interleaving_sequence);
-    void set_sequence(const std::vector<short> &interleaving_sequence) { d_interleaving_sequence = interleaving_sequence; }
-    int work (int noutput_items,
-              gr_vector_const_void_star &input_items,
-              gr_vector_void_star &output_items);
-};
+      void set_sequence(const std::vector<short> &interleaving_sequence) {
+        d_interleaving_sequence = interleaving_sequence;
+      }
 
-}
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+    };
+
+  }
 }
 
 #endif /* INCLUDED_DAB_FREQUENCY_INTERLEAVER_VCC_H */

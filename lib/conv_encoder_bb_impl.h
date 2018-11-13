@@ -31,10 +31,12 @@
 
 namespace gr {
   namespace dab {
-/*! \brief convolutional encoding for DAB without puncturing
+/*! \brief convolutional encoding for DAB/DAB+ without puncturing
  *
  * convolutional encoder according to DAB standard ETSI EN 300 401 V1.4.1
- * code rate R=1/4, polyonoms in octal form: [133, 171, 145, 133], appends 3*8 tailbits to mother codeword (flush out of state register)
+ * code rate R=1/4, polyonoms in octal form: [133, 171, 145, 133],
+ * appends 3*8 tailbits to mother codeword (flush out of state register)
+ *
  * input and output are packed bytes
  *
  * @param framesize size of packed bytes in one frame; output framelenght is 4*framesize+3 in packed bytes
@@ -42,10 +44,10 @@ namespace gr {
  */
     class conv_encoder_bb_impl : public conv_encoder_bb {
     private:
-      int d_framesize;
-      int d_outsize;
-      unsigned int d_in_offset, d_out_offset;
-      uint16_t d_memory;
+      int d_framesize; /*!< size of packed bytes in one frame */
+      int d_outsize; /*!< = d_framesize * 4 + 3 */
+      unsigned int d_in_offset, d_out_offset; /*!< control variable for buffer read/write operations */
+      uint16_t d_memory; /*!< virtual shift register for convolutional encoder */
 
 
     public:
@@ -54,14 +56,14 @@ namespace gr {
       ~conv_encoder_bb_impl();
 
       // Where all the action really happens
-      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
+      void
+      forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       int general_work(int noutput_items,
                        gr_vector_int &ninput_items,
                        gr_vector_const_void_star &input_items,
                        gr_vector_void_star &output_items);
     };
-
   } // namespace dab
 } // namespace gr
 

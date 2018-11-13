@@ -22,26 +22,11 @@
 ########################################################################
 install(FILES
     api.h
-    moving_sum_ff.h
-    ofdm_ffe_all_in_one.h
-    ofdm_sampler.h
-    ofdm_coarse_frequency_correct.h
     diff_phasor_vcc.h
-    ofdm_remove_first_symbol_vcc.h
     frequency_interleaver_vcc.h
-    qpsk_demapper_vcb.h
     complex_to_interleaved_float_vcf.h
-    modulo_ff.h
-    measure_processing_rate.h
-    select_vectors.h
-    repartition_vectors.h
     unpuncture_vff.h
-    prune_vectors.h
     fib_sink_vb.h
-    estimate_sample_rate_bf.h
-    fractional_interpolator_triggered_update_cc.h
-    magnitude_equalizer_vcc.h
-    qpsk_mapper_vbc.h
     ofdm_insert_pilot_vcc.h
     sum_phasor_trig_vcc.h
     ofdm_move_and_insert_zero.h
@@ -50,14 +35,11 @@ install(FILES
     time_deinterleave_ff.h
     crc16_bb.h
     fib_source_b.h
-    select_subch_vfvf.h
-    unpuncture_ff.h
     prune.h
     firecode_check_bb.h
     puncture_bb.h
     dab_transmission_frame_mux_bb.h
     conv_encoder_bb.h
-    mapper_bc.h
     mp2_decode_bs.h
     mp4_decode_bs.h
     reed_solomon_decode_bb.h
@@ -65,5 +47,9 @@ install(FILES
     mp4_encode_sb.h
     mp2_encode_sb.h
     valve_ff.h
-    peak_detector_fb.h DESTINATION include/dab
+    ofdm_synchronization_cvf.h
+    ofdm_coarse_frequency_correction_vcvc.h
+    demux_cc.h
+    select_cus_vfvf.h
+    qpsk_mapper_vbvc.h DESTINATION include/dab
 )

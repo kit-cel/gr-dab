@@ -25,7 +25,7 @@
 
 namespace gr {
   namespace dab {
-/*! \brief source that produces Fast Information Blocks (FIBs) according to the DAB standard
+/*! \brief source that produces Fast Information Blocks (FIBs) according to the DAB standard ETSI EN 300 401
  *
  * output: unpacked byte stream with FIBs (each 256 bit) and zeros at last 16 bits for following CRC16
  *
@@ -55,7 +55,8 @@ namespace gr {
       const static char d_ensemble_info[56]; //CIF counter changes every FIB
       const static int d_size_ensemble_info = 56;
 
-      void CIF_counter(char *out_ptr, int counter);//implementation of the mod 20 and mod 250 counter
+      void CIF_counter(char *out_ptr,
+                       int counter);//implementation of the mod 20 and mod 250 counter
       const static char d_service_orga_header[16]; //*const
       const static int d_size_service_orga_header = 16;
       const static char d_service_orga[40]; //*services
@@ -74,12 +75,24 @@ namespace gr {
       static char d_programme_service_label[176]; //21*8+8, service label (FIG 1/0)
       std::string d_service_labels;
 
-      int write_label(char *out_ptr, std::string label, int num_chars = 16);//default for 16 characters (16 byte)
+      /*! \brief Writes a character string as utf-8 to byte buffer.
+       *
+       * @param out_ptr Pointer to output buffer.
+       * @param label String object.
+       * @param num_chars Lenght of the character string (without end indicator).
+       * @return Number of processed bits (= num_chars * 8).
+       */
+      int write_label(char *out_ptr, std::string label, int num_chars = 16); //default for 16 characters (16 byte)
 
     public:
-      fib_source_b_impl(int transmission_mode, int coutry_ID, int num_subch, std::string ensemble_label,
-                        std::string programme_service_labels, std::string service_comp_label, uint8_t service_comp_lang,
-                        const std::vector <uint8_t> &protection_mode, const std::vector <uint8_t> &data_rate_n, const std::vector <uint8_t> &dabplus);
+      fib_source_b_impl(int transmission_mode, int coutry_ID,
+                        int num_subch, std::string ensemble_label,
+                        std::string programme_service_labels,
+                        std::string service_comp_label,
+                        uint8_t service_comp_lang,
+                        const std::vector <uint8_t> &protection_mode,
+                        const std::vector <uint8_t> &data_rate_n,
+                        const std::vector <uint8_t> &dabplus);
 
       ~fib_source_b_impl();
 

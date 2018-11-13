@@ -26,7 +26,10 @@
 
 namespace gr {
   namespace dab {
-
+/*! \brief inserting complex zeros at the beginning of each transmission frame
+ * @param symbol_length length of the symbol vector
+ * @param ns_length length of null symbol
+ */
 class insert_null_symbol_impl : public insert_null_symbol
 {
   private:

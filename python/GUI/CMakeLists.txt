@@ -19,19 +19,30 @@
 
 include(GrPython)
 
+########################################################################
+# Generate the GUI python code user_frontend.py from the user interface  user_frontend.ui
+########################################################################
+set(GUI_UI ${CMAKE_CURRENT_SOURCE_DIR}/user_frontend.ui)
+set(GUI_PY ${CMAKE_CURRENT_BINARY_DIR}/user_frontend.py)
+add_custom_command(OUTPUT ${GUI_PY}
+    COMMAND ${PYUIC4_EXECUTABLE} ${GUI_UI} -o ${GUI_PY}
+    DEPENDS ${GUI_UI}
+    COMMENT "Generating python code from the user interface"
+)
 GR_PYTHON_INSTALL(
     FILES
     usrp_dab_rx.py
     usrp_dab_tx.py
-    user_frontend.py
+    ${GUI_PY}
     DESTINATION ${GR_PYTHON_DIR}/dab
     COMPONENT "dab_python"
 )
 set(GR_PKG_DAB_DATA_DIR ${GR_PKG_DATA_DIR})
-install(FILES                                                                   
+install(FILES
    DAB_logo.png
    led_red.png
    led_orange.png
-   led_green.png                                                             
-   DESTINATION ${GR_PKG_DAB_DATA_DIR}                                          
+   led_green.png
+   DESTINATION ${GR_PKG_DAB_DATA_DIR}
 )
+

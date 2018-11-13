@@ -35,30 +35,34 @@ extern "C" {
 
 namespace gr {
   namespace dab {
-/*! \brief Reed Solomon encoder for DAB+ transmission
- * Reed Solomon RS(120, 110, t=5) with virtual interleaving; derived from RS(255, 245, t=5). Details see ETSI TS 102 563 clause 6.0 and 6.1.
- * @param bit_rate_n data rate in multiples of 8kbit/s
+/*! \brief Reed Solomon encoder for DAB+ transmission.
+ * Reed Solomon RS(120, 110, t=5) with virtual interleaving.
+ * Derived from RS(255, 245, t=5). Details see ETSI TS 102 563 clause 6.0 and 6.1.
+ * @param bit_rate_n Data rate in multiples of 8kbit/s.
  */
 
-    class reed_solomon_encode_bb_impl : public reed_solomon_encode_bb
-    {
-     private:
+    class reed_solomon_encode_bb_impl : public reed_solomon_encode_bb {
+
+    private:
       int d_bit_rate_n;
       int d_superframe_size_rs;
+      /*!< size of a superframe in byte with appended rs code words*/
       int d_superframe_size_in;
+      /*!< size of a superframe in byte without rs code words*/
       void *rs_handle;
 
-     public:
+    public:
       reed_solomon_encode_bb_impl(int bit_rate_n);
+
       ~reed_solomon_encode_bb_impl();
 
       // Where all the action really happens
-      void forecast (int noutput_items, gr_vector_int &ninput_items_required);
+      void forecast(int noutput_items, gr_vector_int &ninput_items_required);
 
       int general_work(int noutput_items,
-           gr_vector_int &ninput_items,
-           gr_vector_const_void_star &input_items,
-           gr_vector_void_star &output_items);
+                       gr_vector_int &ninput_items,
+                       gr_vector_const_void_star &input_items,
+                       gr_vector_void_star &output_items);
     };
 
   } // namespace dab

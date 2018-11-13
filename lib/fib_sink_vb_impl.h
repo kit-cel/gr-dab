@@ -1,7 +1,7 @@
 /* -*- c++ -*- */
 /*
- * Copyright belongs to Andreas Mueller
- * Modified 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2017 by Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
+ * Copyright 2008 by Andreas Mueller
  *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,15 +25,30 @@
 
 namespace gr {
   namespace dab {
-/*! \brief sink for DAB FIBs, interprets MSC and SI
- *
+/*! \brief sink for DAB/DAB+ FIBs, interprets MSC and SI
+ * CRC16 check of incoming fibs.
+ * Reads correct fibs.
+ * Generates json objects with service and multiplex information.
  */
     class fib_sink_vb_impl : public fib_sink_vb {
 
     private:
+      /*! \brief Processes an incoming FIB.
+       * If CRC16 fails, dump the FIB,
+       * otherwise extract Fast Information Groups (FIGs) and read header information.
+       *
+       * @param fib Pointer to the first byte of the 30 byte FIB.
+       * @return 0 if CRC failed, 1 if CRC succeeded.
+       */
       int process_fib(const char *fib);
-
-      int process_fig(uint8_t type, const char *data, uint8_t length);
+      /*! \brief Processes a FIG.
+       * Switch between FIG types, extract information and write it to logger.
+       * Write and collect information in JSON objects for transport to GUI.
+       * @param type Type of the FIG. See ETSI EN 300 401 chapter 5.2.2.
+       * @param data Pointer to the FIG data buffer.
+       * @param length Length of the FIG data buffer in bytes.
+       */
+      void process_fig(uint8_t type, const char *data, uint8_t length);
 
       bool d_crc_passed;
 
@@ -55,28 +70,20 @@ namespace gr {
       std::string d_programme_type_current;
       int d_programme_type_written_trigger;
 
-
-
     public:
       fib_sink_vb_impl();
 
-      virtual std::string get_ensemble_info()
-      { return d_json_ensemble_info; }
+      virtual std::string get_ensemble_info() { return d_json_ensemble_info; }
 
-      virtual std::string get_service_info()
-      { return d_json_service_info;}
+      virtual std::string get_service_info() { return d_json_service_info; }
 
-      virtual std::string get_service_labels()
-      { return d_json_service_labels;}
+      virtual std::string get_service_labels() { return d_json_service_labels; }
 
-      virtual std::string get_subch_info()
-      { return d_json_subch_info;}
+      virtual std::string get_subch_info() { return d_json_subch_info; }
 
-      virtual std::string get_programme_type()
-      { return d_json_programme_type;}
+      virtual std::string get_programme_type() { return d_json_programme_type; }
 
-      virtual bool get_crc_passed()
-      { return d_crc_passed;}
+      virtual bool get_crc_passed() { return d_crc_passed; }
 
       int work(int noutput_items,
                gr_vector_const_void_star &input_items,

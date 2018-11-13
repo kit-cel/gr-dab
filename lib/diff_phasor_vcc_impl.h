@@ -26,21 +26,23 @@
 
 namespace gr {
   namespace dab {
+/*! \brief vector wise working differential phasor calculation
+ * this block has the same functionality as the gr-digital diff_phasor_cc block,
+ * but is working on vector basis.
+ */
+    class diff_phasor_vcc_impl : public diff_phasor_vcc {
+    private:
+      unsigned int d_length; /*!< Length of each complex vector. */
 
-class diff_phasor_vcc_impl : public diff_phasor_vcc
-{
-  private:
+    public:
+      diff_phasor_vcc_impl(unsigned int length);
 
-    unsigned int d_length;
+      int work(int noutput_items,
+               gr_vector_const_void_star &input_items,
+               gr_vector_void_star &output_items);
+    };
 
-  public:
-    diff_phasor_vcc_impl(unsigned int length);
-    int work (int noutput_items,
-              gr_vector_const_void_star &input_items,
-              gr_vector_void_star &output_items);
-};
-
-}
+  }
 }
 
 #endif /* INCLUDED_DAB_DIFF_PHASOR_VCC_H */

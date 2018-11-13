@@ -35,54 +35,54 @@
 namespace gr {
   namespace dab {
 
-unpuncture_vff::sptr
-unpuncture_vff::make(const std::vector<unsigned char> &puncturing_vector, float fillval)
-{
-  return gnuradio::get_initial_sptr
-    (new unpuncture_vff_impl(puncturing_vector, fillval));
-}
-
-unsigned int unpuncture_vff_impl::ones (const std::vector<unsigned char> &puncturing_vector) {
-  unsigned int onescount = 0;
-  for (unsigned int i=0; i<puncturing_vector.size(); i++) {
-    if (puncturing_vector[i]==1)
-      onescount++;
-  }
-  return onescount;
-}
-
-unpuncture_vff_impl::unpuncture_vff_impl(const std::vector<unsigned char> &puncturing_vector, float fillval)
-  : gr::sync_block("unpuncture_vff",
-             gr::io_signature::make (1, 1, sizeof(float)*ones(puncturing_vector)),
-             gr::io_signature::make (1, 1, sizeof(float)*puncturing_vector.size())),
-  d_puncturing_vector(puncturing_vector), d_fillval(fillval)
-{
-  d_vlen_in  = ones(puncturing_vector);
-  d_vlen_out = puncturing_vector.size();
-}
-
-int 
-unpuncture_vff_impl::work(int noutput_items,
-                        gr_vector_const_void_star &input_items,
-                        gr_vector_void_star &output_items)
-{
-  int i;
-  unsigned int j;
-  
-  const float *in = (const float *) input_items[0];
-  float *out = (float *) output_items[0];
-
-  for (i=0; i<noutput_items; i++) {
-    for (j=0;j<d_vlen_out;j++) {
-      if (d_puncturing_vector[j]==1)
-        *out++ = *in++;
-      else
-        *out++ = d_fillval;
+    unpuncture_vff::sptr
+    unpuncture_vff::make(const std::vector<unsigned char> &puncturing_vector,
+                         float fillval) {
+      return gnuradio::get_initial_sptr(new unpuncture_vff_impl(puncturing_vector, fillval));
     }
+
+    unsigned int unpuncture_vff_impl::ones(const std::vector<unsigned char> &puncturing_vector) {
+      unsigned int onescount = 0;
+      for (unsigned int i = 0; i < puncturing_vector.size(); i++) {
+        if (puncturing_vector[i] == 1)
+          onescount++;
+      }
+      return onescount;
+    }
+
+    unpuncture_vff_impl::unpuncture_vff_impl(
+            const std::vector<unsigned char> &puncturing_vector, float fillval)
+            : gr::sync_block("unpuncture_vff",
+                             gr::io_signature::make(1, 1, sizeof(float) * ones(puncturing_vector)),
+                             gr::io_signature::make(1, 1, sizeof(float) * puncturing_vector.size())),
+              d_puncturing_vector(puncturing_vector), d_fillval(fillval) {
+      d_vlen_in = ones(puncturing_vector);
+      d_vlen_out = puncturing_vector.size();
+    }
+
+    int
+    unpuncture_vff_impl::work(int noutput_items,
+                              gr_vector_const_void_star &input_items,
+                              gr_vector_void_star &output_items) {
+      int i;
+      unsigned int j;
+
+      const float *in = (const float *) input_items[0];
+      float *out = (float *) output_items[0];
+
+      for (i = 0; i < noutput_items; i++) {
+        for (j = 0; j < d_vlen_out; j++) {
+          if (d_puncturing_vector[j] == 1) {
+            *out++ = *in++;
+          }
+          else {
+            *out++ = d_fillval;
+          }
+        }
+      }
+
+      return noutput_items;
+    }
+
   }
-
-  return noutput_items;
-}
-
-}
 }

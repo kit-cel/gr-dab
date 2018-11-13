@@ -28,10 +28,10 @@
 #include <cstring>
 
 //	g(x)=(x^11+1)(x^5+x^3+x^2+x+1)=1+x+x^2+x^3+x^5+x^11+x^12+x^13+x^14+x^16
-const uint8_t firecode_checker::g[16] = {1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0};
+const uint8_t firecode_checker::g[16] = {1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1,
+                                         1, 1, 0};
 
-firecode_checker::firecode_checker(void)
-{
+firecode_checker::firecode_checker(void) {
 // prepare the table
   uint8_t regs[16];
   int16_t i, j;
@@ -51,12 +51,10 @@ firecode_checker::firecode_checker(void)
   }
 }
 
-firecode_checker::~firecode_checker(void)
-{
+firecode_checker::~firecode_checker(void) {
 }
 
-uint16_t firecode_checker::run8(uint8_t regs[])
-{
+uint16_t firecode_checker::run8(uint8_t regs[]) {
   int16_t i, j;
   uint16_t z;
   uint16_t v = 0;
@@ -74,8 +72,7 @@ uint16_t firecode_checker::run8(uint8_t regs[])
   return v;
 }
 
-bool firecode_checker::check(const uint8_t *x)
-{
+bool firecode_checker::check(const uint8_t *x) {
   int16_t i;
   uint16_t state = (x[2] << 8) | x[3];
   uint16_t istate;

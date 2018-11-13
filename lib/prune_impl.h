@@ -41,7 +41,8 @@ namespace gr {
       unsigned int d_prune_end;
 
     public:
-      prune_impl(size_t itemsize, unsigned int length, unsigned int prune_start, unsigned int prune_end);
+      prune_impl(size_t itemsize, unsigned int length, unsigned int prune_start,
+                 unsigned int prune_end);
 
       ~prune_impl();
 

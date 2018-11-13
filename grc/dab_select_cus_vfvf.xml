@@ -1,0 +1,37 @@
+<block>
+  <name>Select CUs</name>
+  <key>dab_select_cus_vfvf</key>
+  <category>DAB</category>
+  <import>import dab</import>
+  <make>dab.select_cus_vfvf($vlen, $frame_len, $address, $size)</make>
+  <param>
+    <name>Vlen</name>
+    <key>vlen</key>
+    <type>raw</type>
+  </param>
+  <param>
+    <name>Frame_len</name>
+    <key>frame_len</key>
+    <type>raw</type>
+  </param>
+  <param>
+    <name>Address</name>
+    <key>address</key>
+    <type>raw</type>
+  </param>
+  <param>
+    <name>Size</name>
+    <key>size</key>
+    <type>raw</type>
+  </param>
+  <sink>
+    <name>in</name>
+    <type>float</type>
+    <vlen>$vlen</vlen>
+  </sink>
+  <source>
+    <name>out</name>
+    <type>float</type>
+    <vlen>$vlen</vlen>
+  </source>
+</block>

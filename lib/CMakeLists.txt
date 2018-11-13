@@ -25,27 +25,12 @@ include(GrPlatform) #define LIB_SUFFIX
 include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC-DAB_INCLUDE_DIRS} ${LIBTOOLAME-DAB_INCLUDE_DIR})
 link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dab_sources
-    moving_sum_ff_impl.cc
-    ofdm_ffe_all_in_one_impl.cc
-    ofdm_sampler_impl.cc
-    ofdm_coarse_frequency_correct_impl.cc
     diff_phasor_vcc_impl.cc
-    ofdm_remove_first_symbol_vcc_impl.cc
     frequency_interleaver_vcc_impl.cc
-    qpsk_demapper_vcb_impl.cc
     complex_to_interleaved_float_vcf_impl.cc
-    modulo_ff_impl.cc
-    measure_processing_rate_impl.cc
-    select_vectors_impl.cc
-    repartition_vectors_impl.cc
     unpuncture_vff_impl.cc
-    prune_vectors_impl.cc
     fib_sink_vb_impl.cc
     crc16.cc
-    estimate_sample_rate_bf_impl.cc
-    fractional_interpolator_triggered_update_cc_impl.cc
-    magnitude_equalizer_vcc_impl.cc
-    qpsk_mapper_vbc_impl.cc
     ofdm_insert_pilot_vcc_impl.cc
     sum_phasor_trig_vcc_impl.cc
     ofdm_move_and_insert_zero_impl.cc
@@ -54,15 +39,13 @@ list(APPEND dab_sources
     time_deinterleave_ff_impl.cc
     crc16_bb_impl.cc
     fib_source_b_impl.cc
-    select_subch_vfvf_impl.cc
-    unpuncture_ff_impl.cc
+    select_cus_vfvf_impl.cc
     prune_impl.cc
     firecode-checker.cpp
     firecode_check_bb_impl.cc
     puncture_bb_impl.cc
     dab_transmission_frame_mux_bb_impl.cc
     conv_encoder_bb_impl.cc
-    mapper_bc_impl.cc
     mp2_decode_bs_impl.cc
     mp4_decode_bs_impl.cc
     reed_solomon_decode_bb_impl.cc
@@ -94,7 +77,10 @@ list(APPEND dab_sources
     ${LIBTOOLAME-DAB_SOURCE_DIR}/encode_new.c
     ${LIBTOOLAME-DAB_SOURCE_DIR}/portableio.c
     valve_ff_impl.cc
-    peak_detector_fb_impl.cc )
+    ofdm_synchronization_cvf_impl.cc
+    ofdm_coarse_frequency_correction_vcvc_impl.cc
+    demux_cc_impl.cc
+    qpsk_mapper_vbvc_impl.cc )
 
 
 set(dab_sources "${dab_sources}" PARENT_SCOPE)

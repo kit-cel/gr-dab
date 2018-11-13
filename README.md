@@ -12,9 +12,9 @@ Contents
 
 2: Installation
 
-3: Features
+3: Usage
 
-4: Usage
+4: Features
 
 5: Current Constraints
 
@@ -63,7 +63,6 @@ fulfilled. All my code got merged into the master branch of this repository.
 This fork will serve as upstream repository for further development of the OFDM
 receiver (especially with respect to synchronization), and other improvements.
 
-
 Installation
 ------------
 
@@ -106,6 +105,7 @@ Features
 * Receiving and Transmitting DAB/DAB+ broadcasts with the graphical application "DABstep"
 * Receiving or Transmitting DAB/DAB+ with prepaired GNU Radio Companion flowgraph in examples/
 * Receiving or Transmitting DAB/DAB+ by building your own GNU Radio flowgraph with provided gr-dab blocks
+* USRP and RTL-SDR for reception supported
 
 Usage
 -------
@@ -124,16 +124,18 @@ Current Constraints
 * PAD interpretation and generation not supported so far
 * only EEP with protection profile set A supported so far, no set B and no UEP
 
+
 Ideas
 ----------
 
 * FM simulation, calculating the audio noise out of the SNR and adding it to the audio
 * parallel FM receiver that fills in the audio in case a superframe is broken 
+* include reception and transmission of data channels with packed data, e.g. pictures
 
 Known Bugs
 ----------
 
-* OFDM demodulator gets out of sync sometimes causing burst errors
+* Audio underruns disturb played audio signal without having actual errors. Additional buffer through delay block is a temporary fix that only works until reception errors occur.
 
 Documentation
 --------------
