@@ -192,17 +192,11 @@ class usrp_dab_rx(gr.top_block):
         self.qt_label_dyn_lab.setText(label)
 
     def update_mot_image(self, image_numpy):
-        print 'update mot image'
         self.qt_label_mot_image.setText("image angekommen in rx als numpy")
-        print image_numpy
-        print type(image_numpy)
-        print len(image_numpy)
-        print image_numpy.shape
 
-        img = Image.open("jpg_image.dat")
-        qt_image = ImageQt(img)
-        self.qt_label_mot_image.setPixmap(QtGui.QPixmap.fromImage(qt_image))
-        print "show image"
+        img = Image.open("jpg_image.dat") # Incoming message is written in jpg_image.dat.
+        qt_image = ImageQt(img)         # Converts PIL-Image-Object into Qt-Image-Object.
+        self.qt_label_mot_image.setPixmap(QtGui.QPixmap.fromImage(qt_image)) # Sets qt_image into the qt_label, QPixmap converts qt_image into a pixmap.
 
 ########################
 # getter methods

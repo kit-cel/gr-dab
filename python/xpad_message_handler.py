@@ -65,13 +65,8 @@ class xpad_message_handler(gr.basic_block):
         print image_message
         print type(image_message)
         print len(image_message)
-        file = open("jpg_image.dat", "w")
-        image_message.tofile(file)
+        file = open("jpg_image.dat", "w") #opens .dat-file in "write"-mode
+        image_message.tofile(file)  #writes incomming image in file "file"
 
 
-        # Interprete jpg message with PIL
-        #temp_file = tempfile.TemporaryFile()
-        #temp_file.write(image_message)
-
-        # emit a signal to the GUI, containing this dynamic label string
         self.qt_object.emit_label(image_message)
