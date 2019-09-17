@@ -1,5 +1,5 @@
 /* -*- c++ -*- */
-/* 
+/*
  * Reed-Solomon decoder for DAB+
  * Copyright 2002 Phil Karn, KA9Q
  * May be used under the terms of the GNU General Public License (GPL)
@@ -7,17 +7,17 @@
  * Rewritten into a GNU Radio block for gr-dab
  * Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
 
- * 
+ *
  * This is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3, or (at your option)
  * any later version.
- * 
+ *
  * This software is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU General Public License
  * along with this software; see the file COPYING.  If not, write to
  * the Free Software Foundation, Inc., 51 Franklin Street,
@@ -30,7 +30,7 @@
 #include <dab/reed_solomon_decode_bb.h>
 
 extern "C" {
-#include <fec/fec.h>
+#include "fec/fec.h"
 }
 
 namespace gr {
@@ -74,4 +74,3 @@ namespace gr {
 } // namespace gr
 
 #endif /* INCLUDED_DAB_REED_SOLOMON_DECODE_BB_IMPL_H */
-

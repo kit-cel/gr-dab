@@ -26,17 +26,16 @@ This is the GNU Radio DAB module.
 import os
 
 # import swig generated symbols into the dab namespace
-from dab_swig import *
+from .dab_swig import *
 
-from parameters import *
-from ofdm_demod_cc import *
-from ofdm_mod_bc import *
-from fic_decode_vc import *
-from fic_encode import *
-from msc_decode import *
-from msc_encode import *
-from transmitter_c import *
-from dabplus_audio_decoder_ff import *
+from .parameters import *
+from .ofdm_demod_cc import *
+from .ofdm_mod_bc import *
+from .fic_decode_vc import *
+from .fic_encode import *
+from .msc_decode import *
+from .msc_encode import *
+from .transmitter_c import *
+from .dabplus_audio_decoder_ff import *
 
-import constants
-
+from . import constants

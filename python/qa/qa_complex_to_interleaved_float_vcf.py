@@ -2,7 +2,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab_swig as dab
+from . from . import dab_swig as dab
 
 
 class qa_complex_to_interleaved_float_vcf(gr_unittest.TestCase):

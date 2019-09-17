@@ -1,23 +1,23 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
-# 
+#
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
-# 
+#
 # This software is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this software; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
-# 
+#
 
 from gnuradio import gr, blocks, trellis
 import dab
@@ -51,7 +51,7 @@ class msc_decode(gr.hier_block2):
         self.debug = debug
 
         # calculate n factor (multiple of 8kbits etc.)
-        self.n = self.size / self.dp.subch_size_multiple_n[self.protect]
+        self.n = self.size // self.dp.subch_size_multiple_n[self.protect]
 
         # calculate puncturing factors (EEP, table 33, 34)
         self.msc_I = self.n * 192
@@ -88,14 +88,14 @@ class msc_decode(gr.hier_block2):
         # time deinterleaving
         self.time_v2s = blocks.vector_to_stream_make(gr.sizeof_float, self.dp.msc_cu_size)
         self.time_deinterleaver = dab.time_deinterleave_ff_make(self.dp.msc_cu_size * self.size, self.dp.scrambling_vector)
-        
+
         # unpuncture
         self.unpuncture_s2v = blocks.stream_to_vector(gr.sizeof_float, self.msc_punctured_codeword_length)
         self.unpuncture = dab.unpuncture_vff_make(self.assembled_msc_puncturing_sequence, 0)
         self.unpuncture_v2s = blocks.vector_to_stream(gr.sizeof_float, self.msc_conv_codeword_length)
 
         # convolutional decoding
-        self.fsm = trellis.fsm(1, 4, [0133, 0171, 0145, 0133])  # OK (dumped to text and verified partially)
+        self.fsm = trellis.fsm(1, 4, [133, 171, 145, 133])  # OK (dumped to text and verified partially)
         table = [
             0, 0, 0, 0,
             0, 0, 0, 1,

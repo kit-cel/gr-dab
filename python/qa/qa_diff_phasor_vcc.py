@@ -2,7 +2,7 @@
 
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
-import dab_swig as dab
+from . import dab_swig as dab
 
 
 class qa_diff_phasor_vcc(gr_unittest.TestCase):

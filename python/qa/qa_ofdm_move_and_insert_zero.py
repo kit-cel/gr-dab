@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from gnuradio import gr, gr_unittest, blocks
-import dab_swig as dab
+from . import dab_swig as dab
 
 
 class qa_ofdm_move_and_insert_zero(gr_unittest.TestCase):

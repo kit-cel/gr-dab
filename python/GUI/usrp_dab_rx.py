@@ -89,7 +89,7 @@ class usrp_dab_rx(gr.top_block):
             self.src.set_antenna("", 0)
             self.src.set_bandwidth(0, 0)
         else:
-            print "using file source"
+            print("using file source")
             self.src = blocks.file_source_make(gr.sizeof_gr_complex, self.src_path, False)
 
         ########################
@@ -221,10 +221,10 @@ class usrp_dab_rx(gr.top_block):
     def set_freq(self, freq):
         if self.src.set_center_freq(freq):
             if self.verbose:
-                print "--> retuned to " + str(freq) + " Hz"
+                print("--> retuned to " + str(freq) + " Hz")
             return True
         else:
-            print "-> error - cannot tune to " + str(freq) + " Hz"
+            print("-> error - cannot tune to " + str(freq) + " Hz")
             return False
 
     def set_gain(self, gain):
@@ -234,4 +234,3 @@ class usrp_dab_rx(gr.top_block):
     def receive(self):
         rx = usrp_dab_rx()
         rx.run()
-
