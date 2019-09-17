@@ -22,7 +22,7 @@
 from gnuradio import gr, gr_unittest
 from gnuradio import blocks
 import math
-import dab_swig as dab
+from . import dab_swig as dab
 
 
 class qa_qpsk_mapper_vbvc(gr_unittest.TestCase):

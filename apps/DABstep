@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from PyQt5 import QtGui
+from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import QTimer
 import sys
 import time
@@ -15,7 +15,7 @@ import sip
 resolution_width = 0
 resolution_height = 0
 
-class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
+class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
     def __init__(self, parent=None):
         super(DABstep, self).__init__(parent)
         self.setupUi(self)
@@ -58,13 +58,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
         # table preparations
         header = self.table_mci.horizontalHeader()
-        header.setResizeMode(0, QtGui.QHeaderView.ResizeToContents)
-        header.setResizeMode(1, QtGui.QHeaderView.Stretch)
-        header.setResizeMode(2, QtGui.QHeaderView.ResizeToContents)
-        header.setResizeMode(3, QtGui.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(2, QtWidgets.QHeaderView.ResizeToContents)
+        header.setSectionResizeMode(3, QtWidgets.QHeaderView.ResizeToContents)
         header.setStretchLastSection(False)
         self.table_mci.verticalHeader().hide()
-        self.table_mci.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.table_mci.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
 
         # timer for update of SNR
         self.snr_timer = QTimer()
@@ -213,13 +213,13 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     ################################
     def change_tab(self):
         if self.mode_tabs.currentWidget() is self.tab_transmission:
-            print "changed to transmission mode"
+            print("changed to transmission mode")
             self.t_update_service_components()
 
         elif self.mode_tabs.currentWidget() is self.tab_reception:
-            print "changed to reception mode"
+            print("changed to reception mode")
         else:
-            print "changed to unknown tab"
+            print("changed to unknown tab")
 
     ################################
     # Receiver functions
@@ -355,8 +355,8 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
 
         # display ensemble info
         ensemble_data = self.get_ensemble_info()
-        self.label_ensemble.setText(ensemble_data.keys()[0].strip())
-        self.label_country.setText(str(self.table.country_ID_ECC_E0[int(ensemble_data.values()[0]['country_ID'])]))
+        self.label_ensemble.setText(list(ensemble_data.keys())[0].strip())
+        self.label_country.setText(str(self.table.country_ID_ECC_E0[int(list(ensemble_data.values())[0]['country_ID'])]))
         self.lcd_number_num_subch.display(self.num_subch)
         # status bar
         self.statusBar.showMessage("Select a Service Component.")
@@ -508,7 +508,7 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def get_ensemble_info(self):
         self.json = self.my_receiver.get_ensemble_info()
         if self.json is "":
-            return {"unknown":{"country_ID":0}}
+            return {"unknown":{"country_ID":0},}
         else:
             # load string (json) with ensemble info and convert it to dictionary
             # string structure example: "{\"SWR_BW_N\":{\"country_ID\":1}}"
@@ -571,19 +571,19 @@ class DABstep(QtGui.QMainWindow, user_frontend.Ui_MainWindow):
     def dev_mode_init(self):
         available_height = self.screen_height-200
         # constellation plot
-        self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtGui.QWidget)
+        self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtWidgets.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.constellation)
         self.constellation.setMaximumHeight(available_height/3)
         self.constellation.setMaximumWidth(available_height/3*2)
         self.constellation.hide()
         # FFT plot
-        self.fft_plot = sip.wrapinstance(self.my_receiver.fft_plot.pyqwidget(), QtGui.QWidget)
+        self.fft_plot = sip.wrapinstance(self.my_receiver.fft_plot.pyqwidget(), QtWidgets.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.fft_plot)
         self.fft_plot.setMaximumHeight(available_height/3)
         self.fft_plot.setMaximumWidth(available_height/3*2)
         self.fft_plot.hide()
         # Waterfall plot
-        self.waterfall_plot = sip.wrapinstance(self.my_receiver.waterfall_plot.pyqwidget(), QtGui.QWidget)
+        self.waterfall_plot = sip.wrapinstance(self.my_receiver.waterfall_plot.pyqwidget(), QtWidgets.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.waterfall_plot)
         self.waterfall_plot.setMaximumHeight(available_height/3)
         self.waterfall_plot.setMaximumWidth(available_height/3*2)
@@ -1113,7 +1113,7 @@ class lookup_tables:
     ]
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     global resolution_width
     resolution_width = app.desktop().screenGeometry().width()
     global resolution_height

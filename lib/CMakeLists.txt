@@ -22,8 +22,6 @@
 ########################################################################
 include(GrPlatform) #define LIB_SUFFIX
 
-include_directories(${Boost_INCLUDE_DIR} ${FDK-AAC_INCLUDE_DIRS} ${LIBTOOLAME-DAB_INCLUDE_DIR})
-link_directories(${Boost_LIBRARY_DIRS})
 list(APPEND dab_sources
     diff_phasor_vcc_impl.cc
     frequency_interleaver_vcc_impl.cc
@@ -90,7 +88,12 @@ if(NOT dab_sources)
 endif(NOT dab_sources)
 
 add_library(gnuradio-dab SHARED ${dab_sources})
-target_link_libraries(gnuradio-dab ${Boost_LIBRARIES} ${GNURADIO_ALL_LIBRARIES} ${GNURADIO_FILTER_LIBRARIES} ${FAAD_LIBRARIES} ${FDK-AAC_LIBRARIES})
+target_link_libraries(gnuradio-dab gnuradio::gnuradio-runtime gnuradio::gnuradio-filter ${FAAD_LIBRARIES} ${FDK-AAC_LIBRARIES})
+target_include_directories(gnuradio-dab
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+  PUBLIC $<BUILD_INTERFACE:${LIBTOOLAME-DAB_SOURCE_DIR}/../>
+  PUBLIC $<INSTALL_INTERFACE:include>
+  )
 set_target_properties(gnuradio-dab PROPERTIES DEFINE_SYMBOL "gnuradio_dab_EXPORTS")
 
 if(APPLE)
@@ -107,29 +110,3 @@ install(TARGETS gnuradio-dab
     ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
     RUNTIME DESTINATION bin              # .dll file
 )
-
-########################################################################
-# Build and register unit test
-########################################################################
-include(GrTest)
-
-include_directories(${CPPUNIT_INCLUDE_DIRS})
-
-list(APPEND test_dab_sources
-    ${CMAKE_CURRENT_SOURCE_DIR}/test_dab.cc
-    ${CMAKE_CURRENT_SOURCE_DIR}/qa_dab.cc
-)
-
-add_executable(test-dab ${test_dab_sources})
-
-
-target_link_libraries(
-  test-dab
-  ${GNURADIO_RUNTIME_LIBRARIES}
-  ${GNURADIO_FILTER_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${CPPUNIT_LIBRARIES}
-  gnuradio-dab
-)
-
-GR_ADD_TEST(test_dab test-dab)

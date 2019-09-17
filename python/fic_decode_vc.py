@@ -1,26 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-# 
+#
 # Copyright 2017 Moritz Luca Schmid, Communications Engineering Lab (CEL) / Karlsruhe Institute of Technology (KIT).
-# 
+#
 # This is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3, or (at your option)
 # any later version.
-# 
+#
 # This software is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
 # along with this software; see the file COPYING.  If not, write to
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
-# 
+#
 
 from gnuradio import gr, trellis, blocks
-import dab_swig as dab
+from . import dab_swig as dab
 from math import sqrt
 
 class fic_decode_vc(gr.hier_block2):
@@ -51,7 +51,7 @@ class fic_decode_vc(gr.hier_block2):
         self.unpuncture = dab.unpuncture_vff(self.dp.assembled_fic_puncturing_sequence, 0)
 
         # convolutional coding
-        self.fsm = trellis.fsm(1, 4, [0133, 0171, 0145, 0133])  # OK (dumped to text and verified partially)
+        self.fsm = trellis.fsm(1, 4, [133, 171, 145, 133])  # OK (dumped to text and verified partially)
         self.conv_v2s = blocks.vector_to_stream(gr.sizeof_float, self.dp.fic_conv_codeword_length)
         table = [
             0, 0, 0, 0,
@@ -75,7 +75,8 @@ class fic_decode_vc(gr.hier_block2):
         table = [(1 - 2 * x) / sqrt(2) for x in table]
         self.conv_decode = trellis.viterbi_combined_fb(self.fsm, 774, 0, 0, 4, table, trellis.TRELLIS_EUCLIDEAN)
         # self.conv_s2v = blocks.stream_to_vector(gr.sizeof_char, 774)
-        self.conv_prune = dab.prune(gr.sizeof_char, self.dp.fic_conv_codeword_length / 4, 0,
+        print(self.dp.fic_conv_codeword_length, self.dp.conv_code_add_bits_input)
+        self.conv_prune = dab.prune(gr.sizeof_char, self.dp.fic_conv_codeword_length // 4, 0,
                                     self.dp.conv_code_add_bits_input)
 
         # energy dispersal

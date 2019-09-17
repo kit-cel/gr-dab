@@ -20,7 +20,7 @@
 #
 
 from gnuradio import gr, gr_unittest, blocks
-import dab_swig as dab
+from . import dab_swig as dab
 import cmath
 
 
