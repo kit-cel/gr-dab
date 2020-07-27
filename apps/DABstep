@@ -212,11 +212,11 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
     # general functions
     ################################
     def change_tab(self):
-        if self.mode_tabs.currentWidget() is self.tab_transmission:
+        if self.mode_tabs.currentWidget() == self.tab_transmission:
             print("changed to transmission mode")
             self.t_update_service_components()
 
-        elif self.mode_tabs.currentWidget() is self.tab_reception:
+        elif self.mode_tabs.currentWidget() == self.tab_reception:
             print("changed to reception mode")
         else:
             print("changed to unknown tab")
@@ -402,7 +402,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         self.label_primary.setText(("primary" if service_data['primary'] == True else "secondary"))
         self.label_dabplus.setText(("DAB+" if service_data['DAB+'] == True else "DAB"))
         # programme type
-        if programme_type["programme_type"] is 0:
+        if programme_type["programme_type"] == 0:
             self.label_programme_type.setText("\n")
         else:
             self.label_programme_type.setText(self.table.programme_types[programme_type["programme_type"]] + "\n")
@@ -434,7 +434,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
     def play_audio(self):
         # play button pressed
         # if selected sub-channel is not the current sub-channel we have to reconfigure the receiver
-        if self.subch is not self.table_mci.currentRow():
+        if self.subch != self.table_mci.currentRow():
             self.subch = self.table_mci.currentRow()
             dev_mode_opened = False
             if self.dev_mode_active:
@@ -507,8 +507,8 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
 
     def get_ensemble_info(self):
         self.json = self.my_receiver.get_ensemble_info()
-        if self.json is "":
-            return {"unknown":{"country_ID":0},}
+        if self.json == "":
+            return {"unknown":{"country_ID":0}}
         else:
             # load string (json) with ensemble info and convert it to dictionary
             # string structure example: "{\"SWR_BW_N\":{\"country_ID\":1}}"
@@ -518,7 +518,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
 
     def get_service_info(self):
         self.json = self.my_receiver.get_service_info()
-        if self.json is "":
+        if self.json == "":
             return []
         else:
             # load string (json) with MCI and convert it to array of dictionaries
@@ -529,7 +529,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
 
     def get_service_labels(self):
         self.json = self.my_receiver.get_service_labels()
-        if self.json is "":
+        if self.json == "":
             return []
         else:
             # load string (json) with service labels and convert it to array of dictionaries
@@ -540,7 +540,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
 
     def get_subch_info(self):
         self.json = self.my_receiver.get_subch_info()
-        if self.json is "":
+        if self.json  == "":
             return []
         else:
             # load string (json) with sub-channel info and convert it to array of dictionaries
@@ -684,7 +684,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         # get number of sub-channels from spin box
         num_subch = self.t_spin_num_subch.value()
         # update info text under the component fill in forms
-        if num_subch is 7:
+        if num_subch == 7:
             self.t_label_increase_num_subch_info.setText("7 is the maximum number of components")
         else:
             self.t_label_increase_num_subch_info.setText("increase \"Number of channels\" for more components")
@@ -702,7 +702,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
     def t_update_service_components(self):
         # display/hide components referring to the info in components (dict)
         for component in self.components:
-            if component["enabled"] is False:
+            if component["enabled"] == False:
                 component["label"].hide()
                 component["data_rate_label"].hide()
                 component["data_rate"].hide()
@@ -734,7 +734,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
                 component["btn_record"].show()
                 component["audio_rate_label"].show()
                 component["combo_stereo"].show()
-                if component["combo_dabplus"].currentIndex() is 0:
+                if component["combo_dabplus"].currentIndex() == 0:
                     component["combo_audio_rate"].show()
                     component["combo_audio_rate_dab"].hide()
                 else:
@@ -769,12 +769,12 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
                 # write stereo flags
                 stereo_flags[i] = self.components[i]["combo_stereo"].currentIndex()
                 # write audio sampling rates in array
-                if self.components[i]["combo_dabplus"].currentIndex() is 0:
-                    audio_sampling_rate_array[i] = 32000 if (self.components[i]["combo_audio_rate"].currentIndex() is 0) else 48000
+                if self.components[i]["combo_dabplus"].currentIndex() == 0:
+                    audio_sampling_rate_array[i] = 32000 if (self.components[i]["combo_audio_rate"].currentIndex() == 0) else 48000
                 else:
-                    audio_sampling_rate_array[i] = 48000 if (self.components[i]["combo_audio_rate_dab"].currentIndex() is 0) else 24000
+                    audio_sampling_rate_array[i] = 48000 if (self.components[i]["combo_audio_rate_dab"].currentIndex() == 0) else 24000
                 # check audio paths
-                if self.components[i]["src_path"] is "None":
+                if self.components[i]["src_path"] == "None":
                     # highlight the path which is not selected
                     self.components[i]["src_path_disp"].setStyleSheet('color: red')
                     arguments_incomplete = True
@@ -790,7 +790,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
                     merged_service_string = merged_service_string + str(self.components[i]["edit_label"].text()).ljust(16)
                     self.components[i]["edit_label"].setStyleSheet('color: black')
                 # write dabplus types
-                    dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() is 0 else 0)
+                    dabplus_types[i] = (1 if self.components[i]["combo_dabplus"].currentIndex() == 0 else 0)
 
             # check if length of ensemble label is <= 16 chars
             if len(str(self.t_edit_ensemble_label.text())) > 16:
@@ -803,7 +803,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
                 self.t_label_sink.setStyleSheet('color: red')
                 arguments_incomplete = True
 
-            if arguments_incomplete is False:
+            if arguments_incomplete == False:
                 # init transmitter
                 self.my_transmitter = usrp_dab_tx.usrp_dab_tx(self.t_spin_dab_mode.value(),
                                                                       self.t_spinbox_frequency.value(),
@@ -942,7 +942,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         self.components[6]["src_path"] = "mic"
 
     def change_audio_bit_rates1(self):
-        if self.t_combo_dabplus1.currentIndex() is 0:
+        if self.t_combo_dabplus1.currentIndex() == 0:
             self.t_combo_audio_rate1.show()
             self.t_combo_audio_rate_dab1.hide()
         else:
@@ -950,7 +950,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             self.t_combo_audio_rate1.hide()
 
     def change_audio_bit_rates2(self):
-        if self.t_combo_dabplus2.currentIndex() is 0:
+        if self.t_combo_dabplus2.currentIndex() == 0:
             self.t_combo_audio_rate2.show()
             self.t_combo_audio_rate_dab2.hide()
         else:
@@ -958,7 +958,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             self.t_combo_audio_rate2.hide()
 
     def change_audio_bit_rates3(self):
-        if self.t_combo_dabplus3.currentIndex() is 0:
+        if self.t_combo_dabplus3.currentIndex() == 0:
             self.t_combo_audio_rate3.show()
             self.t_combo_audio_rate_dab3.hide()
         else:
@@ -966,7 +966,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             self.t_combo_audio_rate3.hide()
 
     def change_audio_bit_rates4(self):
-        if self.t_combo_dabplus4.currentIndex() is 0:
+        if self.t_combo_dabplus4.currentIndex() == 0:
             self.t_combo_audio_rate4.show()
             self.t_combo_audio_rate_dab4.hide()
         else:
@@ -974,7 +974,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             self.t_combo_audio_rate4.hide()
 
     def change_audio_bit_rates5(self):
-        if self.t_combo_dabplus5.currentIndex() is 0:
+        if self.t_combo_dabplus5.currentIndex() == 0:
             self.t_combo_audio_rate5.show()
             self.t_combo_audio_rate_dab5.hide()
         else:
@@ -982,7 +982,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             self.t_combo_audio_rate5.hide()
 
     def change_audio_bit_rates6(self):
-        if self.t_combo_dabplus6.currentIndex() is 0:
+        if self.t_combo_dabplus6.currentIndex() == 0:
             self.t_combo_audio_rate6.show()
             self.t_combo_audio_rate_dab6.hide()
         else:
@@ -990,7 +990,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             self.t_combo_audio_rate6.hide()
 
     def change_audio_bit_rates7(self):
-        if self.t_combo_dabplus7.currentIndex() is 0:
+        if self.t_combo_dabplus7.currentIndex() == 0:
             self.t_combo_audio_rate7.show()
             self.t_combo_audio_rate_dab7.hide()
         else:

@@ -74,13 +74,13 @@ class usrp_dab_tx(gr.top_block):
         self.rs_encoders = [None] * self.num_subch
         self.msc_encoders = [None] * self.num_subch
         for i in range(0, self.num_subch):
-            if not self.src_paths[i] is "mic":
+            if self.src_paths[i] != "mic":
                 # source
                 self.msc_sources[i] = blocks.wavfile_source_make(self.src_paths[i], True)
             # float to short
             self.f2s_left_converters[i] = blocks.float_to_short_make(1, 32767)
             self.f2s_right_converters[i] = blocks.float_to_short_make(1, 32767)
-            if self.dabplus_types[i] is 1:
+            if self.dabplus_types[i] == 1:
                 # mp4 encoder and Reed-Solomon encoder
                 self.mp4_encoders[i] = dab.mp4_encode_sb_make(self.data_rates_n[i], 2, audio_sampling_rates[i], 1)
                 self.rs_encoders[i] = dab.reed_solomon_encode_bb_make(self.data_rates_n[i])
@@ -130,8 +130,8 @@ class usrp_dab_tx(gr.top_block):
         ########################
         self.connect(self.fic_src, self.fic_enc, (self.mux, 0))
         for i in range(0, self.num_subch):
-            if self.dabplus_types[i] is 1:
-                if self.src_paths[i] is "mic":
+            if self.dabplus_types[i] == 1:
+                if self.src_paths[i] == "mic":
                     self.connect((self.recorder, 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i + 1))
                     if stereo_flags[i] == 0:
                         self.connect((self.recorder, 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
