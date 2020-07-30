@@ -2,6 +2,7 @@
 
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QFileDialog, QTableWidgetItem
 import sys
 import time
 import dab.user_frontend as user_frontend
@@ -253,10 +254,10 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         self.src_is_RTL = False
 
     def set_file_path(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a file with recorded IQ samples")
+        path = QFileDialog.getOpenFileName(self, "Pick a file with recorded IQ samples")
         if path:  # if user didn't pick a directory don't continue
-            self.file_path = str(path)
-            self.label_path.setText(path)
+            self.file_path = str(path[0])
+            self.label_path.setText(self.file_path)
 
     def init_receiver(self):
         if not self.receiver_running:
@@ -342,13 +343,13 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
             # add a new row
             self.table_mci.insertRow(n)
             # print ID in first collumn
-            self.table_mci.setItem(n, 0, QtGui.QTableWidgetItem(str(key['ID'])))
+            self.table_mci.setItem(n, 0, QTableWidgetItem(str(key['ID'])))
             # print reference (later label)
-            self.table_mci.setItem(n, 1, QtGui.QTableWidgetItem(next((item for item in service_labels if item["reference"] == key['reference']), {'label':"not found"})['label']))
+            self.table_mci.setItem(n, 1, QTableWidgetItem(next((item for item in service_labels if item["reference"] == key['reference']), {'label':"not found"})['label']))
             # print type
-            self.table_mci.setItem(n, 3, QtGui.QTableWidgetItem("primary" if key['primary'] == True else "secondary"))
+            self.table_mci.setItem(n, 3, QTableWidgetItem("primary" if key['primary'] == True else "secondary"))
             # print DAB Mode
-            self.table_mci.setItem(n, 2, QtGui.QTableWidgetItem(("DAB+" if key['DAB+'] == True else "DAB ")))
+            self.table_mci.setItem(n, 2, QTableWidgetItem(("DAB+" if key['DAB+'] == True else "DAB ")))
 
         # set number of sub channels
         self.num_subch = self.table_mci.rowCount()
@@ -384,7 +385,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         self.size = int(subch_data['size'])
         self.protection = int(subch_data['protection'])
         conv_table = [12, 8, 6, 5]
-        self.bit_rate = self.size * 8/conv_table[self.protection]
+        self.bit_rate = self.size * 8//conv_table[self.protection]
         self.dabplus = service_data['DAB+']
         if self.dabplus:
             if self.bit_rate < 100:
@@ -397,7 +398,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         # display info to selected sub-channel
         # service info
         self.label_service.setText(service_label['label'].strip())
-        self.label_bit_rate.setText(str(subch_data['size']*8/6) + " kbps")
+        self.label_bit_rate.setText(str(subch_data['size']*8//6) + " kbps")
         # service component (=sub-channel) info
         self.label_primary.setText(("primary" if service_data['primary'] == True else "secondary"))
         self.label_dabplus.setText(("DAB+" if service_data['DAB+'] == True else "DAB"))
@@ -449,7 +450,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
                                                                self.address, self.size,
                                                                self.protection, self.audio_bit_rate, self.dabplus,
                                                                self.src_is_USRP, self.src_is_RTL, self.file_path, prev_src=self.temp_src)
-            self.my_receiver.set_volume(float(self.slider_volume.value()) / 100)
+            self.my_receiver.set_volume(self.slider_volume.value() / 100)
             self.my_receiver.start()
             self.statusBar.showMessage("Audio playing.")
             self.dev_mode_init()
@@ -573,20 +574,20 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         # constellation plot
         self.constellation = sip.wrapinstance(self.my_receiver.constellation_plot.pyqwidget(), QtWidgets.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.constellation)
-        self.constellation.setMaximumHeight(available_height/3)
-        self.constellation.setMaximumWidth(available_height/3*2)
+        self.constellation.setMaximumHeight(available_height//3)
+        self.constellation.setMaximumWidth(available_height*2//3)
         self.constellation.hide()
         # FFT plot
         self.fft_plot = sip.wrapinstance(self.my_receiver.fft_plot.pyqwidget(), QtWidgets.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.fft_plot)
-        self.fft_plot.setMaximumHeight(available_height/3)
-        self.fft_plot.setMaximumWidth(available_height/3*2)
+        self.fft_plot.setMaximumHeight(available_height//3)
+        self.fft_plot.setMaximumWidth(available_height*2//3)
         self.fft_plot.hide()
         # Waterfall plot
         self.waterfall_plot = sip.wrapinstance(self.my_receiver.waterfall_plot.pyqwidget(), QtWidgets.QWidget)
         self.vertical_layout_dev_mode_right.addWidget(self.waterfall_plot)
-        self.waterfall_plot.setMaximumHeight(available_height/3)
-        self.waterfall_plot.setMaximumWidth(available_height/3*2)
+        self.waterfall_plot.setMaximumHeight(available_height//3)
+        self.waterfall_plot.setMaximumWidth(available_height*2//3)
         self.waterfall_plot.hide()
         # if dev mode is initialized, we can enable the dev mode open button
         self.btn_dev_mode_open.setEnabled(True)
@@ -765,7 +766,7 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
                 # write array with protection modes
                 protection_array[i] = self.components[i]["protection"].currentIndex()
                 # write array with data rates
-                data_rate_n_array[i] = self.components[i]["data_rate"].value()/8
+                data_rate_n_array[i] = self.components[i]["data_rate"].value()//8
                 # write stereo flags
                 stereo_flags[i] = self.components[i]["combo_stereo"].currentIndex()
                 # write audio sampling rates in array
@@ -843,74 +844,74 @@ class DABstep(QtWidgets.QMainWindow, user_frontend.Ui_MainWindow):
         self.statusBar.showMessage("Transmission stopped.")
 
     def t_set_file_path(self):
-        path = QtGui.QFileDialog.getExistingDirectory(self, "Pick a folder for your file sink")
+        path = QFileDialog.getExistingDirectory(self, "Pick a folder for your file sink")
         if path:  # if user didn't pick a directory don't continue
             # display path in path label
             self.t_label_sink.setText(path)
             self.t_label_sink.setStyleSheet('color: black')
 
     def t_set_subch_path1(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[0]["src_path"] = str(path)
+            self.components[0]["src_path"] = str(path[0])
             # display path in path label
-            self.components[0]["src_path_disp"].setText(path)
+            self.components[0]["src_path_disp"].setText(path[0])
             self.components[0]["src_path_disp"].setStyleSheet('color: black')
         self.t_btn_record1.setFlat(False)
 
     def t_set_subch_path2(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[1]["src_path"] = str(path)
+            self.components[1]["src_path"] = str(path[0])
             # display path in path label
-            self.components[1]["src_path_disp"].setText(path)
+            self.components[1]["src_path_disp"].setText(path[0])
             self.components[1]["src_path_disp"].setStyleSheet('color: black')
 
     def t_set_subch_path3(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[2]["src_path"] = str(path)
+            self.components[2]["src_path"] = str(path[0])
             # display path in path label
-            self.components[2]["src_path_disp"].setText(path)
+            self.components[2]["src_path_disp"].setText(path[0])
             self.components[2]["src_path_disp"].setStyleSheet('color: black')
 
     def t_set_subch_path4(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[3]["src_path"] = str(path)
+            self.components[3]["src_path"] = str(path[0])
             # display path in path label
-            self.components[3]["src_path_disp"].setText(path)
+            self.components[3]["src_path_disp"].setText(path[0])
             self.components[3]["src_path_disp"].setStyleSheet('color: black')
 
     def t_set_subch_path5(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[4]["src_path"] = str(path)
+            self.components[4]["src_path"] = str(path[0])
             # display path in path label
-            self.components[4]["src_path_disp"].setText(path)
+            self.components[4]["src_path_disp"].setText(path[0])
             self.components[4]["src_path_disp"].setStyleSheet('color: black')
 
     def t_set_subch_path6(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[5]["src_path"] = str(path)
+            self.components[5]["src_path"] = str(path[0])
             # display path in path label
-            self.components[5]["src_path_disp"].setText(path)
+            self.components[5]["src_path_disp"].setText(path[0])
             self.components[5]["src_path_disp"].setStyleSheet('color: black')
 
     def t_set_subch_path7(self):
-        path = QtGui.QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
+        path = QFileDialog.getOpenFileName(self, "Pick a .wav file as audio source")
         if path:  # if user didn't pick a directory don't continue
             # set new path in dict components
-            self.components[6]["src_path"] = str(path)
+            self.components[6]["src_path"] = str(path[0])
             # display path in path label
-            self.components[6]["src_path_disp"].setText(path)
+            self.components[6]["src_path_disp"].setText(str(path[0]))
         self.components[7]["src_path_disp"].setStyleSheet('color: black')
 
     def t_toggle_record1(self):

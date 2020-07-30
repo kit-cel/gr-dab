@@ -66,7 +66,14 @@ class usrp_dab_rx(gr.top_block):
         # source
         ########################
         if self.use_usrp:
-            self.src = uhd.usrp_source("", uhd.io_type.COMPLEX_FLOAT32, 1)
+            self.src = uhd.usrp_source(
+            ",".join(("", "")),
+            uhd.stream_args(
+                cpu_format="fc32",
+                args='',
+                channels=list(range(0,1)),
+            ),
+            )
             self.src.set_clock_rate(self.sample_rate*8)
             self.src.set_samp_rate(self.sample_rate)
             self.src.set_gain(50, 0)

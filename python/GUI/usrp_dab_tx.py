@@ -106,7 +106,15 @@ class usrp_dab_tx(gr.top_block):
         # Sink
         ########################
         if self.use_usrp:
-            self.sink = uhd.usrp_sink("", uhd.io_type.COMPLEX_FLOAT32, 1)
+            self.sink = uhd.usrp_sink(
+                ",".join(("", "")),
+                uhd.stream_args(
+                    cpu_format="fc32",
+                    args='',
+                    channels=list(range(0,1)),
+                ),
+                '',
+            )
             self.sink.set_clock_rate(self.sample_rate * 8)
             self.sink.set_samp_rate(self.sample_rate)
             self.sink.set_clock_source("gpsdo", 0)
@@ -140,7 +148,8 @@ class usrp_dab_tx(gr.top_block):
                 else:
                     self.connect((self.msc_sources[i], 0), self.f2s_left_converters[i], (self.mp4_encoders[i], 0), self.rs_encoders[i], self.msc_encoders[i], (self.mux, i+1))
                     if stereo_flags[i] == 0:
-                        self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
+                        self.connect((self.msc_sources[i], 1), self.f2s_right_converters[i])
+                        self.connect(self.f2s_right_converters[i], (self.mp4_encoders[i], 1))
                     else:
                         self.connect(self.f2s_left_converters[i], (self.mp4_encoders[i], 1))
             else:
